@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<link rel="stylesheet" href="style.css"/>
+<title>Futils</title>
+
+<h1>Futils</h1>
+
+<p>A suite of functional-like command shell utilities.</p>
+
+<ul>
+<li><a href="#fields"><code>fields</code></a></li>
+<li><a href="#filter"><code>filter</code></a></li>
+<li><a href="#map"><code>map</code></a></li>
+<li><a href="#records"><code>records</code></a></li>
+<li><a href="#reduce"><code>reduce</code></a></li>
+<li><a href="#sum"><code>sum</code></a></li>
+<li><a href="#zip"><code>zip</code></a></li>
+</ul>
+
+<a name="fields"></a>
+<h2><code>fields</code></h2>
+
+<p>TODO</p>
+
+<h3>Synopsis</h3>
+
+<p>TODO</p>
+
+<h3>Options</h3>
+
+<dl>
+
+<dt><code>-h</code></dt>
+
+<dd>Print help message and exit.</dd>
+
+</dl>
+
+<a name="filter"></a>
+<h2><code>filter</code></h2>
+
+<p>Given 1 or more input files, splits the files into records (as delimited by a
+given regular expression) and prints each record (delimited by a given string)
+that satisfies a given condition. If no files are given, reads from the standard
+input.</p>
+
+<h3>Synopsis</h3>
+
+<pre>
+filter -h
+filter [-d <var>expression</var>] [-o <var>string</var>] -m <var>expression</var> [<var>file</var> [...]]
+filter [-d <var>expression</var>] [-o <var>string</var>] -p <var>expression</var> [<var>file</var> [...]]
+filter [-d <var>expression</var>] [-o <var>string</var>] -x <var>command</var> [<var>file</var> [...]]
+</pre>
+
+<h3>Options</h3>
+
+<dl>
+
+<dt><code>-h</code></dt>
+
+<dd>Print help message and exit.</dd>
+
+<dt><code>-d <var>expression</var></code></dt>
+
+<dd>Use the regular expression <var>expression</var> to <b>d</b>elimit records
+in the input. If no <var>expression</var> is given, the default value is
+<code>(\r\n|\n|\r)</code>.</dd>
+
+<dt><code>-m <var>expression</var></code></dt>
+
+<dd>Print records that <b>m</b>atch the given regular expression
+<var>expression</var>.</dd>
+
+<dt><code>-o <var>string</var></code></dt>
+
+<dd>Use the string <var>string</var> to delimit records in the <b>o</b>utput. If
+no <var>string</var> is given, the default value is the platform’s native new
+line sequence (e.g. <code>\n</code> on POSIX, <code>\r\n</code> on
+Windows).</dd>
+
+<dt><code>-p <var>expression</var></code></dt>
+
+<dd>Print records that do not match the given regular expression
+<var>expression</var> (i.e. <b>p</b>rune them).</dd>
+
+<dt><code>-x <var>command</var></code></dt>
+
+<dd>For each record in the input, e<b>x</b>ecute the given <var>command</var>.
+If <var>command</var> exits normally (e.g. with status 0 on POSIX), print the
+record.</dd>
+
+</dl>
+
+<h3>Examples</h3>
+
+<p>TODO</p>
+
+<a name="map"></a>
+<h2><code>map</code></h2>
+
+<p>TODO</p>
+
+<h3>Synopsis</h3>
+
+<p>TODO</p>
+
+<h3>Options</h3>
+
+<dl>
+
+<dt><code>-h</code></dt>
+
+<dd>Print help message and exit.</dd>
+
+</dl>
+
+<a name="records"></a>
+<h2><code>records</code></h2>
+
+<p>Given 1 or more input files, splits the files into records (as delimited by a
+given regular expression) and prints each record (delimited by a given string).
+If no files are given, reads from the standard input.</p>
+
+<h3>Synopsis</h3>
+
+<pre>
+records -h
+records [-d <var>expression</var>] [-o <var>string</var>] [<var>file</var> [...]]
+</pre>
+
+<h3>Options</h3>
+
+<dl>
+
+<dt><code>-h</code></dt>
+
+<dd>Print help message and exit.</dd>
+
+<dt><code>-d <var>expression</var></code></dt>
+
+<dd>Use the regular expression <var>expression</var> to <b>d</b>elimit records
+in the input. If no <var>expression</var> is given, the default value is
+<code>(\r\n|\n|\r)</code>.</dd>
+
+<dt><code>-o <var>string</var></code></dt>
+
+<dd>Use the string <var>string</var> to delimit records in the <b>o</b>utput. If
+no <var>string</var> is given, the default value is the platform’s native new
+line sequence (e.g. <code>\n</code> on POSIX, <code>\r\n</code> on
+Windows).</dd>
+
+<h3>Examples</h3>
+
+<pre>
+% <b>records some-file.txt</b>
+</pre>
+
+<p>This is similar to POSIX <code>cat</code>, except that it will convert any
+new line sequences into your platform’s native sequence.</p>
+
+<pre>
+% <b>records -d '\r\n' -o '\n' some-file.txt</b>
+</pre>
+
+<p>As above, but explicitly convert Windows new line sequences (only) into
+POSIX.</p>
+
+<pre>
+% <b>records -o '\0' some-file.txt</b>
+</pre>
+
+<p>Delimit records in some-file.txt with the NUL character (<code>\0</code>).
+This is typically used together with other utilities that use NUL to delimit
+records in a more robust way (such as when the other utilities may treat the
+file’s existing delimiters as as syntactic metacharacters of some kind). For
+example,</p>
+
+<pre>
+% <b>records -o '\0' list-of-files.txt | xargs -0 foo...</b>
+</pre>
+
+<p>(See for example <a href="#filter"><code>filter</code></a>, and the
+<code>xargs</code>(1) and <code>find</code>(1) manual pages.)</p>
+
+<a name="reduce"></a>
+<h2><code>reduce</code></h2>
+
+<p>TODO</p>
+
+<h3>Synopsis</h3>
+
+<p>TODO</p>
+
+<h3>Options</h3>
+
+<dl>
+
+<dt><code>-h</code></dt>
+
+<dd>Print help message and exit.</dd>
+
+</dl>
+
+<h3>Examples</h3>
+
+<p>TODO</p>
+
+<a name="sum"></a>
+<h2><code>sum</code></h2>
+
+<p>TODO</p>
+
+<h3>Synopsis</h3>
+
+<p>TODO</p>
+
+<h3>Options</h3>
+
+<dl>
+
+<dt><code>-h</code></dt>
+
+<dd>Print help message and exit.</dd>
+
+</dl>
+
+<h3>Examples</h3>
+
+<p>TODO</p>
+
+<a name="zip"></a>
+<h2><code>zip</code></h2>
+
+<p>TODO</p>
+
+<h3>Synopsis</h3>
+
+<p>TODO</p>
+
+<h3>Options</h3>
+
+<dl>
+
+<dt><code>-h</code></dt>
+
+<dd>Print help message and exit.</dd>
+
+</dl>
+
+<h3>Examples</h3>
+
+<p>TODO</p>
