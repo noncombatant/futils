@@ -21,32 +21,6 @@ fn find_subsequence(haystack: &[u8], needle: &[u8]) -> Option<usize> {
         .position(|window| window == needle)
 }
 
-// TODO: Break this up into a function that returns an iterator over
-// subsequences, and a wrapper around `write_all`.
-fn find_and_write_subsequences(haystack: &[u8], input_delimiter: &[u8], output_delimiter: &[u8]) {
-    let mut start: usize = 0;
-    let mut out = stdout();
-    let input_delimiter_length = input_delimiter.len();
-    loop {
-        if start >= haystack.len() {
-            break;
-        }
-        let i = find_subsequence(&haystack[start..], input_delimiter);
-        match i {
-            Some(i) => {
-                out.write_all(&haystack[start..start + i]).unwrap();
-                out.write_all(output_delimiter).unwrap();
-                start = start + i + input_delimiter_length;
-            }
-            None => {
-                out.write_all(&haystack[start..]).unwrap();
-                out.write_all(output_delimiter).unwrap();
-                break;
-            }
-        }
-    }
-}
-
 // TODO: This should be generic and separated out into its own library?
 struct SubSlicer<'a> {
     slice: &'a [u8],
@@ -54,7 +28,7 @@ struct SubSlicer<'a> {
     start: usize,
 }
 
-impl <'a> Iterator for SubSlicer<'a> {
+impl<'a> Iterator for SubSlicer<'a> {
     type Item = &'a [u8];
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -65,9 +39,7 @@ impl <'a> Iterator for SubSlicer<'a> {
                 self.start = self.start + i + self.input_delimiter.len();
                 Some(sub_slice)
             }
-            None => {
-                None
-            }
+            None => None,
         }
     }
 }
@@ -82,7 +54,7 @@ fn map_file(pathname: &String) -> Option<Mmap> {
                     Ok(m) => m,
                     Err(e) => {
                         eprintln!("{}: {}", pathname, e);
-                        return None
+                        return None;
                     }
                 }
             };
@@ -141,11 +113,19 @@ fn filter_main(arguments: &[String]) {
         for pathname in arguments {
             match map_file(&pathname) {
                 Some(mapped) => {
-                    find_and_write_subsequences(
-                        &mapped,
-                        input_delimiter_bytes,
-                        output_delimiter_bytes,
-                    );
+                    let slicer = SubSlicer {
+                        slice: &mapped,
+                        input_delimiter: &input_delimiter_bytes,
+                        start: 0,
+                    };
+                    for s in slicer {
+                        if true
+                        /* TODO */
+                        {
+                            stdout().write_all(s).unwrap();
+                            stdout().write_all(b"\n").unwrap();
+                        }
+                    }
                 }
                 None => {}
             }
@@ -188,11 +168,15 @@ fn records_main(arguments: &[String]) {
         for pathname in arguments {
             match map_file(&pathname) {
                 Some(mapped) => {
-                    find_and_write_subsequences(
-                        &mapped,
-                        input_delimiter_bytes,
-                        output_delimiter_bytes,
-                    );
+                    let slicer = SubSlicer {
+                        slice: &mapped,
+                        input_delimiter: &input_delimiter_bytes,
+                        start: 0,
+                    };
+                    for s in slicer {
+                        stdout().write_all(s).unwrap();
+                        stdout().write_all(output_delimiter_bytes).unwrap();
+                    }
                 }
                 None => {}
             }
