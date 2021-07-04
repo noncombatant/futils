@@ -1,5 +1,5 @@
 use getopt::Opt;
-use memmap::MmapOptions;
+use memmap::{Mmap, MmapOptions};
 //use regex::Regex;
 use std::env;
 use std::fs::File;
@@ -10,6 +10,8 @@ use std::process::exit;
 //static DEFAULT_INPUT_DELIMITER: &str = r"(\r\n|\n|\r)";
 static DEFAULT_INPUT_DELIMITER: &str = "\n";
 static DEFAULT_OUTPUT_DELIMITER: &str = "\n";
+
+// Utility Functions
 
 // Cribbed from https://stackoverflow.com/posts/35907071/revisions. Thanks,
 // Francis Gagné!
@@ -42,6 +44,31 @@ fn find_and_write_subsequences(haystack: &[u8], input_delimiter: &[u8], output_d
         }
     }
 }
+
+fn map_file(pathname: &String) -> Option<Mmap> {
+    let file = File::open(pathname);
+    match file {
+        Ok(file) => {
+            let mapped = unsafe {
+                let m = MmapOptions::new().map(&file);
+                match m {
+                    Ok(m) => m,
+                    Err(e) => {
+                        eprintln!("{}: {}", pathname, e);
+                        return None
+                    }
+                }
+            };
+            Some(mapped)
+        }
+        Err(e) => {
+            eprintln!("{}: {}", pathname, e);
+            None
+        }
+    }
+}
+
+// Main functions
 
 fn records_help() {
     eprintln!("TODO: records_help");
@@ -76,26 +103,15 @@ fn records_main(arguments: &[String]) {
         // TODO: read stdin
     } else {
         for pathname in arguments {
-            let file = File::open(&pathname);
-            match file {
-                Ok(file) => {
-                    let mapped = unsafe {
-                        let m = MmapOptions::new().map(&file);
-                        match m {
-                            Ok(m) => m,
-                            Err(e) => {
-                                eprintln!("{}: {}", &pathname, e);
-                                continue;
-                            }
-                        }
-                    };
+            match map_file(&pathname) {
+                Some(mapped) => {
                     find_and_write_subsequences(
                         &mapped,
                         input_delimiter_bytes,
                         output_delimiter_bytes,
                     );
                 }
-                Err(e) => eprintln!("{}: {}", &pathname, e),
+                None => {}
             }
         }
     }
