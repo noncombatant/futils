@@ -1,11 +1,14 @@
 use getopt::Opt;
 use memmap::{Mmap, MmapOptions};
 use regex::Regex;
-use std::cmp::PartialEq;
 use std::env;
 use std::fs::File;
 use std::io::{stdout, Write};
 use std::process::exit;
+
+mod sub_slicer;
+
+use sub_slicer::SubSlicer;
 
 // TODO: Support regex someday.
 //static DEFAULT_INPUT_DELIMITER: &str = r"(\r\n|\n|\r)";
@@ -13,37 +16,6 @@ static DEFAULT_INPUT_DELIMITER: &str = "\n";
 static DEFAULT_OUTPUT_DELIMITER: &str = "\n";
 
 // Utility Functions
-
-// Cribbed from https://stackoverflow.com/posts/35907071/revisions. Thanks,
-// Francis Gagné!
-fn find_subsequence<T: PartialEq>(haystack: &[T], needle: &[T]) -> Option<usize> {
-    haystack
-        .windows(needle.len())
-        .position(|window| window == needle)
-}
-
-// TODO: This should be generic and separated out into its own library?
-struct SubSlicer<'a, T: PartialEq> {
-    slice: &'a [T],
-    input_delimiter: &'a [T],
-    start: usize,
-}
-
-impl<'a, T: PartialEq> Iterator for SubSlicer<'a, T> {
-    type Item = &'a [T];
-
-    fn next(&mut self) -> Option<Self::Item> {
-        let i = find_subsequence(&self.slice[self.start..], self.input_delimiter);
-        match i {
-            Some(i) => {
-                let sub_slice = &self.slice[self.start..self.start + i];
-                self.start = self.start + i + self.input_delimiter.len();
-                Some(sub_slice)
-            }
-            None => None,
-        }
-    }
-}
 
 fn map_file(pathname: &str) -> Option<Mmap> {
     let file = File::open(pathname);
