@@ -23,14 +23,14 @@ fn find_subsequence<T: PartialEq>(haystack: &[T], needle: &[T]) -> Option<usize>
 }
 
 // TODO: This should be generic and separated out into its own library?
-struct SubSlicer<'a> {
-    slice: &'a [u8],
-    input_delimiter: &'a [u8],
+struct SubSlicer<'a, T: PartialEq> {
+    slice: &'a [T],
+    input_delimiter: &'a [T],
     start: usize,
 }
 
-impl<'a> Iterator for SubSlicer<'a> {
-    type Item = &'a [u8];
+impl<'a, T: PartialEq> Iterator for SubSlicer<'a, T> {
+    type Item = &'a [T];
 
     fn next(&mut self) -> Option<Self::Item> {
         let i = find_subsequence(&self.slice[self.start..], self.input_delimiter);
