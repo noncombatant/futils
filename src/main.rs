@@ -1,6 +1,7 @@
 use getopt::Opt;
 use memmap::{Mmap, MmapOptions};
 use regex::Regex;
+use std::cmp::PartialEq;
 use std::env;
 use std::fs::File;
 use std::io::{stdout, Write};
@@ -15,7 +16,7 @@ static DEFAULT_OUTPUT_DELIMITER: &str = "\n";
 
 // Cribbed from https://stackoverflow.com/posts/35907071/revisions. Thanks,
 // Francis Gagné!
-fn find_subsequence(haystack: &[u8], needle: &[u8]) -> Option<usize> {
+fn find_subsequence<T: PartialEq>(haystack: &[T], needle: &[T]) -> Option<usize> {
     haystack
         .windows(needle.len())
         .position(|window| window == needle)
