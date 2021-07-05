@@ -44,7 +44,7 @@ impl<'a> Iterator for SubSlicer<'a> {
     }
 }
 
-fn map_file(pathname: &String) -> Option<Mmap> {
+fn map_file(pathname: &str) -> Option<Mmap> {
     let file = File::open(pathname);
     match file {
         Ok(file) => {
@@ -107,27 +107,24 @@ fn filter_main(arguments: &[String]) {
 
     let (_, arguments) = arguments.split_at(options.index());
 
-    if arguments.len() == 0 {
+    if arguments.is_empty() {
         // TODO: read stdin
     } else {
         for pathname in arguments {
-            match map_file(&pathname) {
-                Some(mapped) => {
-                    let slicer = SubSlicer {
-                        slice: &mapped,
-                        input_delimiter: &input_delimiter_bytes,
-                        start: 0,
-                    };
-                    for s in slicer {
-                        if true
-                        /* TODO */
-                        {
-                            stdout().write_all(s).unwrap();
-                            stdout().write_all(b"\n").unwrap();
-                        }
+            if let Some(mapped) = map_file(&pathname) {
+                let slicer = SubSlicer {
+                    slice: &mapped,
+                    input_delimiter: &input_delimiter_bytes,
+                    start: 0,
+                };
+                for s in slicer {
+                    if true
+                    /* TODO */
+                    {
+                        stdout().write_all(s).unwrap();
+                        stdout().write_all(b"\n").unwrap();
                     }
                 }
-                None => {}
             }
         }
     }
@@ -162,23 +159,20 @@ fn records_main(arguments: &[String]) {
 
     let (_, arguments) = arguments.split_at(options.index());
 
-    if arguments.len() == 0 {
+    if arguments.is_empty() {
         // TODO: read stdin
     } else {
         for pathname in arguments {
-            match map_file(&pathname) {
-                Some(mapped) => {
-                    let slicer = SubSlicer {
-                        slice: &mapped,
-                        input_delimiter: &input_delimiter_bytes,
-                        start: 0,
-                    };
-                    for s in slicer {
-                        stdout().write_all(s).unwrap();
-                        stdout().write_all(output_delimiter_bytes).unwrap();
-                    }
+            if let Some(mapped) = map_file(&pathname) {
+                let slicer = SubSlicer {
+                    slice: &mapped,
+                    input_delimiter: &input_delimiter_bytes,
+                    start: 0,
+                };
+                for s in slicer {
+                    stdout().write_all(s).unwrap();
+                    stdout().write_all(output_delimiter_bytes).unwrap();
                 }
-                None => {}
             }
         }
     }
