@@ -1,44 +1,19 @@
 use getopt::Opt;
-use memmap::{Mmap, MmapOptions};
 use regex::Regex;
 use std::env;
-use std::fs::File;
 use std::io::{stdout, Write};
 use std::process::exit;
 
 mod sub_slicer;
+mod util;
 
 use sub_slicer::SubSlicer;
+use util::map_file;
 
 // TODO: Support regex someday.
 //static DEFAULT_INPUT_DELIMITER: &str = r"(\r\n|\n|\r)";
 static DEFAULT_INPUT_DELIMITER: &str = "\n";
 static DEFAULT_OUTPUT_DELIMITER: &str = "\n";
-
-// Utility Functions
-
-fn map_file(pathname: &str) -> Option<Mmap> {
-    let file = File::open(pathname);
-    match file {
-        Ok(file) => {
-            let mapped = unsafe {
-                let m = MmapOptions::new().map(&file);
-                match m {
-                    Ok(m) => m,
-                    Err(e) => {
-                        eprintln!("{}: {}", pathname, e);
-                        return None;
-                    }
-                }
-            };
-            Some(mapped)
-        }
-        Err(e) => {
-            eprintln!("{}: {}", pathname, e);
-            None
-        }
-    }
-}
 
 // Main functions
 
