@@ -35,6 +35,13 @@ pub fn filter_main(arguments: &[String]) {
         }
     }
 
+    let conditions = [match_expression, prune_expression, match_command];
+    let count = conditions.iter().filter(|i| !i.is_empty()).count();
+    if count != 1 {
+        eprintln!("Use exactly 1 of -m, -p, or -x.");
+        filter_help();
+    }
+
     // TODO: Support this someday.
     //let input_delimiter = Regex::new(&input_delimiter).unwrap();
     let input_delimiter_bytes = input_delimiter.as_bytes();
