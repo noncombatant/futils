@@ -1,11 +1,42 @@
 use getopt::Opt;
 use regex::bytes::Regex;
-use std::io::{stdout, Write};
-use std::process::exit;
+use std::io::{stderr, stdout, Write};
+use std::process::{exit, Command};
+use std::str;
 
 use crate::sub_slicer::SubSlicer;
 use crate::util::map_file;
 use crate::{DEFAULT_INPUT_DELIMITER, DEFAULT_OUTPUT_DELIMITER};
+
+fn run_command(command: &str, argument: &[u8]) -> bool {
+    let argument = str::from_utf8(argument).unwrap();
+    let error_message = "failed to execute process";
+
+    let output = if cfg!(target_os = "windows") {
+        Command::new("cmd")
+            .args(&["/C", command])
+            .arg(argument)
+            .output()
+            .expect(error_message)
+    } else {
+        Command::new("sh")
+            .arg("-c")
+            .arg(command)
+            .arg(argument)
+            .output()
+            .expect(error_message)
+    };
+
+    let success = output.status.success();
+    if !success {
+        stderr().write_all(&output.stderr).unwrap();
+        match output.status.code() {
+            Some(code) => exit(code),
+            None => exit(1),
+        }
+    }
+    success
+}
 
 pub fn filter_help() {
     eprintln!("TODO: filter_help");
@@ -58,7 +89,8 @@ pub fn filter_main(arguments: &[String]) {
     let (_, arguments) = arguments.split_at(options.index());
 
     if arguments.is_empty() {
-        // TODO: read stdin
+        eprintln!("TODO: Reading from stdin not implemented yet. Sorry!");
+        filter_help();
     } else {
         for pathname in arguments {
             if let Some(mapped) = map_file(&pathname) {
@@ -68,7 +100,7 @@ pub fn filter_main(arguments: &[String]) {
                     start: 0,
                 };
                 // TODO: This should be a `match` on an `enum`, as described
-                // above.
+                // above. And then pass that `enum` to a halper fonction.
                 for s in slicer {
                     if !match_expression.is_empty() {
                         if match_re.is_match(s) {
@@ -81,7 +113,10 @@ pub fn filter_main(arguments: &[String]) {
                             stdout().write_all(output_delimiter_bytes).unwrap();
                         }
                     } else if !match_command.is_empty() {
-                        // TODO
+                        if run_command(&match_command, s) {
+                            stdout().write_all(s).unwrap();
+                            stdout().write_all(output_delimiter_bytes).unwrap();
+                        }
                     }
                 }
             }
