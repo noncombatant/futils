@@ -1,5 +1,5 @@
 use getopt::Opt;
-use regex::Regex;
+use regex::bytes::Regex;
 use std::io::{stdout, Write};
 use std::process::exit;
 
@@ -20,6 +20,11 @@ pub fn filter_main(arguments: &[String]) {
     let mut match_expression = String::new();
     let mut prune_expression = String::new();
     let mut match_command = String::new();
+
+    // TODO: Since exactly 1 predicate (`match_expression`, `prune_expression`,
+    // `match_command`) is allowed, we should use an `enum` instead of 3
+    // variables, and then `match` on it in the main processing loop below.
+
     loop {
         match options.next().transpose().unwrap() {
             None => break,
@@ -35,7 +40,7 @@ pub fn filter_main(arguments: &[String]) {
         }
     }
 
-    let conditions = [match_expression, prune_expression, match_command];
+    let conditions = [&match_expression, &prune_expression, &match_command];
     let count = conditions.iter().filter(|i| !i.is_empty()).count();
     if count != 1 {
         eprintln!("Use exactly 1 of -m, -p, or -x.");
@@ -47,8 +52,8 @@ pub fn filter_main(arguments: &[String]) {
     let input_delimiter_bytes = input_delimiter.as_bytes();
     let output_delimiter_bytes = output_delimiter.as_bytes();
 
-    let match_expression = Regex::new(&input_delimiter).unwrap();
-    let prune_expression = Regex::new(&input_delimiter).unwrap();
+    let match_re = Regex::new(&match_expression).unwrap();
+    let prune_re = Regex::new(&prune_expression).unwrap();
 
     let (_, arguments) = arguments.split_at(options.index());
 
@@ -62,12 +67,21 @@ pub fn filter_main(arguments: &[String]) {
                     input_delimiter: &input_delimiter_bytes,
                     start: 0,
                 };
+                // TODO: This should be a `match` on an `enum`, as described
+                // above.
                 for s in slicer {
-                    if true
-                    /* TODO */
-                    {
-                        stdout().write_all(s).unwrap();
-                        stdout().write_all(b"\n").unwrap();
+                    if !match_expression.is_empty() {
+                        if match_re.is_match(s) {
+                            stdout().write_all(s).unwrap();
+                            stdout().write_all(output_delimiter_bytes).unwrap();
+                        }
+                    } else if !prune_expression.is_empty() {
+                        if !prune_re.is_match(s) {
+                            stdout().write_all(s).unwrap();
+                            stdout().write_all(output_delimiter_bytes).unwrap();
+                        }
+                    } else if !match_command.is_empty() {
+                        // TODO
                     }
                 }
             }
