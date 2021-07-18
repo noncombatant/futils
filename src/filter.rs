@@ -8,6 +8,26 @@ use crate::sub_slicer::SubSlicer;
 use crate::util::map_file;
 use crate::{DEFAULT_INPUT_DELIMITER, DEFAULT_OUTPUT_DELIMITER};
 
+enum Predicate<'a> {
+    Nothing,
+    MatchCommand(&'a str),
+    MatchExpression(&'a Regex),
+    PruneExpression(&'a Regex),
+}
+
+// TODO: define a global `type Record = &[u8]`.
+
+impl<'a> Predicate<'a> {
+    fn evaluate(&self, record: &[u8]) -> bool {
+        match self {
+            Predicate::Nothing => panic!("Some goatery has occured."),
+            Predicate::MatchCommand(c) => run_command(c, record),
+            Predicate::MatchExpression(e) => e.is_match(record),
+            Predicate::PruneExpression(e) => !e.is_match(record),
+        }
+    }
+}
+
 fn run_command(command: &str, argument: &[u8]) -> bool {
     let argument = str::from_utf8(argument).unwrap();
     let error_message = "failed to execute process";
@@ -78,13 +98,23 @@ pub fn filter_main(arguments: &[String]) {
         filter_help();
     }
 
+    let re: Regex;
+    let predicate = if !match_command.is_empty() {
+        Predicate::MatchCommand(&match_command)
+    } else if !match_expression.is_empty() {
+        re = Regex::new(&match_expression).unwrap();
+        Predicate::MatchExpression(&re)
+    } else if !prune_expression.is_empty() {
+        re = Regex::new(&prune_expression).unwrap();
+        Predicate::PruneExpression(&re)
+    } else {
+        Predicate::Nothing
+    };
+
     // TODO: Support this someday.
     //let input_delimiter = Regex::new(&input_delimiter).unwrap();
     let input_delimiter_bytes = input_delimiter.as_bytes();
     let output_delimiter_bytes = output_delimiter.as_bytes();
-
-    let match_re = Regex::new(&match_expression).unwrap();
-    let prune_re = Regex::new(&prune_expression).unwrap();
 
     let (_, arguments) = arguments.split_at(options.index());
 
@@ -99,24 +129,10 @@ pub fn filter_main(arguments: &[String]) {
                     input_delimiter: &input_delimiter_bytes,
                     start: 0,
                 };
-                // TODO: This should be a `match` on an `enum`, as described
-                // above. And then pass that `enum` to a halper fonction.
                 for s in slicer {
-                    if !match_expression.is_empty() {
-                        if match_re.is_match(s) {
-                            stdout().write_all(s).unwrap();
-                            stdout().write_all(output_delimiter_bytes).unwrap();
-                        }
-                    } else if !prune_expression.is_empty() {
-                        if !prune_re.is_match(s) {
-                            stdout().write_all(s).unwrap();
-                            stdout().write_all(output_delimiter_bytes).unwrap();
-                        }
-                    } else if !match_command.is_empty() {
-                        if run_command(&match_command, s) {
-                            stdout().write_all(s).unwrap();
-                            stdout().write_all(output_delimiter_bytes).unwrap();
-                        }
+                    if predicate.evaluate(s) {
+                        stdout().write_all(s).unwrap();
+                        stdout().write_all(output_delimiter_bytes).unwrap();
                     }
                 }
             }
