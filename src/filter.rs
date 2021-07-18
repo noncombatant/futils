@@ -72,10 +72,6 @@ pub fn filter_main(arguments: &[String]) {
     let mut prune_expression = String::new();
     let mut match_command = String::new();
 
-    // TODO: Since exactly 1 predicate (`match_expression`, `prune_expression`,
-    // `match_command`) is allowed, we should use an `enum` instead of 3
-    // variables, and then `match` on it in the main processing loop below.
-
     loop {
         match options.next().transpose().unwrap() {
             None => break,

@@ -20,6 +20,7 @@ pub fn records_main(arguments: &[String]) {
         match options.next().transpose().unwrap() {
             None => break,
             Some(opt) => match opt {
+                // TODO: Support common escape sequences, like \n, \t, et c.
                 Opt('d', Some(string)) => input_delimiter = string.clone(),
                 Opt('h', None) => records_help(),
                 Opt('o', Some(string)) => output_delimiter = string.clone(),
@@ -36,7 +37,8 @@ pub fn records_main(arguments: &[String]) {
     let (_, arguments) = arguments.split_at(options.index());
 
     if arguments.is_empty() {
-        // TODO: read stdin
+        eprintln!("TODO: Reading from stdin not implemented yet. Sorry!");
+        filter_help();
     } else {
         for pathname in arguments {
             if let Some(mapped) = map_file(&pathname) {
