@@ -38,7 +38,7 @@ pub fn records_main(arguments: &[String]) {
 
     if arguments.is_empty() {
         eprintln!("TODO: Reading from stdin not implemented yet. Sorry!");
-        filter_help();
+        records_help();
     } else {
         for pathname in arguments {
             if let Some(mapped) = map_file(&pathname) {
