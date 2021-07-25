@@ -1,6 +1,7 @@
 use memmap::{Mmap, MmapOptions};
 use std::fs::File;
-use rustc_lexer::unescape::{EscapeError, unescape_char};
+// TODO: `rustc_lexer` might not be the best dependency.
+use rustc_lexer::unescape::{EscapeError, unescape_str};
 
 pub fn map_file(pathname: &str) -> Option<Mmap> {
     let file = File::open(pathname);
@@ -25,6 +26,15 @@ pub fn map_file(pathname: &str) -> Option<Mmap> {
     }
 }
 
-pub fn unescape_backslashes(s: &str) -> Result<char, (usize, EscapeError)> {
-    unescape_char(s)
+pub fn unescape_backslashes(input: &str) -> Result<String, EscapeError> {
+    let mut result = String::new();
+    let mut cb = |_, ch| {
+        if let Ok(c) = ch {
+            result.push(c);
+        } else {
+            // TODO: Don't just fail silently.
+        }
+    };
+    unescape_str(&input, &mut cb);
+    Ok(result)
 }
