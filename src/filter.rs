@@ -5,7 +5,7 @@ use std::process::{exit, Command};
 use std::str;
 
 use crate::sub_slicer::SubSlicer;
-use crate::util::map_file;
+use crate::util::{map_file, unescape_backslashes};
 use crate::{DEFAULT_INPUT_DELIMITER, DEFAULT_OUTPUT_DELIMITER};
 
 enum Predicate<'a> {
@@ -20,7 +20,7 @@ enum Predicate<'a> {
 impl<'a> Predicate<'a> {
     fn evaluate(&self, record: &[u8]) -> bool {
         match self {
-            Predicate::Nothing => panic!("Some goatery has occured."),
+            Predicate::Nothing => panic!("Some goatery has occurred."),
             Predicate::MatchCommand(c) => run_command(c, record),
             Predicate::MatchExpression(e) => e.is_match(record),
             Predicate::PruneExpression(e) => !e.is_match(record),
@@ -109,7 +109,9 @@ pub fn filter_main(arguments: &[String]) {
 
     // TODO: Support this someday.
     //let input_delimiter = Regex::new(&input_delimiter).unwrap();
+    let input_delimiter = unescape_backslashes(&input_delimiter).unwrap();
     let input_delimiter_bytes = input_delimiter.as_bytes();
+    let output_delimiter = unescape_backslashes(&output_delimiter).unwrap();
     let output_delimiter_bytes = output_delimiter.as_bytes();
 
     let (_, arguments) = arguments.split_at(options.index());
