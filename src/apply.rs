@@ -1,4 +1,5 @@
 use getopt::Opt;
+use std::io::{stdout, Write};
 use std::process::exit;
 
 use crate::sub_slicer::SubSlicer;
@@ -51,7 +52,8 @@ pub fn apply_main(arguments: &[String]) {
                     start: 0,
                 };
                 for s in slicer {
-                    println!("{}", run_command(&command, s));
+                    run_command(&command, s);
+                    stdout().write_all(output_delimiter_bytes).unwrap();
                 }
             }
         }
