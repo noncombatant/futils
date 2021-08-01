@@ -22,11 +22,16 @@
 <a name="apply"></a>
 <h2><code>apply</code></h2>
 
-<p>TODO</p>
+<p>Given 1 or more input files, splits the files into records (as delimited by a
+given regular expression) and passes each record to a given command as its
+argument. If no files are given, reads from the standard input.</p>
 
 <h3>Synopsis</h3>
 
-<p>TODO</p>
+<pre>
+apply -h
+apply [-d <var>expression</var>] [-o <var>string</var>] -x <var>command</var> [<var>file</var> [...]]
+</pre>
 
 <h3>Options</h3>
 
@@ -36,7 +41,29 @@
 
 <dd>Print help message and exit.</dd>
 
+<dt><code>-d <var>expression</var></code></dt>
+
+<dd>Use the regular expression <var>expression</var> to <b>d</b>elimit records
+in the input. If no <var>expression</var> is given, the default value is
+<code>(\r\n|\n|\r)</code>.</dd>
+
+<dt><code>-o <var>string</var></code></dt>
+
+<dd>Use the string <var>string</var> to delimit records in the <b>o</b>utput. If
+no <var>string</var> is given, the default value is the platform’s native new
+line sequence (e.g. <code>\n</code> on POSIX, <code>\r\n</code> on
+Windows).</dd>
+
+<dt><code>-x <var>command</var></code></dt>
+
+<dd>For each record in the input, e<b>x</b>ecute the given <var>command</var>
+with the record as the argument.</dd>
+
 </dl>
+
+<h3>Examples</h3>
+
+<p>TODO</p>
 
 <a name="fields"></a>
 <h2><code>fields</code></h2>

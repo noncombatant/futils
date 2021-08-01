@@ -1,11 +1,10 @@
 use getopt::Opt;
 use regex::bytes::Regex;
-use std::io::{stderr, stdout, Write};
-use std::process::{exit, Command};
-use std::str;
+use std::io::{stdout, Write};
+use std::process::exit;
 
 use crate::sub_slicer::SubSlicer;
-use crate::util::{map_file, unescape_backslashes};
+use crate::util::{map_file, run_command, unescape_backslashes};
 use crate::{DEFAULT_INPUT_DELIMITER, DEFAULT_OUTPUT_DELIMITER};
 
 enum Predicate<'a> {
@@ -26,36 +25,6 @@ impl<'a> Predicate<'a> {
             Predicate::PruneExpression(e) => !e.is_match(record),
         }
     }
-}
-
-fn run_command(command: &str, argument: &[u8]) -> bool {
-    let argument = str::from_utf8(argument).unwrap();
-    let error_message = "failed to execute process";
-
-    let output = if cfg!(target_os = "windows") {
-        Command::new("cmd")
-            .args(&["/C", command])
-            .arg(argument)
-            .output()
-            .expect(error_message)
-    } else {
-        Command::new("sh")
-            .arg("-c")
-            .arg(command)
-            .arg(argument)
-            .output()
-            .expect(error_message)
-    };
-
-    let success = output.status.success();
-    if !success {
-        stderr().write_all(&output.stderr).unwrap();
-        match output.status.code() {
-            Some(code) => exit(code),
-            None => exit(1),
-        }
-    }
-    success
 }
 
 pub fn filter_help() {
