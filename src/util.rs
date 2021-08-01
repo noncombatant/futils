@@ -52,6 +52,8 @@ pub fn run_command(command: &str, argument: &[u8]) -> bool {
     stderr().write_all(&output.stderr).unwrap();
     if !success {
         match output.status.code() {
+            // TODO: Return the code as well as `success`, and let the caller
+            // decide.
             Some(code) => exit(code),
             None => exit(1),
         }
