@@ -3,7 +3,7 @@ use std::io::{stdout, Write};
 use std::process::exit;
 
 use crate::sub_slicer::SubSlicer;
-use crate::util::{map_file, run_command, unescape_backslashes};
+use crate::util::{map_file, run_command, unescape_backslashes, ShellResult};
 use crate::{DEFAULT_INPUT_DELIMITER, DEFAULT_OUTPUT_DELIMITER};
 
 pub fn apply_help() {
@@ -11,7 +11,7 @@ pub fn apply_help() {
     exit(1);
 }
 
-pub fn apply_main(arguments: &[String]) {
+pub fn apply_main(arguments: &[String]) -> ShellResult {
     let mut options = getopt::Parser::new(&arguments, "d:ho:x:");
 
     let mut input_delimiter = String::from(DEFAULT_INPUT_DELIMITER);
@@ -58,4 +58,5 @@ pub fn apply_main(arguments: &[String]) {
             }
         }
     }
+    Ok(0)
 }

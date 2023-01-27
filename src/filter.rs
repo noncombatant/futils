@@ -4,7 +4,7 @@ use std::io::{stdout, Write};
 use std::process::exit;
 
 use crate::sub_slicer::SubSlicer;
-use crate::util::{map_file, run_command, unescape_backslashes};
+use crate::util::{map_file, run_command, unescape_backslashes, ShellResult};
 use crate::{DEFAULT_INPUT_DELIMITER, DEFAULT_OUTPUT_DELIMITER};
 
 enum Predicate<'a> {
@@ -32,7 +32,7 @@ pub fn filter_help() {
     exit(1);
 }
 
-pub fn filter_main(arguments: &[String]) {
+pub fn filter_main(arguments: &[String]) -> ShellResult {
     let mut options = getopt::Parser::new(&arguments, "d:hm:o:p:x:");
 
     let mut input_delimiter = String::from(DEFAULT_INPUT_DELIMITER);
@@ -105,4 +105,5 @@ pub fn filter_main(arguments: &[String]) {
             }
         }
     }
+    Ok(0)
 }
