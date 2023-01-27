@@ -78,6 +78,5 @@ pub fn unescape_backslashes(input: &str) -> Result<String, EscapeError> {
 }
 
 pub fn file_name(pathname: &str) -> Option<&str> {
-    let file_name = Path::new(pathname).file_name()?;
-    return file_name.to_str()
+    Path::new(pathname).file_name()?.to_str()
 }

@@ -15,7 +15,7 @@ use files::files_main;
 use filter::filter_main;
 use records::records_main;
 use test::test_main;
-use crate::util::{file_name, ShellResult};
+use util::{file_name, ShellResult};
 
 // TODO: Support regex someday.
 //static DEFAULT_INPUT_DELIMITER: &str = r"(\r\n|\n|\r)";
@@ -33,7 +33,9 @@ fn futils_help(i: i32) -> ShellResult {
 
 fn main() {
     let mut arguments = env::args().collect::<Vec<String>>();
-    let basename = file_name(&arguments[0]).expect("Need a valid program name");
+
+    let conversion_error_message = "Need a valid program name";
+    let basename = file_name(&arguments[0]).expect(conversion_error_message);
     if basename.eq("futils") {
         if arguments.len() < 2 {
             futils_help(-1).expect("NOTREACHED");
@@ -42,24 +44,18 @@ fn main() {
         arguments.remove(0);
     }
 
-    let basename = file_name(&arguments[0]).expect("Need a valid program name");
-    let r = match basename {
+    let basename = file_name(&arguments[0]).expect(conversion_error_message);
+    if let Err(e) = match basename {
         "apply" => apply_main(&arguments),
         "files" => files_main(&arguments),
         "filter" => filter_main(&arguments),
-        "help" => futils_help(0),
         "records" => records_main(&arguments),
 
+        "help" => futils_help(0),
         "test" => test_main(&arguments),
         _ => futils_help(-1),
-    };
-    match r {
-        Ok(i) => {
-            exit(i)
-        },
-        Err(e) => {
-            eprintln!("{}", e);
-            exit(-1)
-        }
-    };
+    } {
+        eprintln!("{}", e);
+        exit(-1)
+    }
 }
