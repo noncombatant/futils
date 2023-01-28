@@ -5,7 +5,7 @@ use std::error::Error;
 use std::fs::File;
 use std::io::{stderr, stdout, Write};
 use std::path::Path;
-use std::process::{exit, Command};
+use std::process::Command;
 use std::str;
 
 pub type ShellResult = Result<i32, Box<dyn Error>>;
@@ -33,36 +33,29 @@ pub fn map_file(pathname: &str) -> Option<Mmap> {
     }
 }
 
-pub fn run_command(command: &str, argument: &[u8]) -> bool {
-    let argument = str::from_utf8(argument).unwrap();
-    let error_message = "failed to execute process";
+pub fn run_command(command: &str, argument: &[u8], verbose: bool) -> ShellResult {
+    let argument = str::from_utf8(argument)?;
 
     let output = if cfg!(target_os = "windows") {
         Command::new("cmd")
             .args(&["/C", command])
             .arg(argument)
-            .output()
-            .expect(error_message)
+            .output()?
     } else {
-        Command::new(command)
-            .arg(argument)
-            .output()
-            .expect(error_message)
+        Command::new(command).arg(argument).output()?
     };
 
-    let success = output.status.success();
-    // TODO: Add a `verbose` option to control whether to write `output.stdout`.
-    stdout().write_all(&output.stdout).unwrap();
-    stderr().write_all(&output.stderr).unwrap();
-    if !success {
-        match output.status.code() {
-            // TODO: Return the code as well as `success`, and let the caller
-            // decide.
-            Some(code) => exit(code),
-            None => exit(1),
-        }
+    let code = output.status.code();
+    if verbose {
+        stdout().write_all(&output.stdout)?;
     }
-    success
+    if !output.stderr.is_empty() {
+        stderr().write_all(&output.stderr)?;
+    }
+    match code {
+        Some(code) => Ok(code),
+        None => panic!("Total goatery in effect"),
+    }
 }
 
 fn escape_error_to_str(e: EscapeError) -> &'static str {

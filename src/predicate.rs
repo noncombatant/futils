@@ -15,7 +15,10 @@ impl<'a> Predicate<'a> {
     pub fn evaluate(&self, record: &[u8]) -> bool {
         match self {
             Predicate::Nothing => panic!("Some goatery has occurred."),
-            Predicate::MatchCommand(c) => run_command(c, record),
+            Predicate::MatchCommand(c) => match run_command(c, record, false) {
+                Ok(code) => code == 0,
+                _ => false,
+            },
             Predicate::MatchExpression(e) => e.is_match(record),
             Predicate::PruneExpression(e) => !e.is_match(record),
         }
