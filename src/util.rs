@@ -65,7 +65,37 @@ pub fn run_command(command: &str, argument: &[u8]) -> bool {
     success
 }
 
-pub fn unescape_backslashes(input: &str) -> Result<String, EscapeError> {
+fn escape_error_to_str(e: EscapeError) -> &'static str {
+    // TODO
+    match e {
+        EscapeError::ZeroChars => "",
+        EscapeError::MoreThanOneChar => "",
+        EscapeError::LoneSlash => "",
+        EscapeError::InvalidEscape => "",
+        EscapeError::BareCarriageReturn => "",
+        EscapeError::BareCarriageReturnInRawString => "",
+        EscapeError::EscapeOnlyChar => "",
+        EscapeError::TooShortHexEscape => "",
+        EscapeError::InvalidCharInHexEscape => "",
+        EscapeError::OutOfRangeHexEscape => "",
+        EscapeError::NoBraceInUnicodeEscape => "",
+        EscapeError::InvalidCharInUnicodeEscape => "",
+        EscapeError::EmptyUnicodeEscape => "",
+        EscapeError::UnclosedUnicodeEscape => "",
+        EscapeError::LeadingUnderscoreUnicodeEscape => "",
+        EscapeError::OverlongUnicodeEscape => "",
+        EscapeError::LoneSurrogateUnicodeEscape => "",
+        EscapeError::OutOfRangeUnicodeEscape => "",
+        EscapeError::UnicodeEscapeInByte => "",
+        EscapeError::NonAsciiCharInByte => "",
+        // Documented, but apparently not implemented:
+        //EscapeError::UnskippedWhitespaceWarning => "",
+        //EscapeError::MultipleSkippedLinesWarning => "",
+        _ => "",
+    }
+}
+
+pub fn unescape_backslashes(input: &str) -> Result<String, Box<dyn Error>> {
     let mut result = Ok(String::new());
     // Thanks to Steve Checkoway for help:
     let mut cb = |_, ch| match (&mut result, ch) {
@@ -74,7 +104,10 @@ pub fn unescape_backslashes(input: &str) -> Result<String, EscapeError> {
         _ => (),
     };
     unescape_str(&input, &mut cb);
-    result
+    match result {
+        Ok(s) => Ok(s),
+        Err(e) => Err(Box::<dyn Error>::from(escape_error_to_str(e))),
+    }
 }
 
 pub fn file_name(pathname: &str) -> Option<&str> {

@@ -5,6 +5,7 @@ use std::process::exit;
 mod apply;
 mod files;
 mod filter;
+mod predicate;
 mod records;
 mod sub_slicer;
 mod test;

@@ -3,29 +3,10 @@ use regex::bytes::Regex;
 use std::io::{stdout, Write};
 use std::process::exit;
 
+use crate::predicate::Predicate;
 use crate::sub_slicer::SubSlicer;
-use crate::util::{map_file, run_command, unescape_backslashes, ShellResult};
+use crate::util::{map_file, unescape_backslashes, ShellResult};
 use crate::{DEFAULT_INPUT_DELIMITER, DEFAULT_OUTPUT_DELIMITER};
-
-enum Predicate<'a> {
-    Nothing,
-    MatchCommand(&'a str),
-    MatchExpression(&'a Regex),
-    PruneExpression(&'a Regex),
-}
-
-// TODO: define a global `type Record = &[u8]`.
-
-impl<'a> Predicate<'a> {
-    fn evaluate(&self, record: &[u8]) -> bool {
-        match self {
-            Predicate::Nothing => panic!("Some goatery has occurred."),
-            Predicate::MatchCommand(c) => run_command(c, record),
-            Predicate::MatchExpression(e) => e.is_match(record),
-            Predicate::PruneExpression(e) => !e.is_match(record),
-        }
-    }
-}
 
 pub fn filter_help() {
     eprintln!("TODO: filter_help");
@@ -33,6 +14,7 @@ pub fn filter_help() {
 }
 
 pub fn filter_main(arguments: &[String]) -> ShellResult {
+    // TODO: Somehow, make this whole options parsing chunk reusable.
     let mut options = getopt::Parser::new(&arguments, "d:hm:o:p:x:");
 
     let mut input_delimiter = String::from(DEFAULT_INPUT_DELIMITER);
@@ -42,7 +24,7 @@ pub fn filter_main(arguments: &[String]) -> ShellResult {
     let mut match_command = String::new();
 
     loop {
-        match options.next().transpose().unwrap() {
+        match options.next().transpose()? {
             None => break,
             Some(opt) => match opt {
                 Opt('d', Some(string)) => input_delimiter = string.clone(),
@@ -59,6 +41,8 @@ pub fn filter_main(arguments: &[String]) -> ShellResult {
     let conditions = [&match_expression, &prune_expression, &match_command];
     let count = conditions.iter().filter(|i| !i.is_empty()).count();
     if count != 1 {
+        // TODO: Make it possible to pass more than 1, and AND them all
+        // together.
         eprintln!("Use exactly 1 of -m, -p, or -x.");
         filter_help();
     }
@@ -67,20 +51,20 @@ pub fn filter_main(arguments: &[String]) -> ShellResult {
     let predicate = if !match_command.is_empty() {
         Predicate::MatchCommand(&match_command)
     } else if !match_expression.is_empty() {
-        re = Regex::new(&match_expression).unwrap();
+        re = Regex::new(&match_expression)?;
         Predicate::MatchExpression(&re)
     } else if !prune_expression.is_empty() {
-        re = Regex::new(&prune_expression).unwrap();
+        re = Regex::new(&prune_expression)?;
         Predicate::PruneExpression(&re)
     } else {
         Predicate::Nothing
     };
 
     // TODO: Support this someday.
-    //let input_delimiter = Regex::new(&input_delimiter).unwrap();
-    let input_delimiter = unescape_backslashes(&input_delimiter).unwrap();
+    //let input_delimiter = Regex::new(&input_delimiter)?;
+    let input_delimiter = unescape_backslashes(&input_delimiter)?;
     let input_delimiter_bytes = input_delimiter.as_bytes();
-    let output_delimiter = unescape_backslashes(&output_delimiter).unwrap();
+    let output_delimiter = unescape_backslashes(&output_delimiter)?;
     let output_delimiter_bytes = output_delimiter.as_bytes();
 
     let (_, arguments) = arguments.split_at(options.index());
@@ -98,8 +82,8 @@ pub fn filter_main(arguments: &[String]) -> ShellResult {
                 };
                 for s in slicer {
                     if predicate.evaluate(s) {
-                        stdout().write_all(s).unwrap();
-                        stdout().write_all(output_delimiter_bytes).unwrap();
+                        stdout().write_all(s)?;
+                        stdout().write_all(output_delimiter_bytes)?;
                     }
                 }
             }
