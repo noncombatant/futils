@@ -56,9 +56,11 @@ pub fn apply_main(arguments: &[String]) -> ShellResult {
                 };
                 for s in slicer {
                     match run_command(&command, s, verbose) {
-                        Ok(c) => if c != 0 && code == 0 {
-                            code = c
-                        },
+                        Ok(c) => {
+                            if c != 0 && code == 0 {
+                                code = c
+                            }
+                        }
                         _ => panic!("We're gonna die"),
                     };
                     // TODO: First, remove the trailing \n, if
