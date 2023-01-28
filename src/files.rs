@@ -20,12 +20,12 @@ pub fn files_help() {
 }
 
 pub fn files_main(arguments: &[String]) -> ShellResult {
-    // TODO: Add a -t for type: file, directory, symlink, others?
-    let mut options = getopt::Parser::new(&arguments, "ahm:o:p:vx:");
+    let mut options = getopt::Parser::new(&arguments, "ahm:o:p:t:vx:");
     let mut show_all = false;
     let mut match_expressions = Vec::new();
     let mut output_delimiter = String::from(DEFAULT_OUTPUT_DELIMITER);
     let mut prune_expressions = Vec::new();
+    let mut file_types = String::from("dfs");
     let mut verbose = false;
     let mut match_commands = Vec::new();
 
@@ -38,6 +38,7 @@ pub fn files_main(arguments: &[String]) -> ShellResult {
                 Opt('m', Some(string)) => match_expressions.push(Regex::new(&string)?),
                 Opt('o', Some(string)) => output_delimiter = string.clone(),
                 Opt('p', Some(string)) => prune_expressions.push(Regex::new(&string)?),
+                Opt('t', Some(string)) => file_types = string.clone(),
                 Opt('v', None) => verbose = true,
                 Opt('x', Some(string)) => match_commands.push(string.clone()),
                 _ => files_help(),
@@ -69,8 +70,20 @@ pub fn files_main(arguments: &[String]) -> ShellResult {
                 }
                 Ok(e) => e,
             };
+
+            let file_type = entry.file_type();
+            let is_dir = file_type.is_dir();
+            let is_file = file_type.is_file();
+            let is_symlink = file_type.is_symlink();
+            if (is_dir && !file_types.contains("d"))
+                || (is_file && !file_types.contains("f"))
+                || (is_symlink && !file_types.contains("s"))
+            {
+                continue;
+            }
+
             if !show_all && is_hidden(&entry) {
-                if entry.file_type().is_dir() {
+                if is_dir {
                     it.skip_current_dir();
                 }
                 continue;
@@ -106,11 +119,11 @@ pub fn files_main(arguments: &[String]) -> ShellResult {
                         if code != 0 {
                             continue 'outer;
                         }
-                    },
+                    }
                     Err(e) => {
                         eprintln!("{}", e);
                         continue 'outer;
-                    },
+                    }
                 }
             }
 
