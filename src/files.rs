@@ -4,7 +4,7 @@ use std::io::{stdout, Write};
 use std::process::exit;
 use walkdir::{DirEntry, WalkDir};
 
-use crate::util::{unescape_backslashes, ShellResult};
+use crate::util::{run_command, unescape_backslashes, ShellResult};
 use crate::DEFAULT_OUTPUT_DELIMITER;
 
 fn is_hidden(e: &DirEntry) -> bool {
@@ -20,11 +20,14 @@ pub fn files_help() {
 }
 
 pub fn files_main(arguments: &[String]) -> ShellResult {
-    let mut options = getopt::Parser::new(&arguments, "ahm:o:");
+    // TODO: Add a -t for type: file, directory, symlink, others?
+    let mut options = getopt::Parser::new(&arguments, "ahm:o:p:vx:");
     let mut show_all = false;
-    let mut output_delimiter = String::from(DEFAULT_OUTPUT_DELIMITER);
-
     let mut match_expressions = Vec::new();
+    let mut output_delimiter = String::from(DEFAULT_OUTPUT_DELIMITER);
+    let mut prune_expressions = Vec::new();
+    let mut verbose = false;
+    let mut match_commands = Vec::new();
 
     loop {
         match options.next().transpose()? {
@@ -34,6 +37,9 @@ pub fn files_main(arguments: &[String]) -> ShellResult {
                 Opt('h', None) => files_help(),
                 Opt('m', Some(string)) => match_expressions.push(Regex::new(&string)?),
                 Opt('o', Some(string)) => output_delimiter = string.clone(),
+                Opt('p', Some(string)) => prune_expressions.push(Regex::new(&string)?),
+                Opt('v', None) => verbose = true,
+                Opt('x', Some(string)) => match_commands.push(string.clone()),
                 _ => files_help(),
             },
         }
@@ -79,9 +85,32 @@ pub fn files_main(arguments: &[String]) -> ShellResult {
                 }
             };
 
+            for re in &prune_expressions {
+                if re.is_match(pathname) {
+                    if entry.file_type().is_dir() {
+                        it.skip_current_dir();
+                    }
+                    continue 'outer;
+                }
+            }
+
             for re in &match_expressions {
                 if !re.is_match(pathname) {
                     continue 'outer;
+                }
+            }
+
+            for command in &match_commands {
+                match run_command(command, pathname.as_bytes(), verbose) {
+                    Ok(code) => {
+                        if code != 0 {
+                            continue 'outer;
+                        }
+                    },
+                    Err(e) => {
+                        eprintln!("{}", e);
+                        continue 'outer;
+                    },
                 }
             }
 
