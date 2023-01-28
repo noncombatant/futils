@@ -1,5 +1,5 @@
 use getopt::Opt;
-use std::io::{stdout, Write};
+//use std::io::{stdout, Write};
 use std::process::exit;
 
 use crate::sub_slicer::SubSlicer;
@@ -38,7 +38,7 @@ pub fn apply_main(arguments: &[String]) -> ShellResult {
     let input_delimiter = unescape_backslashes(&input_delimiter)?;
     let input_delimiter_bytes = input_delimiter.as_bytes();
     let output_delimiter = unescape_backslashes(&output_delimiter)?;
-    let output_delimiter_bytes = output_delimiter.as_bytes();
+    let _output_delimiter_bytes = output_delimiter.as_bytes();
 
     let (_, arguments) = arguments.split_at(options.index());
 
