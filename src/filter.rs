@@ -60,8 +60,6 @@ pub fn filter_main(arguments: &[String]) -> ShellResult {
         Predicate::Nothing
     };
 
-    // TODO: Support this someday.
-    //let input_delimiter = Regex::new(&input_delimiter)?;
     let input_delimiter = unescape_backslashes(&input_delimiter)?;
     let input_delimiter_bytes = input_delimiter.as_bytes();
     let output_delimiter = unescape_backslashes(&output_delimiter)?;
