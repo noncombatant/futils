@@ -9,6 +9,7 @@ mod predicate;
 mod records;
 mod sub_slicer;
 mod test;
+mod time;
 mod util;
 
 use apply::apply_main;

@@ -1,8 +1,10 @@
 use getopt::Opt;
 use regex::Regex;
 use std::io::{stdout, Write};
+use std::time::SystemTime;
 use walkdir::{DirEntry, WalkDir};
 
+use crate::time::{Comparison, Time};
 use crate::util::{help, run_command, unescape_backslashes, ShellResult};
 use crate::DEFAULT_OUTPUT_DELIMITER;
 
@@ -50,8 +52,7 @@ fn is_hidden(e: &DirEntry) -> bool {
 }
 
 pub fn files_main(arguments: &[String]) -> ShellResult {
-    // TODO: Consider adding support for mtime before and after, or ranges.
-    let mut options = getopt::Parser::new(arguments, "ahm:o:p:t:vx:");
+    let mut options = getopt::Parser::new(arguments, "ahm:M:o:p:t:vx:");
     let mut show_all = false;
     let mut match_expressions = Vec::new();
     let mut output_delimiter = String::from(DEFAULT_OUTPUT_DELIMITER);
@@ -59,6 +60,7 @@ pub fn files_main(arguments: &[String]) -> ShellResult {
     let mut file_types = String::from("dfs");
     let mut verbose = false;
     let mut match_commands = Vec::new();
+    let mut mtime_expressions = Vec::new();
 
     loop {
         match options.next().transpose()? {
@@ -67,6 +69,7 @@ pub fn files_main(arguments: &[String]) -> ShellResult {
                 Opt('a', None) => show_all = true,
                 Opt('h', None) => help(0, HELP_MESSAGE),
                 Opt('m', Some(string)) => match_expressions.push(Regex::new(&string)?),
+                Opt('M', Some(string)) => mtime_expressions.push(Time::new(&string)?),
                 Opt('o', Some(string)) => output_delimiter = string.clone(),
                 Opt('p', Some(string)) => prune_expressions.push(Regex::new(&string)?),
                 Opt('t', Some(string)) => file_types = string.clone(),
@@ -141,6 +144,37 @@ pub fn files_main(arguments: &[String]) -> ShellResult {
             for re in &match_expressions {
                 if !re.is_match(pathname) {
                     continue 'outer;
+                }
+            }
+
+            for mtime in &mtime_expressions {
+                let modified = entry
+                    .metadata()
+                    .unwrap()
+                    .modified()
+                    .unwrap()
+                    .duration_since(SystemTime::UNIX_EPOCH)
+                    .unwrap()
+                    .as_secs();
+                let timestamp = TryInto::<u64>::try_into(mtime.date_time.timestamp()).unwrap();
+                match mtime.comparison {
+                    Comparison::After => {
+                        // BUG: timestamp is local, not UTC, so these comparisons will be wrong
+                        // Something like let converted: DateTime<Local> = DateTime::from(utc);
+                        if timestamp > modified {
+                            continue 'outer;
+                        }
+                    }
+                    Comparison::Before => {
+                        if timestamp < modified {
+                            continue 'outer;
+                        }
+                    }
+                    Comparison::Exactly => {
+                        if timestamp == modified {
+                            continue 'outer;
+                        }
+                    }
                 }
             }
 
