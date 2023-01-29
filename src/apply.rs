@@ -40,33 +40,39 @@ pub fn apply_main(arguments: &[String]) -> ShellResult {
 
     let (_, arguments) = arguments.split_at(options.index());
 
-    let mut code = 0;
+    let mut status = 0;
     if arguments.is_empty() {
         eprintln!("TODO: Reading from stdin not implemented yet. Sorry!");
         apply_help();
     } else {
         for pathname in arguments {
-            if let Some(mapped) = map_file(pathname) {
-                let slicer = SubSlicer {
-                    slice: &mapped,
-                    input_delimiter: input_delimiter_bytes,
-                    start: 0,
-                };
-                for s in slicer {
-                    match run_command(&command, s, verbose) {
-                        Ok(c) => {
-                            if c != 0 && code == 0 {
-                                code = c
-                            }
-                        }
-                        _ => panic!("We're gonna die"),
+            match map_file(pathname) {
+                Ok(mapped) => {
+                    let slicer = SubSlicer {
+                        slice: &mapped,
+                        input_delimiter: input_delimiter_bytes,
+                        start: 0,
                     };
-                    // TODO: First, remove the trailing \n, if
-                    // output_delimiter_bytes is not \n.
-                    //stdout().write_all(output_delimiter_bytes)?;
+                    for s in slicer {
+                        match run_command(&command, s, verbose) {
+                            Ok(s) => {
+                                if s != 0 && status == 0 {
+                                    status = s
+                                }
+                            }
+                            _ => panic!("We're gonna die"),
+                        };
+                        // TODO: First, remove the trailing \n, if
+                        // output_delimiter_bytes is not \n.
+                        //stdout().write_all(output_delimiter_bytes)?;
+                    }
+                }
+                Err(e) => {
+                    eprintln!("{}", e);
+                    status += 1;
                 }
             }
         }
     }
-    Ok(code)
+    Ok(status)
 }

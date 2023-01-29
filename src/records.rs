@@ -61,7 +61,7 @@ pub fn records_main(arguments: &[String]) -> ShellResult {
     } else {
         for pathname in arguments {
             match map_file(pathname) {
-                Some(mapped) => {
+                Ok(mapped) => {
                     for record in input_delimiter.split(&mapped) {
                         if !record.is_empty() {
                             stdout().write_all(record)?;
@@ -69,8 +69,8 @@ pub fn records_main(arguments: &[String]) -> ShellResult {
                         }
                     }
                 }
-                None => {
-                    eprintln!("Could not read {}", pathname);
+                Err(e) => {
+                    eprintln!("{}", e);
                     status += 1;
                 }
             }

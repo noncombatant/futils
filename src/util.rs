@@ -14,28 +14,9 @@ pub fn help(status: i32, message: &str) {
     exit(status);
 }
 
-// TODO: This should be a Result
-pub fn map_file(pathname: &str) -> Option<Mmap> {
-    let file = File::open(pathname);
-    match file {
-        Ok(file) => {
-            let mapped = unsafe {
-                let m = MmapOptions::new().map(&file);
-                match m {
-                    Ok(m) => m,
-                    Err(e) => {
-                        eprintln!("{}: {}", pathname, e);
-                        return None;
-                    }
-                }
-            };
-            Some(mapped)
-        }
-        Err(e) => {
-            eprintln!("{}: {}", pathname, e);
-            None
-        }
-    }
+pub fn map_file(pathname: &str) -> Result<Mmap, std::io::Error> {
+    let file = File::open(pathname)?;
+    unsafe { MmapOptions::new().map(&file) }
 }
 
 pub fn run_command(command: &str, argument: &[u8], verbose: bool) -> ShellResult {

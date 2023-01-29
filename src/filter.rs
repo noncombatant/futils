@@ -67,25 +67,32 @@ pub fn filter_main(arguments: &[String]) -> ShellResult {
 
     let (_, arguments) = arguments.split_at(options.index());
 
+    let mut status = 0;
     if arguments.is_empty() {
         eprintln!("TODO: Reading from stdin not implemented yet. Sorry!");
         filter_help();
     } else {
         for pathname in arguments {
-            if let Some(mapped) = map_file(pathname) {
-                let slicer = SubSlicer {
-                    slice: &mapped,
-                    input_delimiter: input_delimiter_bytes,
-                    start: 0,
-                };
-                for s in slicer {
-                    if predicate.evaluate(s) {
-                        stdout().write_all(s)?;
-                        stdout().write_all(output_delimiter_bytes)?;
+            match map_file(pathname) {
+                Ok(mapped) => {
+                    let slicer = SubSlicer {
+                        slice: &mapped,
+                        input_delimiter: input_delimiter_bytes,
+                        start: 0,
+                    };
+                    for s in slicer {
+                        if predicate.evaluate(s) {
+                            stdout().write_all(s)?;
+                            stdout().write_all(output_delimiter_bytes)?;
+                        }
                     }
+                }
+                Err(e) => {
+                    eprintln!("{}", e);
+                    status += 1;
                 }
             }
         }
     }
-    Ok(0)
+    Ok(status)
 }
