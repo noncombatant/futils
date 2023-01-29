@@ -1,15 +1,24 @@
 use getopt::Opt;
 use std::io::{stdout, Write};
-use std::process::exit;
 
 use crate::sub_slicer::SubSlicer;
-use crate::util::{map_file, unescape_backslashes, ShellResult};
+use crate::util::{help, map_file, unescape_backslashes, ShellResult};
 use crate::{DEFAULT_INPUT_DELIMITER, DEFAULT_OUTPUT_DELIMITER};
 
-pub fn records_help() {
-    eprintln!("TODO: records_help");
-    exit(1);
-}
+const HELP_MESSAGE: &str = "records - splits a file into records
+
+Usage:
+
+    records -h
+    records [-d input_delimiter] [-o output_delimiter] file [...]
+
+Reads the given *file*s, splits them into records using the *input_delimiter*
+and prints them, delimiting them with the *output_delimiter*. By default, both
+delimiters are \"\\n\".
+
+Additional options:
+
+    -h  Prints this help message.";
 
 pub fn records_main(arguments: &[String]) -> ShellResult {
     let mut options = getopt::Parser::new(arguments, "d:ho:");
@@ -21,9 +30,9 @@ pub fn records_main(arguments: &[String]) -> ShellResult {
             None => break,
             Some(opt) => match opt {
                 Opt('d', Some(string)) => input_delimiter = string.clone(),
-                Opt('h', None) => records_help(),
+                Opt('h', None) => help(0, HELP_MESSAGE),
                 Opt('o', Some(string)) => output_delimiter = string.clone(),
-                _ => records_help(),
+                _ => help(-1, HELP_MESSAGE),
             },
         }
     }
@@ -39,7 +48,7 @@ pub fn records_main(arguments: &[String]) -> ShellResult {
 
     if arguments.is_empty() {
         eprintln!("TODO: Reading from stdin not implemented yet. Sorry!");
-        records_help();
+        help(-1, HELP_MESSAGE);
     } else {
         for pathname in arguments {
             if let Some(mapped) = map_file(pathname) {
