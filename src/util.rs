@@ -5,10 +5,15 @@ use std::error::Error;
 use std::fs::File;
 use std::io::{stderr, stdout, Write};
 use std::path::Path;
-use std::process::Command;
+use std::process::{exit, Command};
 use std::str;
 
 pub type ShellResult = Result<i32, Box<dyn Error>>;
+
+pub fn help(status: i32, message: &str) {
+    println!("{}", message);
+    exit(status);
+}
 
 pub fn map_file(pathname: &str) -> Option<Mmap> {
     let file = File::open(pathname);

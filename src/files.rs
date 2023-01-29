@@ -1,22 +1,48 @@
 use getopt::Opt;
 use regex::Regex;
 use std::io::{stdout, Write};
-use std::process::exit;
 use walkdir::{DirEntry, WalkDir};
 
-use crate::util::{run_command, unescape_backslashes, ShellResult};
+use crate::util::{help, run_command, unescape_backslashes, ShellResult};
 use crate::DEFAULT_OUTPUT_DELIMITER;
+
+const HELP_MESSAGE: &str = "files - print the pathnames of matching files
+
+Usage:
+
+    files -h
+    files [-av] [-m regex] [-o delimiter] [-p regex] [-t types]
+          [-x command] [path [...]]
+
+Searches the given *path*s (assuming \".\" if none are given) for files that match
+the given specifications:
+
+    -a  Search all paths, including those containing components whose names start
+        with \".\".
+    -m  Print pathnames that match the given regular expression.
+    -p  Do not print (i.e. prune) pathnames that match the given regular
+        expression.
+    -t  Print only files that are among the given *types*: (d)irectory, (f)ile,
+        and (s)ymlink. The default value for *types* is \"dfs\", i.e. *files*
+        prints pathnames of all 3 types.
+    -x  Print pathnames for which the given *command* exited with status 0.
+
+If no specifications are given, *files* prints all pathnames under the given
+*path*s (or \".\").
+
+Additional options:
+
+    -h  Print this help message.
+    -o  Use the given output record *delimiter*. The default delimiter is
+        \"\\n\".
+    -v  Print the standard output of commands given with the -x option. (By
+        default, *files* only prints their standard error.)";
 
 fn is_hidden(e: &DirEntry) -> bool {
     match e.path().to_str() {
         Some(s) => s.contains("/."),
         None => false,
     }
-}
-
-pub fn files_help() {
-    eprintln!("TODO: files_help");
-    exit(1);
 }
 
 pub fn files_main(arguments: &[String]) -> ShellResult {
@@ -34,14 +60,14 @@ pub fn files_main(arguments: &[String]) -> ShellResult {
             None => break,
             Some(opt) => match opt {
                 Opt('a', None) => show_all = true,
-                Opt('h', None) => files_help(),
+                Opt('h', None) => help(0, HELP_MESSAGE),
                 Opt('m', Some(string)) => match_expressions.push(Regex::new(&string)?),
                 Opt('o', Some(string)) => output_delimiter = string.clone(),
                 Opt('p', Some(string)) => prune_expressions.push(Regex::new(&string)?),
                 Opt('t', Some(string)) => file_types = string.clone(),
                 Opt('v', None) => verbose = true,
                 Opt('x', Some(string)) => match_commands.push(string.clone()),
-                _ => files_help(),
+                _ => help(-1, HELP_MESSAGE),
             },
         }
     }
@@ -115,8 +141,8 @@ pub fn files_main(arguments: &[String]) -> ShellResult {
 
             for command in &match_commands {
                 match run_command(command, pathname.as_bytes(), verbose) {
-                    Ok(code) => {
-                        if code != 0 {
+                    Ok(status) => {
+                        if status != 0 {
                             continue 'outer;
                         }
                     }
