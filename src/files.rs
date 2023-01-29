@@ -14,8 +14,8 @@ Usage:
     files [-av] [-m regex] [-o delimiter] [-p regex] [-t types]
           [-x command] [path [...]]
 
-Searches the given *path*s (assuming \".\" if none are given) for files that match
-the given specifications:
+Searches the given *path*(s) (assuming \".\" if none are given) for files that
+match the given specifications:
 
     -a  Search all paths, including those containing components whose names start
         with \".\".
@@ -27,8 +27,9 @@ the given specifications:
         prints pathnames of all 3 types.
     -x  Print pathnames for which the given *command* exited with status 0.
 
-If no specifications are given, *files* prints all pathnames under the given
-*path*s (or \".\").
+If you give no specifications, *files* prints all pathnames under the given
+*path*s (or \".\"). If you give multiple specifications, they must all be
+satisfied for *files* to print the pathname.
 
 Regular expressions use the Rust regex library syntax
 (https://docs.rs/regex/latest/regex/).
