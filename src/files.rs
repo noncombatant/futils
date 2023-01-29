@@ -1,3 +1,4 @@
+use chrono::NaiveDateTime;
 use getopt::Opt;
 use regex::Regex;
 use std::io::{stdout, Write};
@@ -49,6 +50,22 @@ fn is_hidden(e: &DirEntry) -> bool {
         Some(s) => s.contains("/."),
         None => false,
     }
+}
+
+fn compare_times(e: &DirEntry, t: &Time) -> Result<bool, std::io::Error> {
+    let metadata = e.metadata()?;
+    let modified = metadata.modified()?;
+    let modified = modified
+        .duration_since(SystemTime::UNIX_EPOCH)
+        .unwrap()
+        .as_secs();
+    let modified = NaiveDateTime::from_timestamp_opt(modified.try_into().unwrap(), 0).unwrap();
+    let given = t.date_time;
+    let c = t.comparison;
+    return Ok((c == Comparison::After && given <= modified)
+        || (c == Comparison::Before && given >= modified)
+        || (c == Comparison::Exactly && given != modified)
+        || false);
 }
 
 pub fn files_main(arguments: &[String]) -> ShellResult {
@@ -148,32 +165,12 @@ pub fn files_main(arguments: &[String]) -> ShellResult {
             }
 
             for mtime in &mtime_expressions {
-                let modified = entry
-                    .metadata()
-                    .unwrap()
-                    .modified()
-                    .unwrap()
-                    .duration_since(SystemTime::UNIX_EPOCH)
-                    .unwrap()
-                    .as_secs();
-                let timestamp = TryInto::<u64>::try_into(mtime.date_time.timestamp()).unwrap();
-                match mtime.comparison {
-                    Comparison::After => {
-                        // BUG: timestamp is local, not UTC, so these comparisons will be wrong
-                        // Something like let converted: DateTime<Local> = DateTime::from(utc);
-                        if timestamp > modified {
-                            continue 'outer;
-                        }
-                    }
-                    Comparison::Before => {
-                        if timestamp < modified {
-                            continue 'outer;
-                        }
-                    }
-                    Comparison::Exactly => {
-                        if timestamp == modified {
-                            continue 'outer;
-                        }
+                match compare_times(&entry, &mtime) {
+                    Ok(true) => continue,
+                    Ok(false) => continue 'outer,
+                    Err(e) => {
+                        eprintln!("{}", e);
+                        continue 'outer;
                     }
                 }
             }
