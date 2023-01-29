@@ -42,12 +42,10 @@ impl Time {
     fn from_date_time_string(string: &str, operator: Comparison) -> Result<Time, ParseError> {
         let date_time = NaiveDateTime::parse_from_str(string, "%Y-%m-%d %H:%M:%S");
         match date_time {
-            Ok(dt) => {
-                return Ok(Time {
-                    date_time: dt,
-                    comparison: operator,
-                })
-            }
+            Ok(dt) => Ok(Time {
+                date_time: dt,
+                comparison: operator,
+            }),
             Err(e) => Err(e),
         }
     }
@@ -61,10 +59,10 @@ impl Time {
                     .unwrap()
                     .and_hms_opt(time.hour(), time.minute(), time.second())
                     .unwrap();
-                return Ok(Time {
-                    date_time: date_time,
+                Ok(Time {
+                    date_time,
                     comparison: operator,
-                });
+                })
             }
             Err(e) => Err(e),
         }
@@ -78,10 +76,10 @@ impl Time {
                     .unwrap()
                     .and_hms_opt(0, 0, 0)
                     .unwrap();
-                return Ok(Time {
-                    date_time: date_time,
+                Ok(Time {
+                    date_time,
                     comparison: operator,
-                });
+                })
             }
             Err(e) => Err(e),
         }

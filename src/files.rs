@@ -62,10 +62,9 @@ fn compare_times(e: &DirEntry, t: &Time) -> Result<bool, std::io::Error> {
     let modified = NaiveDateTime::from_timestamp_opt(modified.try_into().unwrap(), 0).unwrap();
     let given = t.date_time;
     let c = t.comparison;
-    return Ok((c == Comparison::After && given <= modified)
-        || (c == Comparison::Before && given >= modified)
-        || (c == Comparison::Exactly && given != modified)
-        || false);
+    Ok(c == Comparison::After && given <= modified
+        || c == Comparison::Before && given >= modified
+        || c == Comparison::Exactly && given != modified)
 }
 
 pub fn files_main(arguments: &[String]) -> ShellResult {
@@ -165,7 +164,7 @@ pub fn files_main(arguments: &[String]) -> ShellResult {
             }
 
             for mtime in &mtime_expressions {
-                match compare_times(&entry, &mtime) {
+                match compare_times(&entry, mtime) {
                     Ok(true) => continue,
                     Ok(false) => continue 'outer,
                     Err(e) => {
