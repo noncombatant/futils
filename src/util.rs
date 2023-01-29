@@ -42,7 +42,7 @@ pub fn run_command(command: &str, argument: &[u8], verbose: bool) -> ShellResult
 
     let output = if cfg!(target_os = "windows") {
         Command::new("cmd")
-            .args(&["/C", command])
+            .args(["/C", command])
             .arg(argument)
             .output()?
     } else {
@@ -100,7 +100,7 @@ pub fn unescape_backslashes(input: &str) -> Result<String, Box<dyn Error>> {
         (Ok(_), Err(e)) => result = Err(e),
         _ => (),
     };
-    unescape_str(&input, &mut cb);
+    unescape_str(input, &mut cb);
     match result {
         Ok(s) => Ok(s),
         Err(e) => Err(Box::<dyn Error>::from(escape_error_to_str(e))),

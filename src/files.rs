@@ -50,7 +50,7 @@ fn is_hidden(e: &DirEntry) -> bool {
 
 pub fn files_main(arguments: &[String]) -> ShellResult {
     // TODO: Consider adding support for mtime before and after, or ranges.
-    let mut options = getopt::Parser::new(&arguments, "ahm:o:p:t:vx:");
+    let mut options = getopt::Parser::new(arguments, "ahm:o:p:t:vx:");
     let mut show_all = false;
     let mut match_expressions = Vec::new();
     let mut output_delimiter = String::from(DEFAULT_OUTPUT_DELIMITER);
@@ -105,9 +105,9 @@ pub fn files_main(arguments: &[String]) -> ShellResult {
             let is_dir = file_type.is_dir();
             let is_file = file_type.is_file();
             let is_symlink = file_type.is_symlink();
-            if (is_dir && !file_types.contains("d"))
-                || (is_file && !file_types.contains("f"))
-                || (is_symlink && !file_types.contains("s"))
+            if (is_dir && !file_types.contains('d'))
+                || (is_file && !file_types.contains('f'))
+                || (is_symlink && !file_types.contains('s'))
             {
                 continue;
             }

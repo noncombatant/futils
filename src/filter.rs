@@ -15,7 +15,7 @@ pub fn filter_help() {
 
 pub fn filter_main(arguments: &[String]) -> ShellResult {
     // TODO: Somehow, make this whole options parsing chunk reusable.
-    let mut options = getopt::Parser::new(&arguments, "d:hm:o:p:x:");
+    let mut options = getopt::Parser::new(arguments, "d:hm:o:p:x:");
 
     let mut input_delimiter = String::from(DEFAULT_INPUT_DELIMITER);
     let mut output_delimiter = String::from(DEFAULT_OUTPUT_DELIMITER);
@@ -74,10 +74,10 @@ pub fn filter_main(arguments: &[String]) -> ShellResult {
         filter_help();
     } else {
         for pathname in arguments {
-            if let Some(mapped) = map_file(&pathname) {
+            if let Some(mapped) = map_file(pathname) {
                 let slicer = SubSlicer {
                     slice: &mapped,
-                    input_delimiter: &input_delimiter_bytes,
+                    input_delimiter: input_delimiter_bytes,
                     start: 0,
                 };
                 for s in slicer {
