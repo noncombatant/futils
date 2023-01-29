@@ -2,7 +2,7 @@ use chrono::format::ParseError;
 use chrono::{Datelike, Local, Timelike};
 use chrono::{NaiveDate, NaiveDateTime, NaiveTime};
 
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum Comparison {
     Before,
     After,
@@ -29,6 +29,17 @@ impl Time {
             _ => Comparison::Exactly,
         };
 
+        let time = Self::from_date_time_string(string, operator);
+        match time {
+            Ok(time) => Ok(time),
+            Err(_) => match Self::from_time_string(string, operator) {
+                Ok(time) => Ok(time),
+                Err(_) => Self::from_date_string(string, operator),
+            },
+        }
+    }
+
+    fn from_date_time_string(string: &str, operator: Comparison) -> Result<Time, ParseError> {
         let date_time = NaiveDateTime::parse_from_str(string, "%Y-%m-%d %H:%M:%S");
         match date_time {
             Ok(dt) => {
@@ -37,43 +48,45 @@ impl Time {
                     comparison: operator,
                 })
             }
-            Err(_) => {
-                let now = Local::now();
-                let time = NaiveTime::parse_from_str(string, "%H:%M:%S");
-                match time {
-                    Ok(time) => {
-                        let date_time = NaiveDate::from_ymd_opt(now.year(), now.month(), now.day())
-                            .unwrap()
-                            .and_hms_opt(time.hour(), time.minute(), time.second())
-                            .unwrap();
-                        return Ok(Time {
-                            date_time: date_time,
-                            comparison: operator,
-                        });
-                    }
-                    Err(_) => {
-                        let date = NaiveDate::parse_from_str(string, "%Y-%m-%d");
-                        match date {
-                            Ok(date) => {
-                                let date_time =
-                                    NaiveDate::from_ymd_opt(date.year(), date.month(), date.day())
-                                        .unwrap()
-                                        .and_hms_opt(0, 0, 0)
-                                        .unwrap();
-                                return Ok(Time {
-                                    date_time: date_time,
-                                    comparison: operator,
-                                });
-                            }
-                            Err(e) => Err(e),
-                        }
-                    }
-                }
+            Err(e) => Err(e),
+        }
+    }
+
+    fn from_time_string(string: &str, operator: Comparison) -> Result<Time, ParseError> {
+        let now = Local::now();
+        let time = NaiveTime::parse_from_str(string, "%H:%M:%S");
+        match time {
+            Ok(time) => {
+                let date_time = NaiveDate::from_ymd_opt(now.year(), now.month(), now.day())
+                    .unwrap()
+                    .and_hms_opt(time.hour(), time.minute(), time.second())
+                    .unwrap();
+                return Ok(Time {
+                    date_time: date_time,
+                    comparison: operator,
+                });
             }
+            Err(e) => Err(e),
+        }
+    }
+
+    fn from_date_string(string: &str, operator: Comparison) -> Result<Time, ParseError> {
+        let date = NaiveDate::parse_from_str(string, "%Y-%m-%d");
+        match date {
+            Ok(date) => {
+                let date_time = NaiveDate::from_ymd_opt(date.year(), date.month(), date.day())
+                    .unwrap()
+                    .and_hms_opt(0, 0, 0)
+                    .unwrap();
+                return Ok(Time {
+                    date_time: date_time,
+                    comparison: operator,
+                });
+            }
+            Err(e) => Err(e),
         }
     }
 }
-
 
 #[cfg(test)]
 #[test]
@@ -106,4 +119,3 @@ fn parse_time() {
     assert_eq!(34, t.date_time.minute());
     assert_eq!(56, t.date_time.second());
 }
-
