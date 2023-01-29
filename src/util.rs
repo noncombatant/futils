@@ -14,6 +14,7 @@ pub fn help(status: i32, message: &str) {
     exit(status);
 }
 
+// TODO: This should be a Result
 pub fn map_file(pathname: &str) -> Option<Mmap> {
     let file = File::open(pathname);
     match file {
