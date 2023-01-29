@@ -26,7 +26,7 @@ pub fn records_main(arguments: &[String]) -> ShellResult {
     let mut input_delimiter = String::from(DEFAULT_INPUT_DELIMITER);
     let mut output_delimiter = String::from(DEFAULT_OUTPUT_DELIMITER);
     loop {
-        match options.next().transpose().unwrap() {
+        match options.next().transpose()? {
             None => break,
             Some(opt) => match opt {
                 Opt('d', Some(string)) => input_delimiter = string.clone(),
@@ -37,11 +37,9 @@ pub fn records_main(arguments: &[String]) -> ShellResult {
         }
     }
 
-    // TODO: Support this someday.
-    //let input_delimiter = Regex::new(&input_delimiter).unwrap();
-    let input_delimiter = unescape_backslashes(&input_delimiter).unwrap();
+    let input_delimiter = unescape_backslashes(&input_delimiter)?;
     let input_delimiter_bytes = input_delimiter.as_bytes();
-    let output_delimiter = unescape_backslashes(&output_delimiter).unwrap();
+    let output_delimiter = unescape_backslashes(&output_delimiter)?;
     let output_delimiter_bytes = output_delimiter.as_bytes();
 
     let (_, arguments) = arguments.split_at(options.index());
@@ -58,8 +56,8 @@ pub fn records_main(arguments: &[String]) -> ShellResult {
                     start: 0,
                 };
                 for s in slicer {
-                    stdout().write_all(s).unwrap();
-                    stdout().write_all(output_delimiter_bytes).unwrap();
+                    stdout().write_all(s)?;
+                    stdout().write_all(output_delimiter_bytes)?;
                 }
             }
         }
