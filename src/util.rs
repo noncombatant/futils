@@ -1,5 +1,4 @@
 use memmap::{Mmap, MmapOptions};
-// TODO: `rustc_lexer` might not be the best dependency.
 use rustc_lexer::unescape::{unescape_str, EscapeError};
 use std::error::Error;
 use std::fs::File;

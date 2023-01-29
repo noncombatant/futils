@@ -30,6 +30,9 @@ the given specifications:
 If no specifications are given, *files* prints all pathnames under the given
 *path*s (or \".\").
 
+Regular expressions use the Rust regex library syntax
+(https://docs.rs/regex/latest/regex/).
+
 Additional options:
 
     -h  Print this help message.
@@ -46,6 +49,7 @@ fn is_hidden(e: &DirEntry) -> bool {
 }
 
 pub fn files_main(arguments: &[String]) -> ShellResult {
+    // TODO: Consider adding support for mtime before and after, or ranges.
     let mut options = getopt::Parser::new(&arguments, "ahm:o:p:t:vx:");
     let mut show_all = false;
     let mut match_expressions = Vec::new();
