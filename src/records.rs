@@ -1,9 +1,9 @@
 use getopt::Opt;
-use std::io::{stdout, Write};
+use regex::bytes::Regex;
+use std::io::{stdin, stdout, Read, Write};
 
-use crate::sub_slicer::SubSlicer;
 use crate::util::{help, map_file, unescape_backslashes, ShellResult};
-use crate::{DEFAULT_INPUT_DELIMITER, DEFAULT_OUTPUT_DELIMITER};
+use crate::DEFAULT_OUTPUT_DELIMITER;
 
 const HELP_MESSAGE: &str = "records - splits a file into records
 
@@ -12,9 +12,15 @@ Usage:
     records -h
     records [-d input_delimiter] [-o output_delimiter] file [...]
 
-Reads the given *file*s, splits them into records using the *input_delimiter*
-and prints them, delimiting them with the *output_delimiter*. By default, both
-delimiters are \"\\n\".
+Reads the given *file*s, splits them into records using the *input_delimiter* (a
+regular expression) and prints them, delimiting them with the *output_delimiter*
+(a string).
+
+By default, the input delimiter is `r\"(\\r\\n|\\n|\\r)\"` and the output
+delimiter is \"\\n\".
+
+Regular expressions use the Rust regex library syntax
+(https://docs.rs/regex/latest/regex/).
 
 Additional options:
 
@@ -22,14 +28,13 @@ Additional options:
 
 pub fn records_main(arguments: &[String]) -> ShellResult {
     let mut options = getopt::Parser::new(arguments, "d:ho:");
-
-    let mut input_delimiter = String::from(DEFAULT_INPUT_DELIMITER);
+    let mut input_delimiter = Regex::new(r"(\r\n|\n|\r)")?;
     let mut output_delimiter = String::from(DEFAULT_OUTPUT_DELIMITER);
     loop {
         match options.next().transpose()? {
             None => break,
             Some(opt) => match opt {
-                Opt('d', Some(string)) => input_delimiter = string.clone(),
+                Opt('d', Some(string)) => input_delimiter = Regex::new(&unescape_backslashes(&string)?)?,
                 Opt('h', None) => help(0, HELP_MESSAGE),
                 Opt('o', Some(string)) => output_delimiter = string.clone(),
                 _ => help(-1, HELP_MESSAGE),
@@ -37,30 +42,39 @@ pub fn records_main(arguments: &[String]) -> ShellResult {
         }
     }
 
-    let input_delimiter = unescape_backslashes(&input_delimiter)?;
-    let input_delimiter_bytes = input_delimiter.as_bytes();
     let output_delimiter = unescape_backslashes(&output_delimiter)?;
     let output_delimiter_bytes = output_delimiter.as_bytes();
 
     let (_, arguments) = arguments.split_at(options.index());
 
+    let mut status = 0;
     if arguments.is_empty() {
-        eprintln!("TODO: Reading from stdin not implemented yet. Sorry!");
-        help(-1, HELP_MESSAGE);
+        let mut bytes = Vec::new();
+        // TODO: This is inefficient!
+        stdin().read_to_end(&mut bytes)?;
+        for record in input_delimiter.split(&bytes) {
+            if !record.is_empty() {
+                stdout().write_all(record)?;
+                stdout().write_all(output_delimiter_bytes)?;
+            }
+        }
     } else {
         for pathname in arguments {
-            if let Some(mapped) = map_file(pathname) {
-                let slicer = SubSlicer {
-                    slice: &mapped,
-                    input_delimiter: input_delimiter_bytes,
-                    start: 0,
-                };
-                for s in slicer {
-                    stdout().write_all(s)?;
-                    stdout().write_all(output_delimiter_bytes)?;
+            match map_file(pathname) {
+                Some(mapped) => {
+                    for record in input_delimiter.split(&mapped) {
+                        if !record.is_empty() {
+                            stdout().write_all(record)?;
+                            stdout().write_all(output_delimiter_bytes)?;
+                        }
+                    }
+                }
+                None => {
+                    eprintln!("Could not read {}", pathname);
+                    status += 1;
                 }
             }
         }
     }
-    Ok(0)
+    Ok(status)
 }
