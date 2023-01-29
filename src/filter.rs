@@ -1,17 +1,41 @@
 use getopt::Opt;
 use regex::bytes::Regex;
 use std::io::{stdout, Write};
-use std::process::exit;
 
 use crate::predicate::Predicate;
 use crate::sub_slicer::SubSlicer;
-use crate::util::{map_file, unescape_backslashes, ShellResult};
+use crate::util::{help, map_file, unescape_backslashes, ShellResult};
 use crate::{DEFAULT_INPUT_DELIMITER, DEFAULT_OUTPUT_DELIMITER};
 
-pub fn filter_help() {
-    eprintln!("TODO: filter_help");
-    exit(1);
-}
+const HELP_MESSAGE: &str = "filter - filter records from files by patterns
+
+Usage:
+
+    filter -h
+    filter [-d string] [-m regex] [-o string] [-p regex] [-x command] file [...]
+
+Searches the given *file*(s) for records that match the given specifications:
+
+    -m  Print records that match the given regular expression.
+    -p  Do not print (i.e. prune) records that match the given regular
+        expression.
+    -x  Print records for which the given *command* exited with status 0.
+
+BUG: Currently, you must, and can only, supply, exactly 1 of -m, -p, or -x. I’ll
+fix this soon.
+
+Regular expressions use the Rust regex library syntax
+(https://docs.rs/regex/latest/regex/).
+
+Additional options:
+
+    -h  Print this help message.
+    -d  Use the given input record delimiter. The default delimiter is \"\\n\".
+    -o  Use the given output record delimiter. The default delimiter is \"\\n\".
+    -v  Print the standard output of commands given with the -x option. (By
+        default, *files* only prints their standard error.)";
+
+// TODO: Add verbose?
 
 pub fn filter_main(arguments: &[String]) -> ShellResult {
     // TODO: Somehow, make this whole options parsing chunk reusable.
@@ -28,12 +52,12 @@ pub fn filter_main(arguments: &[String]) -> ShellResult {
             None => break,
             Some(opt) => match opt {
                 Opt('d', Some(string)) => input_delimiter = string.clone(),
-                Opt('h', None) => filter_help(),
+                Opt('h', None) => help(0, HELP_MESSAGE),
                 Opt('m', Some(string)) => match_expression = string.clone(),
                 Opt('o', Some(string)) => output_delimiter = string.clone(),
                 Opt('p', Some(string)) => prune_expression = string.clone(),
                 Opt('x', Some(string)) => match_command = string.clone(),
-                _ => filter_help(),
+                _ => help(-1, HELP_MESSAGE),
             },
         }
     }
@@ -44,7 +68,7 @@ pub fn filter_main(arguments: &[String]) -> ShellResult {
         // TODO: Make it possible to pass more than 1, and AND them all
         // together.
         eprintln!("Use exactly 1 of -m, -p, or -x.");
-        filter_help();
+        help(-1, HELP_MESSAGE);
     }
 
     let re: Regex;
@@ -70,7 +94,7 @@ pub fn filter_main(arguments: &[String]) -> ShellResult {
     let mut status = 0;
     if arguments.is_empty() {
         eprintln!("TODO: Reading from stdin not implemented yet. Sorry!");
-        filter_help();
+        help(-1, HELP_MESSAGE);
     } else {
         for pathname in arguments {
             match map_file(pathname) {
