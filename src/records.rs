@@ -34,7 +34,9 @@ pub fn records_main(arguments: &[String]) -> ShellResult {
         match options.next().transpose()? {
             None => break,
             Some(opt) => match opt {
-                Opt('d', Some(string)) => input_delimiter = Regex::new(&unescape_backslashes(&string)?)?,
+                Opt('d', Some(string)) => {
+                    input_delimiter = Regex::new(&unescape_backslashes(&string)?)?
+                }
                 Opt('h', None) => help(0, HELP_MESSAGE),
                 Opt('o', Some(string)) => output_delimiter = string.clone(),
                 _ => help(-1, HELP_MESSAGE),
