@@ -30,12 +30,10 @@ Regular expressions use the Rust regex library syntax
 Additional options:
 
     -h  Print this help message.
-    -d  Use the given input record delimiter. The default delimiter is \"\\n\".
-    -o  Use the given output record delimiter. The default delimiter is \"\\n\".
+    -d  Use the given input record delimiter. The default delimiter is “\\n”.
+    -o  Use the given output record delimiter. The default delimiter is “\\n”.
     -v  Print the standard output of commands given with the -x option. (By
         default, *files* only prints their standard error.)";
-
-// TODO: Add verbose?
 
 pub fn filter_main(arguments: &[String]) -> ShellResult {
     // TODO: Somehow, make this whole options parsing chunk reusable.
