@@ -187,7 +187,7 @@ pub fn files_main(arguments: &[String]) -> ShellResult {
                         }
                     }
                     Err(e) => {
-                        eprintln!("{}", e);
+                        eprintln!("{} \"{}\": {}", command, pathname, e);
                         continue 'outer;
                     }
                 }
