@@ -27,17 +27,22 @@ pub struct Time {
 impl Time {
     pub fn new(string: &str) -> Result<Time, ParseError> {
         if string.is_empty() {
-            // TODO: Return an error
-            //return None
+            return Ok(Time {
+                date_time: NaiveDateTime::from_timestamp_opt(0, 0).unwrap(),
+                comparison: Comparison::After,
+            });
         }
-        let (operator, string) = string.split_at(1);
-        let operator = match operator {
-            "<" => Comparison::Before,
-            ">" => Comparison::After,
-            "=" => Comparison::Exactly,
-            // TODO: Return an error
-            _ => Comparison::Exactly,
-        };
+        let mut operator = Comparison::Exactly;
+        let mut string = string;
+        let (o, s) = string.split_at(1);
+        if ["<", ">", "="].contains(&o) {
+            operator = match o {
+                "<" => Comparison::Before,
+                ">" => Comparison::After,
+                _ => Comparison::Exactly,
+            };
+            string = s;
+        }
 
         let time = Self::from_date_time_string(string, operator);
         match time {

@@ -69,7 +69,7 @@ fn compare_times(e: &DirEntry, t: &Time) -> Result<bool, std::io::Error> {
     let c = t.comparison;
     Ok(c == Comparison::After && given <= modified
         || c == Comparison::Before && given >= modified
-        || c == Comparison::Exactly && given != modified)
+        || c == Comparison::Exactly && given == modified)
 }
 
 pub fn files_main(arguments: &[String]) -> ShellResult {
