@@ -1,6 +1,16 @@
 use chrono::format::ParseError;
+use chrono::{DateTime, NaiveDate, NaiveDateTime, NaiveTime, Utc};
 use chrono::{Datelike, Local, Timelike};
-use chrono::{NaiveDate, NaiveDateTime, NaiveTime};
+
+pub fn utc_timestamp_to_string(utc: i64) -> String {
+    match NaiveDateTime::from_timestamp_opt(utc, 0) {
+        Some(naive) => {
+            let datetime: DateTime<Utc> = DateTime::from_utc(naive, Utc);
+            format!("{}", datetime.format("%Y-%m-%d %H:%M:%S"))
+        }
+        None => format!("{}", utc),
+    }
+}
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum Comparison {

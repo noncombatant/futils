@@ -9,3 +9,4 @@ install:
 	ln -f ~/bin/futils ~/bin/files
 	ln -f ~/bin/futils ~/bin/filter
 	ln -f ~/bin/futils ~/bin/records
+	ln -f ~/bin/futils ~/bin/status

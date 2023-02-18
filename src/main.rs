@@ -6,6 +6,7 @@ mod apply;
 mod files;
 mod filter;
 mod records;
+mod status;
 mod sub_slicer;
 mod test;
 mod time;
@@ -15,6 +16,7 @@ use apply::apply_main;
 use files::files_main;
 use filter::filter_main;
 use records::records_main;
+use status::status_main;
 use test::test_main;
 use util::{file_name, help};
 
@@ -33,6 +35,7 @@ futils consists of many sub-commands:
     files
     filter
     records
+    status
         ... and more to come.
 
 To learn more about each one, run
@@ -50,7 +53,7 @@ directly, e.g.
     files -h
         ... and so on.
 
-NOTE: The attempt to make modern, rational Unix shell utilities is addmitedly
+NOTE: The attempt to make modern, rational shell utilities is addmitedly
 somewhat futile. French speakers may pronounce it « foutils » if they like.";
 
 fn main() {
@@ -74,6 +77,7 @@ fn main() {
         "files" => files_main(&arguments),
         "filter" => filter_main(&arguments),
         "records" => records_main(&arguments),
+        "status" => status_main(&arguments),
 
         "test" => test_main(&arguments),
         _ => {
