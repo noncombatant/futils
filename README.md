@@ -1,23 +1,22 @@
-<!DOCTYPE html>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1"/>
-<link rel="stylesheet" href="style.css"/>
-<title>Futils</title>
+# Futils
 
-<h1>Futils</h1>
+A suite of functional(-like) command shell utilities.
 
-<p>A suite of functional-like command shell utilities.</p>
+The attempt to make modern, rational shell utilities is admittedly somewhat
+futile. French speakers may pronounce it « foutils » if they like.
 
-<ul>
-<li><a href="#apply"><code>apply</code></a></li>
-<li><a href="#fields"><code>fields</code></a></li>
-<li><a href="#filter"><code>filter</code></a></li>
-<li><a href="#map"><code>map</code></a></li>
-<li><a href="#records"><code>records</code></a></li>
-<li><a href="#reduce"><code>reduce</code></a></li>
-<li><a href="#sum"><code>sum</code></a></li>
-<li><a href="#zip"><code>zip</code></a></li>
-</ul>
+## Goals
+
+* Structured data; JSON everywhere
+* Modern: Unicode everywhere, complete Markdown documentation, complete tests
+* Consistently flexible: regular expressions everywhere applicable
+* Consistent command line structure and behavior
+* At least as time- and space- efficient as classic equivalents
+* Safe: Memory-safe, typeful, mistake-resistant UX, as side-effect safe as
+  possible
+
+
+# TODO: Fold the examples below into the help strings
 
 <a name="apply"></a>
 <h2><code>apply</code></h2>
@@ -65,24 +64,6 @@ with the record as the argument.</dd>
 
 <p>TODO</p>
 
-<a name="fields"></a>
-<h2><code>fields</code></h2>
-
-<p>TODO</p>
-
-<h3>Synopsis</h3>
-
-<p>TODO</p>
-
-<h3>Options</h3>
-
-<dl>
-
-<dt><code>-h</code></dt>
-
-<dd>Print help message and exit.</dd>
-
-</dl>
 
 <a name="filter"></a>
 <h2><code>filter</code></h2>
@@ -147,24 +128,6 @@ record.</dd>
 
 <p>TODO</p>
 
-<a name="map"></a>
-<h2><code>map</code></h2>
-
-<p>TODO</p>
-
-<h3>Synopsis</h3>
-
-<p>TODO</p>
-
-<h3>Options</h3>
-
-<dl>
-
-<dt><code>-h</code></dt>
-
-<dd>Print help message and exit.</dd>
-
-</dl>
 
 <a name="records"></a>
 <h2><code>records</code></h2>
@@ -233,72 +196,3 @@ example,</p>
 
 <p>(See for example <a href="#filter"><code>filter</code></a>, and the
 <code>xargs</code>(1) and <code>find</code>(1) manual pages.)</p>
-
-<a name="reduce"></a>
-<h2><code>reduce</code></h2>
-
-<p>TODO</p>
-
-<h3>Synopsis</h3>
-
-<p>TODO</p>
-
-<h3>Options</h3>
-
-<dl>
-
-<dt><code>-h</code></dt>
-
-<dd>Print help message and exit.</dd>
-
-</dl>
-
-<h3>Examples</h3>
-
-<p>TODO</p>
-
-<a name="sum"></a>
-<h2><code>sum</code></h2>
-
-<p>TODO</p>
-
-<h3>Synopsis</h3>
-
-<p>TODO</p>
-
-<h3>Options</h3>
-
-<dl>
-
-<dt><code>-h</code></dt>
-
-<dd>Print help message and exit.</dd>
-
-</dl>
-
-<h3>Examples</h3>
-
-<p>TODO</p>
-
-<a name="zip"></a>
-<h2><code>zip</code></h2>
-
-<p>TODO</p>
-
-<h3>Synopsis</h3>
-
-<p>TODO</p>
-
-<h3>Options</h3>
-
-<dl>
-
-<dt><code>-h</code></dt>
-
-<dd>Print help message and exit.</dd>
-
-</dl>
-
-<h3>Examples</h3>
-
-<p>TODO</p>

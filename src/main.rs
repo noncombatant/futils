@@ -26,36 +26,42 @@ const HELP_MESSAGE: &str = "futils - functional shell utilities
 
 Usage:
 
-futils consists of many sub-commands:
+`futils` has various sub-commands:
 
-    apply
-    files
-    filter
-    records
-    status
-        ... and more to come.
+* `apply`
+* `files`
+* `filter`
+* `help`
+* `records`
+* `status`
+
+…and more to come.
 
 To learn more about each one, run
 
-    futils *sub-command* -h
+```
+futils sub-command -h
+```
 
 e.g.
 
-    futils apply -h
+```
+futils apply -h
+```
 
-If installed correctly, *futils* should also allow you invoke the utilities
+If installed correctly, `futils` should also allow you invoke the utilities
 directly, e.g.
 
-    apply -h
-    files -h
-        ... and so on.
+```
+apply -h
+files -h
+```
 
-NOTE: The attempt to make modern, rational shell utilities is addmitedly
-somewhat futile. French speakers may pronounce it « foutils » if they like.";
+…and so on.";
 
 fn main() {
     let mut arguments = env::args().collect::<Vec<String>>();
-
+    // TODO: Parse options and support -h here.
     let conversion_error_message = "Need a valid program name";
     let basename = file_name(&arguments[0]).expect(conversion_error_message);
     if basename.eq("futils") {
@@ -81,6 +87,7 @@ fn main() {
         }
     } {
         eprintln!("{}", e);
+        // TODO: Exit with the exit code from the `*_main` callee.
         exit(-1)
     }
 }

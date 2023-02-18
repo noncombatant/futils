@@ -10,16 +10,4 @@ Tests for everything
 
 Add a `fields` command, somewhat like `cut`(1)
 
-Convert index.html to README.md.
-
 Use `foo` instead of *foo* for variables in help strings
-
-Write down project goals:
-
-* Structured data; JSON everywhere
-* Modern: Unicode everywhere, complete Markdown documentation, complete tests
-* Consistently flexible: REs everywhere applicable
-* Consistent command line structure and behavior
-* At least as time- and space- efficient as classic equivalents
-* Safe: Memory-safe, typeful, mistake-resistant UX, as side-effect safe as
-  possible
