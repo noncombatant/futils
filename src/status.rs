@@ -85,7 +85,13 @@ pub fn status_main(arguments: &[String]) -> ShellResult {
         }
     }
     let (_, arguments) = arguments.split_at(options.index());
+
     let arguments = if arguments.is_empty() {
+        // TODO: This should really be `read_dir` instead of `glob`. Also, the
+        // horrendousness of this chunk of code highlights that we have a type
+        // problem — we're doing a lot of work to turn `OsStr`s into `String`s
+        // when maybe everything should stay `OsStr`? Or at least, there's got
+        // to be a cleaner way to do all this.
         let paths = glob("*").unwrap();
         paths
             .map(|p| p.unwrap().as_os_str().to_string_lossy().into())

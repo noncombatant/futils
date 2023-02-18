@@ -7,3 +7,5 @@ Add JSON input and output to all commands
 Tests for everything
 
 Add a `fields` command, somewhat like `cut`(1)
+
+Convert index.html to README.md
