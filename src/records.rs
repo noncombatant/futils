@@ -10,7 +10,7 @@ const HELP_MESSAGE: &str = "records - splits a file into records
 Usage:
 
     records -h
-    records [-d input_delimiter] [-o output_delimiter] file [...]
+    records [-n] [-d input_delimiter] [-o output_delimiter] file [...]
 
 Reads the given *file*s, splits them into records using the *input_delimiter* (a
 regular expression) and prints them, delimiting them with the *output_delimiter*
@@ -24,12 +24,14 @@ Regular expressions use the Rust regex library syntax
 
 Additional options:
 
-    -h  Prints this help message.";
+    -h  Prints this help message.
+    -n  Prefixes each record with a record number.";
 
 pub fn records_main(arguments: &[String]) -> ShellResult {
-    let mut options = getopt::Parser::new(arguments, "d:ho:");
+    let mut options = getopt::Parser::new(arguments, "d:hno:");
     let mut input_delimiter = Regex::new(r"(\r\n|\n|\r)")?;
     let mut output_delimiter = String::from(DEFAULT_OUTPUT_DELIMITER);
+    let mut show_number = false;
     loop {
         match options.next().transpose()? {
             None => break,
@@ -38,6 +40,7 @@ pub fn records_main(arguments: &[String]) -> ShellResult {
                     input_delimiter = Regex::new(&unescape_backslashes(&string)?)?
                 }
                 Opt('h', None) => help(0, HELP_MESSAGE),
+                Opt('n', None) => show_number = true,
                 Opt('o', Some(string)) => output_delimiter = string.clone(),
                 _ => help(-1, HELP_MESSAGE),
             },
@@ -52,10 +55,18 @@ pub fn records_main(arguments: &[String]) -> ShellResult {
     let mut status = 0;
     if arguments.is_empty() {
         let mut bytes = Vec::new();
-        // TODO: This is inefficient!
+        // TODO: This is inefficient! We need stream processing, and to combine
+        // this branch with the `pathname in arguments` branch below — we should
+        // be iterating over chunks from `split`, regardless of the source.
         stdin().read_to_end(&mut bytes)?;
+        let mut n = 0usize;
         for record in input_delimiter.split(&bytes) {
             if !record.is_empty() {
+                if show_number {
+                    n += 1;
+                    let s = format!("{:05}: ", n);
+                    stdout().write_all(s.as_bytes())?;
+                }
                 stdout().write_all(record)?;
                 stdout().write_all(output_delimiter_bytes)?;
             }
@@ -64,8 +75,14 @@ pub fn records_main(arguments: &[String]) -> ShellResult {
         for pathname in arguments {
             match map_file(pathname) {
                 Ok(mapped) => {
+                    let mut n = 0usize;
                     for record in input_delimiter.split(&mapped) {
                         if !record.is_empty() {
+                            if show_number {
+                                n += 1;
+                                let s = format!("{:05}: ", n);
+                                stdout().write_all(s.as_bytes())?;
+                            }
                             stdout().write_all(record)?;
                             stdout().write_all(output_delimiter_bytes)?;
                         }
