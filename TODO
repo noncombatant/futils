@@ -1,0 +1,9 @@
+Add a `join` command, like join(1)
+
+Add foldr and foldl and sum and so on, zip, reduce, fields, map
+
+Add JSON input and output to all commands
+
+Tests for everything
+
+Add a `fields` command, somewhat like `cut`(1)
