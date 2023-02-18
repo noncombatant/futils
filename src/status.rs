@@ -1,4 +1,5 @@
 use getopt::Opt;
+use glob::glob;
 use nix::sys::stat::{stat, FileStat};
 use serde::Serialize;
 use users::{get_group_by_gid, get_user_by_uid};
@@ -84,10 +85,14 @@ pub fn status_main(arguments: &[String]) -> ShellResult {
         }
     }
     let (_, arguments) = arguments.split_at(options.index());
-    if arguments.is_empty() {
-        // TODO: Consider defaulting to "*".
-        help(-1, HELP_MESSAGE);
-    }
+    let arguments = if arguments.is_empty() {
+        let paths = glob("*").unwrap();
+        paths
+            .map(|p| p.unwrap().as_os_str().to_string_lossy().into())
+            .collect()
+    } else {
+        Vec::from(arguments)
+    };
 
     let mut errors = 0;
     println!("[");

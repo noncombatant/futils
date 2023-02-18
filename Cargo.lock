@@ -131,6 +131,7 @@ version = "0.1.0"
 dependencies = [
  "chrono",
  "getopt",
+ "glob",
  "memmap",
  "nix",
  "regex",
@@ -146,6 +147,12 @@ name = "getopt"
 version = "1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "285cb971bc8c03a00e74dd45a6b23bda02425336a6f23231fec898f796ac49a2"
+
+[[package]]
+name = "glob"
+version = "0.3.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d2fabcfbdc87f4758337ca535fb41a6d701b65693ce38287d856d1674551ec9b"
 
 [[package]]
 name = "iana-time-zone"

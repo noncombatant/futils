@@ -9,6 +9,7 @@ edition = "2021"
 
 chrono = "*"
 getopt = "*"
+glob = "*"
 memmap = "*"
 nix = "*"
 regex = "*"
