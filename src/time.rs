@@ -96,7 +96,6 @@ impl Time {
     }
 }
 
-#[cfg(test)]
 #[test]
 fn parse_time() {
     let t = Time::new(">2023-01-27 12:34:56").unwrap();

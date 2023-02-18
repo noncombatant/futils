@@ -1,5 +1,7 @@
 default:
-	cargo build && cargo clippy
+	cargo build
+	cargo test
+	cargo clippy
 
 install:
 	cargo build --release

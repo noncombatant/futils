@@ -45,28 +45,27 @@ pub fn run_command(command: &str, argument: &[u8], verbose: bool) -> ShellResult
 }
 
 fn escape_error_to_str(e: EscapeError) -> &'static str {
-    // TODO
     match e {
-        EscapeError::ZeroChars => "",
-        EscapeError::MoreThanOneChar => "",
-        EscapeError::LoneSlash => "",
-        EscapeError::InvalidEscape => "",
-        EscapeError::BareCarriageReturn => "",
-        EscapeError::BareCarriageReturnInRawString => "",
-        EscapeError::EscapeOnlyChar => "",
-        EscapeError::TooShortHexEscape => "",
-        EscapeError::InvalidCharInHexEscape => "",
-        EscapeError::OutOfRangeHexEscape => "",
-        EscapeError::NoBraceInUnicodeEscape => "",
-        EscapeError::InvalidCharInUnicodeEscape => "",
-        EscapeError::EmptyUnicodeEscape => "",
-        EscapeError::UnclosedUnicodeEscape => "",
-        EscapeError::LeadingUnderscoreUnicodeEscape => "",
-        EscapeError::OverlongUnicodeEscape => "",
-        EscapeError::LoneSurrogateUnicodeEscape => "",
-        EscapeError::OutOfRangeUnicodeEscape => "",
-        EscapeError::UnicodeEscapeInByte => "",
-        EscapeError::NonAsciiCharInByte => "",
+        EscapeError::ZeroChars => "zero chars",
+        EscapeError::MoreThanOneChar => "more than one char",
+        EscapeError::LoneSlash => "lone slash",
+        EscapeError::InvalidEscape => "invalid escape",
+        EscapeError::BareCarriageReturn => "bare carriage return",
+        EscapeError::BareCarriageReturnInRawString => "bare carriage return in raw string",
+        EscapeError::EscapeOnlyChar => "escape only char",
+        EscapeError::TooShortHexEscape => "too short hex escape",
+        EscapeError::InvalidCharInHexEscape => "invalid char in hex escape",
+        EscapeError::OutOfRangeHexEscape => "out of range hex escape",
+        EscapeError::NoBraceInUnicodeEscape => "no brace in Unicode escape",
+        EscapeError::InvalidCharInUnicodeEscape => "invalid char in Unicode escape",
+        EscapeError::EmptyUnicodeEscape => "empty Unicode escape",
+        EscapeError::UnclosedUnicodeEscape => "unclosed Unicode escape",
+        EscapeError::LeadingUnderscoreUnicodeEscape => "leading underscore Unicode escape",
+        EscapeError::OverlongUnicodeEscape => "overlong Unicode escape",
+        EscapeError::LoneSurrogateUnicodeEscape => "lone surrogate Unicode escape",
+        EscapeError::OutOfRangeUnicodeEscape => "out of range Unicode escape",
+        EscapeError::UnicodeEscapeInByte => "Unicode escape in byte",
+        EscapeError::NonAsciiCharInByte => "non-ASCII char in byte",
         // Documented, but apparently not implemented:
         //EscapeError::UnskippedWhitespaceWarning => "",
         //EscapeError::MultipleSkippedLinesWarning => "",
@@ -87,6 +86,20 @@ pub fn unescape_backslashes(input: &str) -> Result<String, Box<dyn Error>> {
         Ok(s) => Ok(s),
         Err(e) => Err(Box::<dyn Error>::from(escape_error_to_str(e))),
     }
+}
+
+#[test]
+fn test_unescape_backslashes() {
+    let r = unescape_backslashes("\\ngoat\\t").expect("Should parse");
+    assert_eq!("\ngoat\t", r);
+    let r = unescape_backslashes("\\ngoat\t").expect("Should parse");
+    assert_eq!("\ngoat	", r);
+    let r = unescape_backslashes("\ngoat\t").expect("Should parse");
+    assert_eq!(
+        "
+goat	",
+        r
+    );
 }
 
 pub fn file_name(pathname: &str) -> Option<&str> {

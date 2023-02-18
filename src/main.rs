@@ -1,5 +1,4 @@
 use std::env;
-use std::error::Error;
 use std::process::exit;
 
 mod apply;
@@ -8,7 +7,6 @@ mod filter;
 mod records;
 mod status;
 mod sub_slicer;
-mod test;
 mod time;
 mod util;
 
@@ -17,7 +15,6 @@ use files::files_main;
 use filter::filter_main;
 use records::records_main;
 use status::status_main;
-use test::test_main;
 use util::{file_name, help};
 
 // TODO: Support regex someday.
@@ -78,11 +75,9 @@ fn main() {
         "filter" => filter_main(&arguments),
         "records" => records_main(&arguments),
         "status" => status_main(&arguments),
-
-        "test" => test_main(&arguments),
         _ => {
             help(-1, HELP_MESSAGE);
-            Err(Box::<dyn Error>::from("NOTREACHED"))
+            unreachable!()
         }
     } {
         eprintln!("{}", e);
