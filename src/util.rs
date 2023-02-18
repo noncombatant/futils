@@ -7,18 +7,32 @@ use std::path::Path;
 use std::process::{exit, Command};
 use std::str;
 
+/// The various `*_main` functions return this type. `main` catches it and
+/// `exit`s with the given `status`. If there is any `error`, `main` will print
+/// it to `stderr`.
+// TODO: This should be a struct and the error an Option.
 pub type ShellResult = Result<i32, Box<dyn Error>>;
 
+/// Prints `message` and `exit`s with `status`. If `status` is 0, prints
+/// `message` to `stdout`, otherwise to `stderr`.
 pub fn help(status: i32, message: &str) {
-    println!("{}", message);
+    if status == 0 {
+        println!("{}", message);
+    } else {
+        eprintln!("{}", message);
+    }
     exit(status);
 }
 
+/// Opens the file named by `pathname` and returns a memory mapping of it.
 pub fn map_file(pathname: &str) -> Result<Mmap, std::io::Error> {
     let file = File::open(pathname)?;
     unsafe { MmapOptions::new().map(&file) }
 }
 
+/// Runs the shell command `command`, passing it `argument`. If `verbose` is
+/// true, will print any resulting `stdout`. Prints `stderr` unconditionally.
+// TODO: `argument` should probably be a `&[String]`.
 pub fn run_command(command: &str, argument: &[u8], verbose: bool) -> ShellResult {
     let argument = str::from_utf8(argument)?;
 
@@ -32,16 +46,13 @@ pub fn run_command(command: &str, argument: &[u8], verbose: bool) -> ShellResult
     };
 
     let code = output.status.code();
-    if verbose {
+    if verbose && !output.stdout.is_empty() {
         stdout().write_all(&output.stdout)?;
     }
     if !output.stderr.is_empty() {
         stderr().write_all(&output.stderr)?;
     }
-    match code {
-        Some(code) => Ok(code),
-        None => panic!("Total goatery in effect"),
-    }
+    Ok(code.unwrap_or(0))
 }
 
 fn escape_error_to_str(e: EscapeError) -> &'static str {
@@ -73,6 +84,9 @@ fn escape_error_to_str(e: EscapeError) -> &'static str {
     }
 }
 
+/// Lexes `input` according to Rust’s lexical rules for strings, unescaping any
+/// backslash escape sequences. See `rustc_lexer::unescape`. Errors are of type
+/// `Box<dyn Error>` for easier compatibility with `ShellResult`.
 pub fn unescape_backslashes(input: &str) -> Result<String, Box<dyn Error>> {
     let mut result = Ok(String::new());
     // Thanks to Steve Checkoway for help:
@@ -102,6 +116,8 @@ goat	",
     );
 }
 
+/// Returns the basename of `pathname`. (Rust calls this `file_name` instead of
+/// `basename`, so we do, too.
 pub fn file_name(pathname: &str) -> Option<&str> {
     Path::new(pathname).file_name()?.to_str()
 }
