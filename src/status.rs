@@ -7,7 +7,7 @@ use users::{get_group_by_gid, get_user_by_uid};
 use crate::time::utc_timestamp_to_string;
 use crate::util::{help, ShellResult};
 
-const HELP_MESSAGE: &str = "status - print the status of files
+pub const STATUS_HELP_MESSAGE: &str = "status - print the status of files
 
 Usage:
 
@@ -79,8 +79,8 @@ pub fn status_main(arguments: &[String]) -> ShellResult {
         match options.next().transpose()? {
             None => break,
             Some(opt) => match opt {
-                Opt('h', None) => help(0, HELP_MESSAGE),
-                _ => help(-1, HELP_MESSAGE),
+                Opt('h', None) => help(0, STATUS_HELP_MESSAGE),
+                _ => help(-1, STATUS_HELP_MESSAGE),
             },
         }
     }

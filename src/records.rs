@@ -5,7 +5,7 @@ use std::io::{stdin, stdout, Read, Write};
 use crate::util::{help, map_file, unescape_backslashes, ShellResult};
 use crate::DEFAULT_OUTPUT_DELIMITER;
 
-const HELP_MESSAGE: &str = "records - splits a file into records
+pub const RECORDS_HELP_MESSAGE: &str = "records - splits a file into records
 
 Usage:
 
@@ -39,10 +39,10 @@ pub fn records_main(arguments: &[String]) -> ShellResult {
                 Opt('d', Some(string)) => {
                     input_delimiter = Regex::new(&unescape_backslashes(&string)?)?
                 }
-                Opt('h', None) => help(0, HELP_MESSAGE),
+                Opt('h', None) => help(0, RECORDS_HELP_MESSAGE),
                 Opt('n', None) => show_number = true,
                 Opt('o', Some(string)) => output_delimiter = string.clone(),
-                _ => help(-1, HELP_MESSAGE),
+                _ => help(-1, RECORDS_HELP_MESSAGE),
             },
         }
     }

@@ -4,7 +4,7 @@ use crate::sub_slicer::SubSlicer;
 use crate::util::{help, map_file, run_command, unescape_backslashes, ShellResult};
 use crate::{DEFAULT_INPUT_DELIMITER, DEFAULT_OUTPUT_DELIMITER};
 
-const HELP_MESSAGE: &str = "apply - apply commands to records of input
+pub const APPLY_HELP_MESSAGE: &str = "apply - apply commands to records of input
 
 Usage:
 
@@ -37,11 +37,11 @@ pub fn apply_main(arguments: &[String]) -> ShellResult {
             None => break,
             Some(opt) => match opt {
                 Opt('d', Some(string)) => input_delimiter = string.clone(),
-                Opt('h', None) => help(0, HELP_MESSAGE),
+                Opt('h', None) => help(0, APPLY_HELP_MESSAGE),
                 Opt('o', Some(string)) => output_delimiter = string.clone(),
                 Opt('x', Some(string)) => command = string.clone(),
                 Opt('v', None) => verbose = true,
-                _ => help(-1, HELP_MESSAGE),
+                _ => help(-1, APPLY_HELP_MESSAGE),
             },
         }
     }
@@ -56,7 +56,7 @@ pub fn apply_main(arguments: &[String]) -> ShellResult {
     let mut status = 0;
     if arguments.is_empty() {
         eprintln!("TODO: Reading from stdin not implemented yet. Sorry!");
-        help(-1, HELP_MESSAGE);
+        help(-1, APPLY_HELP_MESSAGE);
     } else {
         for pathname in arguments {
             match map_file(pathname) {

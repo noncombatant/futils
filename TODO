@@ -4,7 +4,10 @@ Add foldr and foldl and sum and so on, zip, reduce, fields, map
 
 Add JSON input and output to all commands. Add a `json2fixed` (or similar)
 command that turns JSON into a table view, so that people don’t have to use `vd`
-all the time.
+all the time. Or maybe that is `vd input.json -b -o output.md`.
+
+Similarly, provide or find a good Markdown-to-terminal-escape program. Possibly
+https://github.com/charmbracelet/glow.
 
 Tests for everything
 

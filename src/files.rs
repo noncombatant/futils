@@ -9,7 +9,7 @@ use crate::time::{Comparison, Time};
 use crate::util::{help, run_command, unescape_backslashes, ShellResult};
 use crate::DEFAULT_OUTPUT_DELIMITER;
 
-const HELP_MESSAGE: &str = "files - print the pathnames of matching files
+pub const FILES_HELP_MESSAGE: &str = "files - print the pathnames of matching files
 
 Usage:
 
@@ -39,8 +39,10 @@ If you give no specifications, *files* prints all pathnames (whose basenames do
 not begin with “.”) under the given *path*s (or “.”). If you give multiple
 specifications, they must all be satisfied for *files* to print the pathname.
 
-Regular expressions use the Rust regex library syntax
-(https://docs.rs/regex/latest/regex/).
+Regular expressions use [the Rust regex library
+syntax](https://docs.rs/regex/latest/regex/).
+
+TODO: Move the explanation of Mtime to here.
 
 Additional options:
 
@@ -88,7 +90,7 @@ pub fn files_main(arguments: &[String]) -> ShellResult {
             None => break,
             Some(opt) => match opt {
                 Opt('a', None) => show_all = true,
-                Opt('h', None) => help(0, HELP_MESSAGE),
+                Opt('h', None) => help(0, FILES_HELP_MESSAGE),
                 Opt('m', Some(string)) => match_expressions.push(Regex::new(&string)?),
                 Opt('M', Some(string)) => mtime_expressions.push(Time::new(&string)?),
                 Opt('o', Some(string)) => output_delimiter = string.clone(),
@@ -96,7 +98,7 @@ pub fn files_main(arguments: &[String]) -> ShellResult {
                 Opt('t', Some(string)) => file_types = string.clone(),
                 Opt('v', None) => verbose = true,
                 Opt('x', Some(string)) => match_commands.push(string.clone()),
-                _ => help(-1, HELP_MESSAGE),
+                _ => help(-1, FILES_HELP_MESSAGE),
             },
         }
     }

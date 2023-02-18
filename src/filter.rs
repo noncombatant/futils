@@ -6,7 +6,7 @@ use crate::sub_slicer::SubSlicer;
 use crate::util::{help, map_file, run_command, unescape_backslashes, ShellResult};
 use crate::{DEFAULT_INPUT_DELIMITER, DEFAULT_OUTPUT_DELIMITER};
 
-const HELP_MESSAGE: &str = "filter - filter records from files by patterns
+pub const FILTER_HELP_MESSAGE: &str = "filter - filter records from files by patterns
 
 Usage:
 
@@ -49,13 +49,13 @@ pub fn filter_main(arguments: &[String]) -> ShellResult {
             None => break,
             Some(opt) => match opt {
                 Opt('d', Some(string)) => input_delimiter = string.clone(),
-                Opt('h', None) => help(0, HELP_MESSAGE),
+                Opt('h', None) => help(0, FILTER_HELP_MESSAGE),
                 Opt('m', Some(string)) => match_expressions.push(Regex::new(&string)?),
                 Opt('o', Some(string)) => output_delimiter = string.clone(),
                 Opt('p', Some(string)) => prune_expressions.push(Regex::new(&string)?),
                 Opt('x', Some(string)) => match_commands.push(string.clone()),
                 Opt('v', None) => verbose = true,
-                _ => help(-1, HELP_MESSAGE),
+                _ => help(-1, FILTER_HELP_MESSAGE),
             },
         }
     }
@@ -70,7 +70,7 @@ pub fn filter_main(arguments: &[String]) -> ShellResult {
     let mut status = 0;
     if arguments.is_empty() {
         eprintln!("TODO: Reading from stdin not implemented yet. Sorry!");
-        help(-1, HELP_MESSAGE);
+        help(-1, FILTER_HELP_MESSAGE);
     } else {
         for pathname in arguments {
             // TODO: Separate all this out into a function; it's too deeply nested.
