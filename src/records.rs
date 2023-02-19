@@ -5,20 +5,22 @@ use std::io::{stdin, stdout, Read, Write};
 use crate::util::{help, map_file, unescape_backslashes, ShellResult};
 use crate::DEFAULT_OUTPUT_RECORD_DELIMITER;
 
-pub const RECORDS_HELP_MESSAGE: &str = "records - splits a file into records
+pub const RECORDS_HELP_MESSAGE: &str = "# `records` - splits a file into records
 
-Usage:
+## Usage
 
 ```
 records -h
 records [-n] [-d delimiter] [-o delimiter] [pathname [...]]
 ```
 
+## Description
+
 Reads the given `pathname`s (or `stdin` if none are given), splits them into
 records using the input delimiter, and prints them, delimiting them with the
 output delimiter.
 
-Options:
+## Options
 
 * `-d`: Use the given input record `delimiter`, a regular expression. The
   default delimiter is `r\"(\\r\\n|\\n|\\r)\"`.
@@ -28,7 +30,7 @@ Options:
 Regular expressions use [the Rust regex library
 syntax](https://docs.rs/regex/latest/regex/).
 
-Additional options:
+## Additional Options
 
     -h  Prints this help message.";
 

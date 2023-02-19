@@ -7,14 +7,16 @@ use users::{get_group_by_gid, get_user_by_uid};
 use crate::time::utc_timestamp_to_string;
 use crate::util::{help, ShellResult};
 
-pub const STATUS_HELP_MESSAGE: &str = "status - print the status of files
+pub const STATUS_HELP_MESSAGE: &str = "# `status` - print the status of files
 
-Usage:
+## Usage
 
 ```
 status -h
 status pathname [...]
 ```
+
+## Description
 
 Prints the filesystem metadata for each of the given `pathname`s in JSON format.
 The metadata elements are:
@@ -34,7 +36,7 @@ The metadata elements are:
 * `blocks`: number of storage blocks used
 * `block_size`: size of storage blocks
 
-Additional options:
+## Additional Options
 
 * `-h`: Print this help message.";
 

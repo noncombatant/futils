@@ -9,15 +9,17 @@ use crate::time::{Comparison, Time};
 use crate::util::{help, run_command, unescape_backslashes, ShellResult};
 use crate::DEFAULT_OUTPUT_RECORD_DELIMITER;
 
-pub const FILES_HELP_MESSAGE: &str = "files - print the pathnames of matching files
+pub const FILES_HELP_MESSAGE: &str = "# `files` - print the pathnames of matching files
 
-Usage:
+## Usage
 
 ```
 files -h
 files [-av] [-M datetime] [-m regex] [-o delimiter] [-p regex] [-t types]
       [-x command] [pathname [...]]
 ```
+
+## Description
 
 Searches the given `pathname`(s) (assuming “.” if none are given) for files that
 match the given specifications:
@@ -46,7 +48,7 @@ before, and `=` for exactly) and a datetime string. `files` first attempts to
 parse the string as “YYYY-MM-DD HH:MM:SS”, then as “HH:MM:SS”, then as
 “YYYY-MM-DD”.
 
-Additional options:
+## Additional Options
 
 * `-h`: Print this help message.
 * `-o`: Use the given output record `delimiter`. The default delimiter is `\\n`.

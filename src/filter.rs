@@ -6,15 +6,17 @@ use crate::sub_slicer::SubSlicer;
 use crate::util::{help, map_file, run_command, unescape_backslashes, ShellResult};
 use crate::{DEFAULT_INPUT_RECORD_DELIMITER, DEFAULT_OUTPUT_RECORD_DELIMITER};
 
-pub const FILTER_HELP_MESSAGE: &str = "filter - filter records from files by patterns
+pub const FILTER_HELP_MESSAGE: &str = "# `filter` - filter records from files by patterns
 
-Usage:
+## Usage
 
 ```
 filter -h
 filter [-v] [-d delimeter] [-m regex] [-o delimiter] [-p regex] [-x command]
        pathname [...]
 ```
+
+## Description
 
 Searches the given `pathname`(s) for records that match the given
 specifications:
@@ -27,7 +29,7 @@ specifications:
 Regular expressions use [the Rust regex library
 syntax](https://docs.rs/regex/latest/regex/).
 
-Additional options:
+## Additional Options
 
 * `-h`: Print this help message.
 * `-d`: Use the given input record `delimiter`. The default delimiter is `\\n`.

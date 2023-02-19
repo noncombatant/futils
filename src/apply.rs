@@ -4,14 +4,16 @@ use crate::sub_slicer::SubSlicer;
 use crate::util::{help, map_file, run_command, unescape_backslashes, ShellResult};
 use crate::{DEFAULT_INPUT_RECORD_DELIMITER, DEFAULT_OUTPUT_RECORD_DELIMITER};
 
-pub const APPLY_HELP_MESSAGE: &str = "apply - apply commands to records of input
+pub const APPLY_HELP_MESSAGE: &str = "# `apply` - apply commands to records of input
 
-Usage:
+## Usage
 
 ```
 apply -h
 apply [-v] [-d string] [-o string] -x command pathname [...]
 ```
+
+## Description
 
 For each record in each of the given `pathname`(s), runs the shell command
 `command`.
@@ -19,7 +21,7 @@ For each record in each of the given `pathname`(s), runs the shell command
 TODO: You can only provide 1 instance of the `-x` option. It’d be cool to be
 able to pass several.
 
-Additional options:
+## Additional Options
 
 * `-h`: Print this help message.
 * `-d`: Use the given input record delimiter. The default delimiter is `\\n`.

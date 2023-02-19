@@ -25,14 +25,19 @@ static DEFAULT_INPUT_RECORD_DELIMITER: &str = "\n";
 static DEFAULT_OUTPUT_RECORD_DELIMITER: &str = "\n";
 static DEFAULT_OUTPUT_FIELD_DELIMITER: &str = "\t";
 
-const HELP_MESSAGE: &str = "futils - functional shell utilities
+const HELP_MESSAGE: &str = "# `futils` - functional shell utilities
 
-Usage:
+## Usage
 
 ```
 futils -h
 futiles help
 ```
+
+## Description
+
+`futils` is a suite of shell utilities that somewhat resemble functional
+programming primitives and operate on streams.
 
 `futils` has various sub-commands:
 
