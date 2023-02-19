@@ -16,7 +16,23 @@ status -h
 status pathname [...]
 ```
 
-Prints the metadata for each of the given *pathname*s.
+Prints the filesystem metadata for each of the given `pathname`s in JSON format.
+The metadata elements are:
+
+* `name`: name
+* `device`: device number
+* `mode`: type and permissions
+* `links`: number of hard links
+* `inode`: inode number
+* `user`: user-owner
+* `group`: group-owner
+* `accessed_time`: last accessed time
+* `modified_time`: last modified time
+* `changed_time`: last changed time (metadata change)
+* `birth_time`: birth time
+* `size`: size in bytes
+* `blocks`: number of storage blocks used
+* `block_size`: size of storage blocks
 
 Additional options:
 
@@ -40,6 +56,8 @@ fn format_gid(gid: u32) -> String {
 struct Status<'a> {
     name: &'a str,
     device: i32,
+    // TODO: Make this human-friendly. Possibly split it up into type and
+    // permissions.
     mode: u16,
     links: u16,
     inode: u64,
