@@ -34,11 +34,23 @@ syntax](https://docs.rs/regex/latest/regex/).
 
     -h  Prints this help message.";
 
+fn print_record(n: usize, record: &[u8], enumerate: bool, output_delimiter: &[u8]) -> ShellResult {
+    if !record.is_empty() {
+        if enumerate {
+            let s = format!("{:05}: ", n);
+            stdout().write_all(s.as_bytes())?;
+        }
+        stdout().write_all(record)?;
+        stdout().write_all(output_delimiter)?;
+    }
+    Ok(0)
+}
+
 pub fn records_main(arguments: &[String]) -> ShellResult {
     let mut options = getopt::Parser::new(arguments, "d:hno:");
     let mut input_delimiter = Regex::new(r"(\r\n|\n|\r)")?;
     let mut output_delimiter = String::from(DEFAULT_OUTPUT_RECORD_DELIMITER);
-    let mut show_number = false;
+    let mut enumerate = false;
     loop {
         match options.next().transpose()? {
             None => break,
@@ -47,7 +59,7 @@ pub fn records_main(arguments: &[String]) -> ShellResult {
                     input_delimiter = Regex::new(&unescape_backslashes(&string)?)?
                 }
                 Opt('h', None) => help(0, RECORDS_HELP_MESSAGE),
-                Opt('n', None) => show_number = true,
+                Opt('n', None) => enumerate = true,
                 Opt('o', Some(string)) => output_delimiter = string.clone(),
                 _ => help(-1, RECORDS_HELP_MESSAGE),
             },
@@ -66,33 +78,15 @@ pub fn records_main(arguments: &[String]) -> ShellResult {
         // this branch with the `pathname in arguments` branch below — we should
         // be iterating over chunks from `split`, regardless of the source.
         stdin().read_to_end(&mut bytes)?;
-        let mut n = 0usize;
-        for record in input_delimiter.split(&bytes) {
-            if !record.is_empty() {
-                if show_number {
-                    n += 1;
-                    let s = format!("{:05}: ", n);
-                    stdout().write_all(s.as_bytes())?;
-                }
-                stdout().write_all(record)?;
-                stdout().write_all(output_delimiter_bytes)?;
-            }
+        for (n, r) in input_delimiter.split(&bytes).enumerate() {
+            print_record(n, r, enumerate, output_delimiter_bytes)?;
         }
     } else {
         for pathname in arguments {
             match map_file(pathname) {
                 Ok(mapped) => {
-                    let mut n = 0usize;
-                    for record in input_delimiter.split(&mapped) {
-                        if !record.is_empty() {
-                            if show_number {
-                                n += 1;
-                                let s = format!("{:05}: ", n);
-                                stdout().write_all(s.as_bytes())?;
-                            }
-                            stdout().write_all(record)?;
-                            stdout().write_all(output_delimiter_bytes)?;
-                        }
+                    for (n, r) in input_delimiter.split(&mapped).enumerate() {
+                        print_record(n, r, enumerate, output_delimiter_bytes)?;
                     }
                 }
                 Err(e) => {
