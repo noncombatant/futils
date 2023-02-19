@@ -4,7 +4,7 @@ use std::io::{stdout, Write};
 
 use crate::sub_slicer::SubSlicer;
 use crate::util::{help, map_file, run_command, unescape_backslashes, ShellResult};
-use crate::{DEFAULT_INPUT_DELIMITER, DEFAULT_OUTPUT_DELIMITER};
+use crate::{DEFAULT_INPUT_RECORD_DELIMITER, DEFAULT_OUTPUT_RECORD_DELIMITER};
 
 pub const FILTER_HELP_MESSAGE: &str = "filter - filter records from files by patterns
 
@@ -38,8 +38,8 @@ Additional options:
 pub fn filter_main(arguments: &[String]) -> ShellResult {
     // TODO: Somehow, make this whole options parsing chunk reusable.
     let mut options = getopt::Parser::new(arguments, "d:hm:o:p:x:");
-    let mut input_delimiter = String::from(DEFAULT_INPUT_DELIMITER);
-    let mut output_delimiter = String::from(DEFAULT_OUTPUT_DELIMITER);
+    let mut input_delimiter = String::from(DEFAULT_INPUT_RECORD_DELIMITER);
+    let mut output_delimiter = String::from(DEFAULT_OUTPUT_RECORD_DELIMITER);
     let mut match_expressions = Vec::new();
     let mut prune_expressions = Vec::new();
     let mut match_commands = Vec::new();

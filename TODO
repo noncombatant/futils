@@ -14,3 +14,13 @@ Tests for everything
 
 Add a `fields` command, somewhat like `cut`(1). For JSON inputs, it can select
 fields by name.
+
+When options can be given more than once, note that. in the help strings for
+every program.
+
+Turn what `records` does in `records_main` into a reusable function and use it
+everywhere `DEFAULT_INPUT_RECORD_DELIMITER` is used — i.e. RE-ify all input
+handling.
+
+Use headings in the help message for name, usage, description, options,
+additional options

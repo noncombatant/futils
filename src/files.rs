@@ -7,7 +7,7 @@ use walkdir::{DirEntry, WalkDir};
 
 use crate::time::{Comparison, Time};
 use crate::util::{help, run_command, unescape_backslashes, ShellResult};
-use crate::DEFAULT_OUTPUT_DELIMITER;
+use crate::DEFAULT_OUTPUT_RECORD_DELIMITER;
 
 pub const FILES_HELP_MESSAGE: &str = "files - print the pathnames of matching files
 
@@ -79,7 +79,7 @@ pub fn files_main(arguments: &[String]) -> ShellResult {
     let mut options = getopt::Parser::new(arguments, "ahm:M:o:p:t:vx:");
     let mut show_all = false;
     let mut match_expressions = Vec::new();
-    let mut output_delimiter = String::from(DEFAULT_OUTPUT_DELIMITER);
+    let mut output_delimiter = String::from(DEFAULT_OUTPUT_RECORD_DELIMITER);
     let mut prune_expressions = Vec::new();
     let mut file_types = String::from("dfs");
     let mut verbose = false;

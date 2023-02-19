@@ -3,7 +3,7 @@ use regex::bytes::Regex;
 use std::io::{stdin, stdout, Read, Write};
 
 use crate::util::{help, map_file, unescape_backslashes, ShellResult};
-use crate::DEFAULT_OUTPUT_DELIMITER;
+use crate::DEFAULT_OUTPUT_RECORD_DELIMITER;
 
 pub const RECORDS_HELP_MESSAGE: &str = "records - splits a file into records
 
@@ -11,18 +11,19 @@ Usage:
 
 ```
 records -h
-records [-n] [-d delimiter] [-o delimiter] pathname [...]
+records [-n] [-d delimiter] [-o delimiter] [pathname [...]]
 ```
+
+Reads the given `pathname`s (or `stdin` if none are given), splits them into
+records using the input delimiter, and prints them, delimiting them with the
+output delimiter.
 
 Options:
 
 * `-d`: Use the given input record `delimiter`, a regular expression. The
   default delimiter is `r\"(\\r\\n|\\n|\\r)\"`.
-* `-n`: Prefixes each record with a record number.
+* `-n`: Prefix each record with a record number.
 * `-o`: Use the given output record `delimiter`. The default delimiter is `\\n`.
-
-Reads the given `pathname`s, splits them into records using the input delimiter
-and prints them, delimiting them with the output delimiter.
 
 Regular expressions use [the Rust regex library
 syntax](https://docs.rs/regex/latest/regex/).
@@ -34,7 +35,7 @@ Additional options:
 pub fn records_main(arguments: &[String]) -> ShellResult {
     let mut options = getopt::Parser::new(arguments, "d:hno:");
     let mut input_delimiter = Regex::new(r"(\r\n|\n|\r)")?;
-    let mut output_delimiter = String::from(DEFAULT_OUTPUT_DELIMITER);
+    let mut output_delimiter = String::from(DEFAULT_OUTPUT_RECORD_DELIMITER);
     let mut show_number = false;
     loop {
         match options.next().transpose()? {

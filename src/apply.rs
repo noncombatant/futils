@@ -2,7 +2,7 @@ use getopt::Opt;
 
 use crate::sub_slicer::SubSlicer;
 use crate::util::{help, map_file, run_command, unescape_backslashes, ShellResult};
-use crate::{DEFAULT_INPUT_DELIMITER, DEFAULT_OUTPUT_DELIMITER};
+use crate::{DEFAULT_INPUT_RECORD_DELIMITER, DEFAULT_OUTPUT_RECORD_DELIMITER};
 
 pub const APPLY_HELP_MESSAGE: &str = "apply - apply commands to records of input
 
@@ -29,8 +29,8 @@ Additional options:
 
 pub fn apply_main(arguments: &[String]) -> ShellResult {
     let mut options = getopt::Parser::new(arguments, "d:ho:x:v");
-    let mut input_delimiter = String::from(DEFAULT_INPUT_DELIMITER);
-    let mut output_delimiter = String::from(DEFAULT_OUTPUT_DELIMITER);
+    let mut input_delimiter = String::from(DEFAULT_INPUT_RECORD_DELIMITER);
+    let mut output_delimiter = String::from(DEFAULT_OUTPUT_RECORD_DELIMITER);
     let mut command = String::new();
     let mut verbose = false;
 
