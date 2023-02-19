@@ -10,33 +10,34 @@ pub const FILTER_HELP_MESSAGE: &str = "filter - filter records from files by pat
 
 Usage:
 
-    filter -h
-    filter [-d string] [-m regex] [-o string] [-p regex] [-x command] file [...]
+```
+filter -h
+filter [-v] [-d delimeter] [-m regex] [-o delimiter] [-p regex] [-x command]
+       pathname [...]
+```
 
-Searches the given *file*(s) for records that match the given specifications:
+Searches the given `pathname`(s) for records that match the given
+specifications:
 
-    -m  Print records that match the given regular expression.
-    -p  Do not print (i.e. prune) records that match the given regular
-        expression.
-    -x  Print records for which the given *command* exited with status 0.
+* `-m`: Print records that match the given regular expression.
+* `-p`: Do not print (i.e. prune) records that match the given regular
+  expression.
+* `-x`: Print records for which the given `command` exited with status 0.
 
-TODO update docs to mirror files.rs
-
-Regular expressions use the Rust regex library syntax
-(https://docs.rs/regex/latest/regex/).
+Regular expressions use [the Rust regex library
+syntax](https://docs.rs/regex/latest/regex/).
 
 Additional options:
 
-    -h  Print this help message.
-    -d  Use the given input record delimiter. The default delimiter is “\\n”.
-    -o  Use the given output record delimiter. The default delimiter is “\\n”.
-    -v  Print the standard output of commands given with the -x option. (By
-        default, *files* only prints their standard error.)";
+* `-h`: Print this help message.
+* `-d`: Use the given input record `delimiter`. The default delimiter is `\\n`.
+* `-o`: Use the given output record `delimiter`. The default delimiter is `\\n`.
+* `-v`: Print the standard output of commands given with the `-x` option. (By
+  default, `filter` only prints their standard error.)";
 
 pub fn filter_main(arguments: &[String]) -> ShellResult {
     // TODO: Somehow, make this whole options parsing chunk reusable.
     let mut options = getopt::Parser::new(arguments, "d:hm:o:p:x:");
-
     let mut input_delimiter = String::from(DEFAULT_INPUT_DELIMITER);
     let mut output_delimiter = String::from(DEFAULT_OUTPUT_DELIMITER);
     let mut match_expressions = Vec::new();

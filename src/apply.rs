@@ -8,22 +8,24 @@ pub const APPLY_HELP_MESSAGE: &str = "apply - apply commands to records of input
 
 Usage:
 
-    apply -h
-    apply [-v] [-d string] [-o string] -x command-string file [...]
+```
+apply -h
+apply [-v] [-d string] [-o string] -x command pathname [...]
+```
 
-For each record in each of the given *file*(s), runs the command give by
-*command-string*.
+For each record in each of the given `pathname`(s), runs the shell command
+`command`.
 
-BUG: You can only provide 1 instance of the -x option. It’d be cool to be able
-to pass several.
+TODO: You can only provide 1 instance of the `-x` option. It’d be cool to be
+able to pass several.
 
 Additional options:
 
-    -h  Print this help message.
-    -d  Use the given input record delimiter. The default delimiter is \"\\n\".
-    -o  Use the given output record delimiter. The default delimiter is \"\\n\".
-    -v  Print the standard output of commands given with the -x option. (By
-        default, *files* only prints their standard error.)";
+* `-h`: Print this help message.
+* `-d`: Use the given input record delimiter. The default delimiter is `\\n`.
+* `-o`: Use the given output record delimiter. The default delimiter is `\\n`.
+* `-v`: Print the standard output of commands given with the `-x` option. (By
+  default, `apply` only prints their standard error.)";
 
 pub fn apply_main(arguments: &[String]) -> ShellResult {
     let mut options = getopt::Parser::new(arguments, "d:ho:x:v");

@@ -9,23 +9,27 @@ pub const RECORDS_HELP_MESSAGE: &str = "records - splits a file into records
 
 Usage:
 
-    records -h
-    records [-n] [-d input_delimiter] [-o output_delimiter] file [...]
+```
+records -h
+records [-n] [-d delimiter] [-o delimiter] pathname [...]
+```
 
-Reads the given *file*s, splits them into records using the *input_delimiter* (a
-regular expression) and prints them, delimiting them with the *output_delimiter*
-(a string).
+Options:
 
-By default, the input delimiter is `r\"(\\r\\n|\\n|\\r)\"` and the output
-delimiter is \"\\n\".
+* `-d`: Use the given input record `delimiter`, a regular expression. The
+  default delimiter is `r\"(\\r\\n|\\n|\\r)\"`.
+* `-n`: Prefixes each record with a record number.
+* `-o`: Use the given output record `delimiter`. The default delimiter is `\\n`.
 
-Regular expressions use the Rust regex library syntax
-(https://docs.rs/regex/latest/regex/).
+Reads the given `pathname`s, splits them into records using the input delimiter
+and prints them, delimiting them with the output delimiter.
+
+Regular expressions use [the Rust regex library
+syntax](https://docs.rs/regex/latest/regex/).
 
 Additional options:
 
-    -h  Prints this help message.
-    -n  Prefixes each record with a record number.";
+    -h  Prints this help message.";
 
 pub fn records_main(arguments: &[String]) -> ShellResult {
     let mut options = getopt::Parser::new(arguments, "d:hno:");

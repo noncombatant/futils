@@ -11,14 +11,16 @@ pub const STATUS_HELP_MESSAGE: &str = "status - print the status of files
 
 Usage:
 
-    status -h
-    status pathname [...]
+```
+status -h
+status pathname [...]
+```
 
 Prints the metadata for each of the given *pathname*s.
 
 Additional options:
 
-    -h  Print this help message.";
+* `-h`: Print this help message.";
 
 fn format_uid(uid: u32) -> String {
     match get_user_by_uid(uid) {
