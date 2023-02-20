@@ -1,6 +1,4 @@
-use memmap::{Mmap, MmapOptions};
 use rustc_lexer::unescape::unescape_str;
-use std::fs::File;
 use std::io::{stderr, stdout, Write};
 use std::path::Path;
 use std::process::{exit, Command};
@@ -17,12 +15,6 @@ pub fn help(status: i32, message: &str) {
         eprintln!("{}", message);
     }
     exit(status);
-}
-
-/// Opens the file named by `pathname` and returns a memory mapping of it.
-pub fn map_file(pathname: &str) -> Result<Mmap, std::io::Error> {
-    let file = File::open(pathname)?;
-    unsafe { MmapOptions::new().map(&file) }
 }
 
 /// Runs the shell command `command`, passing it `argument`. If `verbose` is

@@ -1,10 +1,11 @@
 use getopt::Opt;
 use regex::bytes::Regex;
-use std::io::{stdout, Write};
+use std::fs::File;
+use std::io::{stdin, stdout, Write};
 
 use crate::shell::ShellResult;
-use crate::sub_slicer::SubSlicer;
-use crate::util::{help, map_file, run_command, unescape_backslashes};
+use crate::stream_splitter::{is_not_delimiter, StreamSplitter};
+use crate::util::{help, run_command, unescape_backslashes};
 use crate::{DEFAULT_INPUT_RECORD_DELIMITER, DEFAULT_OUTPUT_RECORD_DELIMITER};
 
 pub const FILTER_HELP_MESSAGE: &str = "# `filter` - filter records from files by patterns
@@ -13,7 +14,7 @@ pub const FILTER_HELP_MESSAGE: &str = "# `filter` - filter records from files by
 
 ```
 filter -h
-filter [-v] [-d delimeter] [-m regex] [-o delimiter] [-p regex] [-x command]
+filter [-v] [-d delimiter] [-m regex] [-o delimiter] [-p regex] [-x command]
        pathname [...]
 ```
 
@@ -33,15 +34,59 @@ syntax](https://docs.rs/regex/latest/regex/).
 ## Additional Options
 
 * `-h`: Print this help message.
-* `-d`: Use the given input record `delimiter`. The default delimiter is `\\n`.
+* `-d`: Use the given input record `delimiter`. The default delimiter is
+  `r\"(\\r|\\n)+\"`.
 * `-o`: Use the given output record `delimiter`. The default delimiter is `\\n`.
 * `-v`: Print the standard output of commands given with the `-x` option. (By
   default, `filter` only prints their standard error.)";
 
+fn print_matches(
+    splitter: StreamSplitter,
+    prune_expressions: &[Regex],
+    match_expressions: &[Regex],
+    match_commands: &[String],
+    verbose: bool,
+    output_delimiter: &[u8],
+) -> ShellResult {
+    'outer: for r in splitter.filter(is_not_delimiter) {
+        for re in prune_expressions {
+            if re.is_match(&r.bytes) {
+                continue 'outer;
+            }
+        }
+        for re in match_expressions {
+            if !re.is_match(&r.bytes) {
+                continue 'outer;
+            }
+        }
+        for command in match_commands {
+            match run_command(command, &r.bytes, verbose) {
+                Ok(status) => {
+                    if status != 0 {
+                        continue 'outer;
+                    }
+                }
+                Err(e) => {
+                    eprintln!(
+                        "{} \"{}\": {}",
+                        command,
+                        String::from_utf8_lossy(&r.bytes),
+                        e
+                    );
+                    continue 'outer;
+                }
+            }
+        }
+        stdout().write_all(&r.bytes)?;
+        stdout().write_all(output_delimiter)?;
+    }
+    Ok(0)
+}
+
 pub fn filter_main(arguments: &[String]) -> ShellResult {
     // TODO: Somehow, make this whole options parsing chunk reusable.
     let mut options = getopt::Parser::new(arguments, "d:hm:o:p:x:");
-    let mut input_delimiter = String::from(DEFAULT_INPUT_RECORD_DELIMITER);
+    let mut input_delimiter = Regex::new(DEFAULT_INPUT_RECORD_DELIMITER)?;
     let mut output_delimiter = String::from(DEFAULT_OUTPUT_RECORD_DELIMITER);
     let mut match_expressions = Vec::new();
     let mut prune_expressions = Vec::new();
@@ -52,7 +97,7 @@ pub fn filter_main(arguments: &[String]) -> ShellResult {
         match options.next().transpose()? {
             None => break,
             Some(opt) => match opt {
-                Opt('d', Some(string)) => input_delimiter = string.clone(),
+                Opt('d', Some(string)) => input_delimiter = Regex::new(&string)?,
                 Opt('h', None) => help(0, FILTER_HELP_MESSAGE),
                 Opt('m', Some(string)) => match_expressions.push(Regex::new(&string)?),
                 Opt('o', Some(string)) => output_delimiter = string.clone(),
@@ -64,8 +109,6 @@ pub fn filter_main(arguments: &[String]) -> ShellResult {
         }
     }
 
-    let input_delimiter = unescape_backslashes(&input_delimiter)?;
-    let input_delimiter_bytes = input_delimiter.as_bytes();
     let output_delimiter = unescape_backslashes(&output_delimiter)?;
     let output_delimiter_bytes = output_delimiter.as_bytes();
 
@@ -73,52 +116,27 @@ pub fn filter_main(arguments: &[String]) -> ShellResult {
 
     let mut status = 0;
     if arguments.is_empty() {
-        eprintln!("TODO: Reading from stdin not implemented yet. Sorry!");
-        help(-1, FILTER_HELP_MESSAGE);
+        let mut stdin = stdin();
+        print_matches(
+            StreamSplitter::new(&mut stdin, &input_delimiter),
+            &prune_expressions,
+            &match_expressions,
+            &match_commands,
+            verbose,
+            output_delimiter_bytes,
+        )?;
     } else {
         for pathname in arguments {
-            // TODO: Separate all this out into a function; it's too deeply nested.
-            match map_file(pathname) {
-                Ok(mapped) => {
-                    let slicer = SubSlicer {
-                        slice: &mapped,
-                        input_delimiter: input_delimiter_bytes,
-                        start: 0,
-                    };
-
-                    'outer: for s in slicer {
-                        for re in &prune_expressions {
-                            if re.is_match(s) {
-                                continue 'outer;
-                            }
-                        }
-                        for re in &match_expressions {
-                            if !re.is_match(s) {
-                                continue 'outer;
-                            }
-                        }
-                        for command in &match_commands {
-                            match run_command(command, s, verbose) {
-                                Ok(status) => {
-                                    if status != 0 {
-                                        continue 'outer;
-                                    }
-                                }
-                                Err(e) => {
-                                    eprintln!(
-                                        "{} \"{}\": {}",
-                                        command,
-                                        String::from_utf8_lossy(s),
-                                        e
-                                    );
-                                    continue 'outer;
-                                }
-                            }
-                        }
-
-                        stdout().write_all(s)?;
-                        stdout().write_all(output_delimiter_bytes)?;
-                    }
+            match File::open(pathname) {
+                Ok(mut file) => {
+                    print_matches(
+                        StreamSplitter::new(&mut file, &input_delimiter),
+                        &prune_expressions,
+                        &match_expressions,
+                        &match_commands,
+                        verbose,
+                        output_delimiter_bytes,
+                    )?;
                 }
                 Err(e) => {
                     eprintln!("{}", e);
