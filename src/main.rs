@@ -23,11 +23,10 @@ use status::{status_main, STATUS_HELP_MESSAGE};
 use test::test_main;
 use util::{file_name, help};
 
-// TODO: Support regex someday.
-//static DEFAULT_INPUT_DELIMITER: &str = r"(\r\n|\n|\r)";
-static DEFAULT_INPUT_RECORD_DELIMITER: &str = "\n";
-static DEFAULT_OUTPUT_RECORD_DELIMITER: &str = "\n";
-static DEFAULT_OUTPUT_FIELD_DELIMITER: &str = "\t";
+const DEFAULT_INPUT_RECORD_DELIMITER: &str = r"(\r|\n)+";
+//const DEFAULT_INPUT_FIELD_DELIMITER: &str = r"\s+";
+const DEFAULT_OUTPUT_RECORD_DELIMITER: &str = "\n";
+const DEFAULT_OUTPUT_FIELD_DELIMITER: &str = "\t";
 
 const HELP_MESSAGE: &str = "# `futils` - functional shell utilities
 

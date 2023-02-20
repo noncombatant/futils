@@ -10,6 +10,10 @@ pub struct Record {
     pub bytes: Vec<u8>,
 }
 
+pub fn is_not_delimiter(r: &Record) -> bool {
+    !r.is_delimiter
+}
+
 pub struct StreamSplitter<'a> {
     reader: &'a mut dyn Read,
     delimiter: &'a Regex,

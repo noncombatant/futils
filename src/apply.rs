@@ -1,8 +1,11 @@
 use getopt::Opt;
+use regex::bytes::Regex;
+use std::fs::File;
+use std::io::{stdin, stdout, Write};
 
 use crate::shell::ShellResult;
-use crate::sub_slicer::SubSlicer;
-use crate::util::{help, map_file, run_command, unescape_backslashes};
+use crate::stream_splitter::StreamSplitter;
+use crate::util::{help, run_command, unescape_backslashes};
 use crate::{DEFAULT_INPUT_RECORD_DELIMITER, DEFAULT_OUTPUT_RECORD_DELIMITER};
 
 pub const APPLY_HELP_MESSAGE: &str = "# `apply` - apply commands to records of input
@@ -32,7 +35,7 @@ able to pass several.
 
 pub fn apply_main(arguments: &[String]) -> ShellResult {
     let mut options = getopt::Parser::new(arguments, "d:ho:x:v");
-    let mut input_delimiter = String::from(DEFAULT_INPUT_RECORD_DELIMITER);
+    let mut input_delimiter = Regex::new(DEFAULT_INPUT_RECORD_DELIMITER)?;
     let mut output_delimiter = String::from(DEFAULT_OUTPUT_RECORD_DELIMITER);
     let mut command = String::new();
     let mut verbose = false;
@@ -41,9 +44,9 @@ pub fn apply_main(arguments: &[String]) -> ShellResult {
         match options.next().transpose()? {
             None => break,
             Some(opt) => match opt {
-                Opt('d', Some(string)) => input_delimiter = string.clone(),
+                Opt('d', Some(string)) => input_delimiter = Regex::new(&string)?,
                 Opt('h', None) => help(0, APPLY_HELP_MESSAGE),
-                Opt('o', Some(string)) => output_delimiter = string.clone(),
+                Opt('o', Some(string)) => output_delimiter = unescape_backslashes(&string)?,
                 Opt('x', Some(string)) => command = string.clone(),
                 Opt('v', None) => verbose = true,
                 _ => help(-1, APPLY_HELP_MESSAGE),
@@ -51,38 +54,50 @@ pub fn apply_main(arguments: &[String]) -> ShellResult {
         }
     }
 
-    let input_delimiter = unescape_backslashes(&input_delimiter)?;
-    let input_delimiter_bytes = input_delimiter.as_bytes();
-    let output_delimiter = unescape_backslashes(&output_delimiter)?;
-    let _output_delimiter_bytes = output_delimiter.as_bytes();
+    let output_delimiter_bytes = output_delimiter.as_bytes();
 
     let (_, arguments) = arguments.split_at(options.index());
 
     let mut status = 0;
     if arguments.is_empty() {
-        eprintln!("TODO: Reading from stdin not implemented yet. Sorry!");
-        help(-1, APPLY_HELP_MESSAGE);
+        let mut stdin = stdin();
+        for r in StreamSplitter::new(&mut stdin, &input_delimiter).filter(|r| !r.is_delimiter) {
+            match run_command(&command, &r.bytes, verbose) {
+                Ok(s) => {
+                    if s != 0 {
+                        status += 1;
+                    }
+                }
+                Err(e) => {
+                    eprintln!("{}: {}", std::str::from_utf8(&r.bytes).unwrap(), e);
+                    status += 1;
+                }
+            }
+            if verbose {
+                stdout().write_all(output_delimiter_bytes)?;
+            }
+        }
     } else {
         for pathname in arguments {
-            match map_file(pathname) {
-                Ok(mapped) => {
-                    let slicer = SubSlicer {
-                        slice: &mapped,
-                        input_delimiter: input_delimiter_bytes,
-                        start: 0,
-                    };
-                    for s in slicer {
-                        match run_command(&command, s, verbose) {
+            match File::open(pathname) {
+                Ok(mut file) => {
+                    for r in
+                        StreamSplitter::new(&mut file, &input_delimiter).filter(|r| !r.is_delimiter)
+                    {
+                        match run_command(&command, &r.bytes, verbose) {
                             Ok(s) => {
-                                if s != 0 && status == 0 {
-                                    status = s
+                                if s != 0 {
+                                    status += 1;
                                 }
                             }
-                            _ => panic!("We're gonna die"),
+                            Err(e) => {
+                                eprintln!("{}: {}", std::str::from_utf8(&r.bytes).unwrap(), e);
+                                status += 1;
+                            }
                         };
-                        // TODO: First, remove the trailing \n, if
-                        // output_delimiter_bytes is not \n.
-                        //stdout().write_all(output_delimiter_bytes)?;
+                        if verbose {
+                            stdout().write_all(output_delimiter_bytes)?;
+                        }
                     }
                 }
                 Err(e) => {
