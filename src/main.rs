@@ -7,7 +7,9 @@ mod files;
 mod filter;
 mod records;
 mod status;
+mod stream_splitter;
 mod sub_slicer;
+mod test;
 mod time;
 mod util;
 
@@ -17,6 +19,7 @@ use files::{files_main, FILES_HELP_MESSAGE};
 use filter::{filter_main, FILTER_HELP_MESSAGE};
 use records::{records_main, RECORDS_HELP_MESSAGE};
 use status::{status_main, STATUS_HELP_MESSAGE};
+use test::test_main;
 use util::{file_name, help};
 
 // TODO: Support regex someday.
@@ -108,6 +111,7 @@ fn main() {
         "filter" => filter_main(&arguments),
         "records" => records_main(&arguments),
         "status" => status_main(&arguments),
+        "test" => test_main(&arguments),
         _ => {
             help(-1, HELP_MESSAGE);
             unreachable!()
