@@ -81,8 +81,6 @@ pub fn fields_main(arguments: &[String]) -> ShellResult {
     }
     let (_, arguments) = arguments.split_at(options.index());
 
-    // TODO: Since we use this pattern all over the place, maybe we should have
-    // `unescape_backslashes` return bytes.
     let output_record_delimiter = unescape_backslashes(&output_record_delimiter)?;
     let output_record_delimiter = output_record_delimiter.as_bytes();
     let output_field_delimiter = unescape_backslashes(&output_field_delimiter)?;

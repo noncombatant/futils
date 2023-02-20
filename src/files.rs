@@ -78,6 +78,109 @@ fn compare_times(e: &DirEntry, t: &Time) -> Result<bool, std::io::Error> {
         || c == Comparison::Exactly && given == modified)
 }
 
+#[allow(clippy::too_many_arguments)]
+fn print_matches(
+    pathname: &str,
+    show_all: bool,
+    file_types: &str,
+    prune_expressions: &[Regex],
+    match_expressions: &[Regex],
+    mtime_expressions: &[Time],
+    match_commands: &[String],
+    verbose: bool,
+    output_delimiter: &[u8],
+) -> ShellResult {
+    let mut it = WalkDir::new(pathname).into_iter();
+    let mut status = 0;
+    'outer: loop {
+        let entry = match it.next() {
+            None => break Ok(status),
+            Some(e) => e,
+        };
+        let entry = match entry {
+            Err(e) => {
+                eprintln!("{}", e);
+                status += 1;
+                continue;
+            }
+            Ok(e) => e,
+        };
+
+        let file_type = entry.file_type();
+        let is_dir = file_type.is_dir();
+        let is_file = file_type.is_file();
+        let is_symlink = file_type.is_symlink();
+        if (is_dir && !file_types.contains('d'))
+            || (is_file && !file_types.contains('f'))
+            || (is_symlink && !file_types.contains('s'))
+        {
+            continue;
+        }
+
+        if !show_all && is_hidden(&entry) {
+            if is_dir {
+                it.skip_current_dir();
+            }
+            continue;
+        }
+
+        let p = entry.path();
+        let pathname = match p.to_str() {
+            Some(s) => s,
+            None => {
+                eprintln!("pathname not valid Unicode: '{}'", p.display());
+                status += 1;
+                continue;
+            }
+        };
+
+        for re in prune_expressions {
+            if re.is_match(pathname) {
+                if entry.file_type().is_dir() {
+                    it.skip_current_dir();
+                }
+                continue 'outer;
+            }
+        }
+
+        for re in match_expressions {
+            if !re.is_match(pathname) {
+                continue 'outer;
+            }
+        }
+
+        for mtime in mtime_expressions {
+            match compare_times(&entry, mtime) {
+                Ok(true) => continue,
+                Ok(false) => continue 'outer,
+                Err(e) => {
+                    eprintln!("{}", e);
+                    status += 1;
+                    continue 'outer;
+                }
+            }
+        }
+
+        for command in match_commands {
+            match run_command(command, pathname.as_bytes(), verbose) {
+                Ok(status) => {
+                    if status != 0 {
+                        continue 'outer;
+                    }
+                }
+                Err(e) => {
+                    eprintln!("{} \"{}\": {}", command, pathname, e);
+                    status += 1;
+                    continue 'outer;
+                }
+            }
+        }
+
+        stdout().write_all(pathname.as_bytes())?;
+        stdout().write_all(output_delimiter)?;
+    }
+}
+
 pub fn files_main(arguments: &[String]) -> ShellResult {
     let mut options = getopt::Parser::new(arguments, "ahm:M:o:p:t:vx:");
     let mut show_all = false;
@@ -106,102 +209,34 @@ pub fn files_main(arguments: &[String]) -> ShellResult {
             },
         }
     }
+    let (_, arguments) = arguments.split_at(options.index());
 
     let output_delimiter = unescape_backslashes(&output_delimiter)?;
     let output_delimiter = output_delimiter.as_bytes();
-
-    let (_, arguments) = arguments.split_at(options.index());
 
     let mut pathnames = vec![".".to_string()];
     if !arguments.is_empty() {
         pathnames = arguments.into()
     }
+    let mut status = 0;
     for p in pathnames {
-        // TODO: Separate all this out into a function; it's too deeply nested.
-        let mut it = WalkDir::new(p).into_iter();
-        'outer: loop {
-            let entry = match it.next() {
-                None => break,
-                Some(e) => e,
-            };
-            let entry = match entry {
-                Err(e) => {
-                    eprintln!("{}", e);
-                    continue;
-                }
-                Ok(e) => e,
-            };
-
-            let file_type = entry.file_type();
-            let is_dir = file_type.is_dir();
-            let is_file = file_type.is_file();
-            let is_symlink = file_type.is_symlink();
-            if (is_dir && !file_types.contains('d'))
-                || (is_file && !file_types.contains('f'))
-                || (is_symlink && !file_types.contains('s'))
-            {
-                continue;
+        match print_matches(
+            &p,
+            show_all,
+            &file_types,
+            &prune_expressions,
+            &match_expressions,
+            &mtime_expressions,
+            &match_commands,
+            verbose,
+            output_delimiter,
+        ) {
+            Ok(s) => status += s,
+            Err(e) => {
+                eprintln!("{}: {}", p, e);
+                status += 1;
             }
-
-            if !show_all && is_hidden(&entry) {
-                if is_dir {
-                    it.skip_current_dir();
-                }
-                continue;
-            }
-
-            let p = entry.path();
-            let pathname = match p.to_str() {
-                Some(s) => s,
-                None => {
-                    eprintln!("pathname not valid Unicode: '{}'", p.display());
-                    continue;
-                }
-            };
-
-            for re in &prune_expressions {
-                if re.is_match(pathname) {
-                    if entry.file_type().is_dir() {
-                        it.skip_current_dir();
-                    }
-                    continue 'outer;
-                }
-            }
-
-            for re in &match_expressions {
-                if !re.is_match(pathname) {
-                    continue 'outer;
-                }
-            }
-
-            for mtime in &mtime_expressions {
-                match compare_times(&entry, mtime) {
-                    Ok(true) => continue,
-                    Ok(false) => continue 'outer,
-                    Err(e) => {
-                        eprintln!("{}", e);
-                        continue 'outer;
-                    }
-                }
-            }
-
-            for command in &match_commands {
-                match run_command(command, pathname.as_bytes(), verbose) {
-                    Ok(status) => {
-                        if status != 0 {
-                            continue 'outer;
-                        }
-                    }
-                    Err(e) => {
-                        eprintln!("{} \"{}\": {}", command, pathname, e);
-                        continue 'outer;
-                    }
-                }
-            }
-
-            stdout().write_all(pathname.as_bytes())?;
-            stdout().write_all(output_delimiter)?;
         }
     }
-    Ok(0)
+    Ok(status)
 }
