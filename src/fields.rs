@@ -28,7 +28,7 @@ them with the output field and record delimiters.
 * `-D`: Use the given input field `delimiter`, a regular expression. The
   default delimiter is `r\"\\s+\"`.
 * `-d`: Use the given input record `delimiter`, a regular expression. The
-  default delimiter is `r\"(\\r\\n|\\n|\\r)\"`.
+  default delimiter is `r\"(\\r|\\n)+\"`.
 * `-f`: Select the given `field`(s). This option can be given multiple times,
   and fields will be output in the order given on the command line.
 * `-n`: Prefix each record with a record number.

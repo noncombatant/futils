@@ -17,7 +17,3 @@ fields by name.
 
 When options can be given more than once, note that in the help strings for
 every program.
-
-RE-ify all input record handling by using `StreamSplitter` everywhere and
-changing `DEFAULT_INPUT_RECORD_DELIMITER` to be an RE. This may obviate
-sub_slicer.rs.
