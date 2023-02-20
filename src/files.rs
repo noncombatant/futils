@@ -5,8 +5,9 @@ use std::io::{stdout, Write};
 use std::time::SystemTime;
 use walkdir::{DirEntry, WalkDir};
 
+use crate::shell::ShellResult;
 use crate::time::{Comparison, Time};
-use crate::util::{help, run_command, unescape_backslashes, ShellResult};
+use crate::util::{help, run_command, unescape_backslashes};
 use crate::DEFAULT_OUTPUT_RECORD_DELIMITER;
 
 pub const FILES_HELP_MESSAGE: &str = "# `files` - print the pathnames of matching files

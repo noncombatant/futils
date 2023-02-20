@@ -2,7 +2,8 @@ use getopt::Opt;
 use regex::bytes::Regex;
 //use std::io::{stdin, stdout, Read, Write};
 
-use crate::util::{help, unescape_backslashes, ShellResult};
+use crate::shell::ShellResult;
+use crate::util::{help, unescape_backslashes};
 use crate::{DEFAULT_OUTPUT_FIELD_DELIMITER, DEFAULT_OUTPUT_RECORD_DELIMITER};
 
 pub const FIELDS_HELP_MESSAGE: &str =

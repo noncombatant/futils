@@ -6,6 +6,7 @@ mod fields;
 mod files;
 mod filter;
 mod records;
+mod shell;
 mod status;
 mod stream_splitter;
 mod sub_slicer;

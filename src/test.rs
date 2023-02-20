@@ -1,8 +1,8 @@
 use regex::bytes::Regex;
 use std::io::{stdin, stdout, Write};
 
+use crate::shell::ShellResult;
 use crate::stream_splitter::*;
-use crate::util::ShellResult;
 
 pub fn test_main(_: &[String]) -> ShellResult {
     let input_delimiter = Regex::new(r"(\r\n|\n|\r)+")?;

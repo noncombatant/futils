@@ -2,8 +2,9 @@ use getopt::Opt;
 use regex::bytes::Regex;
 use std::io::{stdout, Write};
 
+use crate::shell::ShellResult;
 use crate::sub_slicer::SubSlicer;
-use crate::util::{help, map_file, run_command, unescape_backslashes, ShellResult};
+use crate::util::{help, map_file, run_command, unescape_backslashes};
 use crate::{DEFAULT_INPUT_RECORD_DELIMITER, DEFAULT_OUTPUT_RECORD_DELIMITER};
 
 pub const FILTER_HELP_MESSAGE: &str = "# `filter` - filter records from files by patterns

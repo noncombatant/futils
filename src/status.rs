@@ -4,8 +4,9 @@ use nix::sys::stat::{stat, FileStat};
 use serde::Serialize;
 use users::{get_group_by_gid, get_user_by_uid};
 
+use crate::shell::ShellResult;
 use crate::time::utc_timestamp_to_string;
-use crate::util::{help, ShellResult};
+use crate::util::help;
 
 pub const STATUS_HELP_MESSAGE: &str = "# `status` - print the status of files
 

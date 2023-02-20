@@ -2,7 +2,8 @@ use getopt::Opt;
 use regex::bytes::Regex;
 use std::io::{stdin, stdout, Read, Write};
 
-use crate::util::{help, map_file, unescape_backslashes, ShellResult};
+use crate::shell::ShellResult;
+use crate::util::{help, map_file, unescape_backslashes};
 use crate::DEFAULT_OUTPUT_RECORD_DELIMITER;
 
 pub const RECORDS_HELP_MESSAGE: &str = "# `records` - splits a file into records
