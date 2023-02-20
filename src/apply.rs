@@ -54,7 +54,7 @@ pub fn apply_main(arguments: &[String]) -> ShellResult {
         }
     }
 
-    let output_delimiter_bytes = output_delimiter.as_bytes();
+    let output_delimiter = output_delimiter.as_bytes();
 
     let (_, arguments) = arguments.split_at(options.index());
 
@@ -74,7 +74,7 @@ pub fn apply_main(arguments: &[String]) -> ShellResult {
                 }
             }
             if verbose {
-                stdout().write_all(output_delimiter_bytes)?;
+                stdout().write_all(output_delimiter)?;
             }
         }
     } else {
@@ -96,7 +96,7 @@ pub fn apply_main(arguments: &[String]) -> ShellResult {
                             }
                         };
                         if verbose {
-                            stdout().write_all(output_delimiter_bytes)?;
+                            stdout().write_all(output_delimiter)?;
                         }
                     }
                 }

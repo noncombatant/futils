@@ -68,7 +68,7 @@ pub fn records_main(arguments: &[String]) -> ShellResult {
     }
 
     let output_delimiter = unescape_backslashes(&output_delimiter)?;
-    let output_delimiter_bytes = output_delimiter.as_bytes();
+    let output_delimiter = output_delimiter.as_bytes();
 
     let (_, arguments) = arguments.split_at(options.index());
 
@@ -79,7 +79,7 @@ pub fn records_main(arguments: &[String]) -> ShellResult {
             .filter(is_not_delimiter)
             .enumerate()
         {
-            print_record(n + 1, &r.bytes, enumerate, output_delimiter_bytes)?;
+            print_record(n + 1, &r.bytes, enumerate, output_delimiter)?;
         }
     } else {
         for pathname in arguments {
@@ -89,7 +89,7 @@ pub fn records_main(arguments: &[String]) -> ShellResult {
                         .filter(is_not_delimiter)
                         .enumerate()
                     {
-                        print_record(n + 1, &r.bytes, enumerate, output_delimiter_bytes)?;
+                        print_record(n + 1, &r.bytes, enumerate, output_delimiter)?;
                     }
                 }
                 Err(e) => {

@@ -110,7 +110,7 @@ pub fn filter_main(arguments: &[String]) -> ShellResult {
     let (_, arguments) = arguments.split_at(options.index());
 
     let output_delimiter = unescape_backslashes(&output_delimiter)?;
-    let output_delimiter_bytes = output_delimiter.as_bytes();
+    let output_delimiter = output_delimiter.as_bytes();
 
     let mut status = 0;
     if arguments.is_empty() {
@@ -121,7 +121,7 @@ pub fn filter_main(arguments: &[String]) -> ShellResult {
             &match_expressions,
             &match_commands,
             verbose,
-            output_delimiter_bytes,
+            output_delimiter,
         )?;
     } else {
         for pathname in arguments {
@@ -133,7 +133,7 @@ pub fn filter_main(arguments: &[String]) -> ShellResult {
                         &match_expressions,
                         &match_commands,
                         verbose,
-                        output_delimiter_bytes,
+                        output_delimiter,
                     )?;
                 }
                 Err(e) => {

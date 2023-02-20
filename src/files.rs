@@ -108,7 +108,7 @@ pub fn files_main(arguments: &[String]) -> ShellResult {
     }
 
     let output_delimiter = unescape_backslashes(&output_delimiter)?;
-    let output_delimiter_bytes = output_delimiter.as_bytes();
+    let output_delimiter = output_delimiter.as_bytes();
 
     let (_, arguments) = arguments.split_at(options.index());
 
@@ -200,7 +200,7 @@ pub fn files_main(arguments: &[String]) -> ShellResult {
             }
 
             stdout().write_all(pathname.as_bytes())?;
-            stdout().write_all(output_delimiter_bytes)?;
+            stdout().write_all(output_delimiter)?;
         }
     }
     Ok(0)

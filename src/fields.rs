@@ -84,9 +84,9 @@ pub fn fields_main(arguments: &[String]) -> ShellResult {
     // TODO: Since we use this pattern all over the place, maybe we should have
     // `unescape_backslashes` return bytes.
     let output_record_delimiter = unescape_backslashes(&output_record_delimiter)?;
-    let output_record_delimiter_bytes = output_record_delimiter.as_bytes();
+    let output_record_delimiter = output_record_delimiter.as_bytes();
     let output_field_delimiter = unescape_backslashes(&output_field_delimiter)?;
-    let output_field_delimiter_bytes = output_field_delimiter.as_bytes();
+    let output_field_delimiter = output_field_delimiter.as_bytes();
 
     let mut status = 0;
     if arguments.is_empty() {
@@ -95,8 +95,8 @@ pub fn fields_main(arguments: &[String]) -> ShellResult {
             print_record(
                 r,
                 &input_field_delimiter,
-                output_field_delimiter_bytes,
-                output_record_delimiter_bytes,
+                output_field_delimiter,
+                output_record_delimiter,
             )?;
         }
     } else {
@@ -109,8 +109,8 @@ pub fn fields_main(arguments: &[String]) -> ShellResult {
                         print_record(
                             r,
                             &input_field_delimiter,
-                            output_field_delimiter_bytes,
-                            output_record_delimiter_bytes,
+                            output_field_delimiter,
+                            output_record_delimiter,
                         )?;
                     }
                 }
