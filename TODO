@@ -18,6 +18,6 @@ fields by name.
 When options can be given more than once, note that in the help strings for
 every program.
 
-Turn what `records` does in `records_main` into a reusable function and use it
-everywhere `DEFAULT_INPUT_RECORD_DELIMITER` is used — i.e. RE-ify all input
-handling. I.e. use `StreamSplitter` everywhere.
+RE-ify all input record handling by using `StreamSplitter` everywhere and
+changing `DEFAULT_INPUT_RECORD_DELIMITER` to be an RE. This may obviate
+sub_slicer.rs.
