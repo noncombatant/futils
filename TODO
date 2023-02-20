@@ -20,7 +20,7 @@ every program.
 
 Turn what `records` does in `records_main` into a reusable function and use it
 everywhere `DEFAULT_INPUT_RECORD_DELIMITER` is used — i.e. RE-ify all input
-handling.
+handling. I.e. use `StreamSplitter` everywhere.
 
 Use headings in the help message for name, usage, description, options,
 additional options
