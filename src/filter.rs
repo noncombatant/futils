@@ -92,7 +92,6 @@ pub fn filter_main(arguments: &[String]) -> ShellResult {
     let mut prune_expressions = Vec::new();
     let mut match_commands = Vec::new();
     let mut verbose = false;
-
     loop {
         match options.next().transpose()? {
             None => break,
@@ -108,11 +107,10 @@ pub fn filter_main(arguments: &[String]) -> ShellResult {
             },
         }
     }
+    let (_, arguments) = arguments.split_at(options.index());
 
     let output_delimiter = unescape_backslashes(&output_delimiter)?;
     let output_delimiter_bytes = output_delimiter.as_bytes();
-
-    let (_, arguments) = arguments.split_at(options.index());
 
     let mut status = 0;
     if arguments.is_empty() {

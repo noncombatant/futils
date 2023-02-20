@@ -1,8 +1,10 @@
 use getopt::Opt;
 use regex::bytes::Regex;
-//use std::io::{stdin, stdout, Read, Write};
+use std::fs::File;
+use std::io::{stdin, stdout, Write};
 
 use crate::shell::ShellResult;
+use crate::stream_splitter::{is_not_delimiter, Record, StreamSplitter};
 use crate::util::{help, unescape_backslashes};
 use crate::{DEFAULT_OUTPUT_FIELD_DELIMITER, DEFAULT_OUTPUT_RECORD_DELIMITER};
 
@@ -42,6 +44,20 @@ syntax](https://docs.rs/regex/latest/regex/).
 
     -h  Prints this help message.";
 
+fn print_record(
+    r: Record,
+    input_field_delimiter: &Regex,
+    output_field_delimiter: &[u8],
+    output_record_delimiter: &[u8],
+) -> ShellResult {
+    let fields = input_field_delimiter.split(&r.bytes);
+    let fields = fields.collect::<Vec<&[u8]>>();
+    let record = fields.join(output_field_delimiter);
+    stdout().write_all(&record)?;
+    stdout().write_all(output_record_delimiter)?;
+    Ok(0)
+}
+
 pub fn fields_main(arguments: &[String]) -> ShellResult {
     let mut options = getopt::Parser::new(arguments, "D:d:f:hO:o:");
     let mut input_field_delimiter = Regex::new(r"\s+")?;
@@ -53,12 +69,8 @@ pub fn fields_main(arguments: &[String]) -> ShellResult {
         match options.next().transpose()? {
             None => break,
             Some(opt) => match opt {
-                Opt('D', Some(string)) => {
-                    input_field_delimiter = Regex::new(&unescape_backslashes(&string)?)?
-                }
-                Opt('d', Some(string)) => {
-                    input_record_delimiter = Regex::new(&unescape_backslashes(&string)?)?
-                }
+                Opt('D', Some(string)) => input_field_delimiter = Regex::new(&string)?,
+                Opt('d', Some(string)) => input_record_delimiter = Regex::new(&string)?,
                 Opt('f', Some(string)) => fields.push(string.clone()),
                 Opt('h', None) => help(0, FIELDS_HELP_MESSAGE),
                 Opt('O', Some(string)) => output_field_delimiter = string.clone(),
@@ -67,12 +79,47 @@ pub fn fields_main(arguments: &[String]) -> ShellResult {
             },
         }
     }
+    let (_, arguments) = arguments.split_at(options.index());
 
-    eprintln!("input_field_delimiter: {}", input_field_delimiter);
-    eprintln!("input_record_delimiter: {}", input_record_delimiter);
-    eprintln!("output_field_delimiter: {}", output_field_delimiter);
-    eprintln!("output_record_delimiter: {}", output_record_delimiter);
-    eprintln!("fields: {:?}", fields);
+    // TODO: Since we use this pattern all over the place, maybe we should have
+    // `unescape_backslashes` return bytes.
+    let output_record_delimiter = unescape_backslashes(&output_record_delimiter)?;
+    let output_record_delimiter_bytes = output_record_delimiter.as_bytes();
+    let output_field_delimiter = unescape_backslashes(&output_field_delimiter)?;
+    let output_field_delimiter_bytes = output_field_delimiter.as_bytes();
 
-    Ok(0)
+    let mut status = 0;
+    if arguments.is_empty() {
+        let mut stdin = stdin();
+        for r in StreamSplitter::new(&mut stdin, &input_record_delimiter).filter(is_not_delimiter) {
+            print_record(
+                r,
+                &input_field_delimiter,
+                output_field_delimiter_bytes,
+                output_record_delimiter_bytes,
+            )?;
+        }
+    } else {
+        for pathname in arguments {
+            match File::open(pathname) {
+                Ok(mut file) => {
+                    for r in StreamSplitter::new(&mut file, &input_record_delimiter)
+                        .filter(is_not_delimiter)
+                    {
+                        print_record(
+                            r,
+                            &input_field_delimiter,
+                            output_field_delimiter_bytes,
+                            output_record_delimiter_bytes,
+                        )?;
+                    }
+                }
+                Err(e) => {
+                    eprintln!("{}", e);
+                    status += 1;
+                }
+            }
+        }
+    }
+    Ok(status)
 }

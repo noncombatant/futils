@@ -12,8 +12,5 @@ https://github.com/charmbracelet/glow.
 
 Tests for everything
 
-Add a `fields` command, somewhat like `cut`(1). For JSON inputs, it can select
-fields by name.
-
 When options can be given more than once, note that in the help strings for
 every program.
