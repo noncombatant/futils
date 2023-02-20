@@ -19,27 +19,27 @@ pub fn help(status: i32, message: &str) {
 
 /// Runs the shell command `command`, passing it `argument`. If `verbose` is
 /// true, will print any resulting `stdout`. Prints `stderr` unconditionally.
-// TODO: `argument` should probably be a `&[String]`.
+// TODO: `arguments` should be `&[String]`.
 pub fn run_command(command: &str, argument: &[u8], verbose: bool) -> ShellResult {
     let argument = str::from_utf8(argument)?;
-
     let output = if cfg!(target_os = "windows") {
         Command::new("cmd")
-            .args(["/C", command])
+            .arg("/C")
+            .arg(command)
             .arg(argument)
             .output()?
     } else {
-        Command::new(command).arg(argument).output()?
+        let command = [command, argument].join(" ");
+        Command::new("sh").arg("-c").arg(command).output()?
     };
 
-    let code = output.status.code();
     if verbose && !output.stdout.is_empty() {
         stdout().write_all(&output.stdout)?;
     }
     if !output.stderr.is_empty() {
         stderr().write_all(&output.stderr)?;
     }
-    Ok(code.unwrap_or(0))
+    Ok(output.status.code().unwrap_or(0))
 }
 
 /// Lexes `input` according to Rust’s lexical rules for strings, unescaping any
