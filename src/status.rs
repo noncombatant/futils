@@ -14,12 +14,14 @@ pub const STATUS_HELP_MESSAGE: &str = "# `status` - print the status of files
 
 ```
 status -h
-status pathname [...]
+status [pathname [...]]
 ```
 
 ## Description
 
 Prints the filesystem metadata for each of the given `pathname`s in JSON format.
+If no pathnames are given, prints the status for each of `*`.
+
 The metadata elements are:
 
 * `name`: name

@@ -14,13 +14,13 @@ pub const APPLY_HELP_MESSAGE: &str = "# `apply` - apply commands to records of i
 
 ```
 apply -h
-apply [-v] [-d string] [-o string] -x command pathname [...]
+apply [-v] [-d string] [-o string] -x command [pathname [...]]
 ```
 
 ## Description
 
 For each record in each of the given `pathname`(s), runs the shell command
-`command`.
+`command`. If no pathnames are given, reads `stdin`.
 
 TODO: You can only provide 1 instance of the `-x` option. It’d be cool to be
 able to pass several.
@@ -28,7 +28,8 @@ able to pass several.
 ## Additional Options
 
 * `-h`: Print this help message.
-* `-d`: Use the given input record delimiter. The default delimiter is `\\n`.
+* `-d`: Use the given input record delimiter. The default delimiter is
+  `r\"(\\r|\\n)+\"`.
 * `-o`: Use the given output record delimiter. The default delimiter is `\\n`.
 * `-v`: Print the standard output of commands given with the `-x` option. (By
   default, `apply` only prints their standard error.)";
