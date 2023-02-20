@@ -11,6 +11,9 @@ use std::str;
 /// `exit`s with the given `status`. If there is any `error`, `main` will print
 /// it to `stderr`.
 // TODO: This should be a struct and the error an Option.
+//
+// TODO: We can probably use an `enum` of all the error types we encounter,
+// instead of all this `Box dyn` stuff.
 pub type ShellResult = Result<i32, Box<dyn Error>>;
 
 /// Prints `message` and `exit`s with `status`. If `status` is 0, prints
