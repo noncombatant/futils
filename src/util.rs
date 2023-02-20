@@ -1,20 +1,81 @@
+use chrono::format;
 use memmap::{Mmap, MmapOptions};
 use rustc_lexer::unescape::{unescape_str, EscapeError};
-use std::error::Error;
+use std::fmt::{Debug, Display};
 use std::fs::File;
-use std::io::{stderr, stdout, Write};
+use std::io::{self, stderr, stdout, Write};
 use std::path::Path;
 use std::process::{exit, Command};
 use std::str;
+
+// TODO: Move `ShellError` and `ShellResult` into shell.rs.
+
+#[derive(Debug)]
+pub enum ShellError {
+    Escape(EscapeError),
+    Getopt(getopt::Error),
+    Io(io::Error),
+    Regex(regex::Error),
+    TimeParse(format::ParseError),
+    Utf8(str::Utf8Error),
+}
+
+impl Display for ShellError {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> Result<(), std::fmt::Error> {
+        match self {
+            ShellError::Escape(e) => write!(f, "{:?}", e),
+            ShellError::Getopt(e) => Display::fmt(e, f),
+            ShellError::Io(e) => Display::fmt(e, f),
+            ShellError::Regex(e) => Display::fmt(e, f),
+            ShellError::TimeParse(e) => Display::fmt(e, f),
+            ShellError::Utf8(e) => Display::fmt(e, f),
+        }
+    }
+}
+
+impl std::error::Error for ShellError {}
+
+impl From<io::Error> for ShellError {
+    fn from(e: io::Error) -> ShellError {
+        ShellError::Io(e)
+    }
+}
+
+impl From<EscapeError> for ShellError {
+    fn from(e: EscapeError) -> ShellError {
+        ShellError::Escape(e)
+    }
+}
+
+impl From<getopt::Error> for ShellError {
+    fn from(e: getopt::Error) -> ShellError {
+        ShellError::Getopt(e)
+    }
+}
+
+impl From<regex::Error> for ShellError {
+    fn from(e: regex::Error) -> ShellError {
+        ShellError::Regex(e)
+    }
+}
+
+impl From<format::ParseError> for ShellError {
+    fn from(e: format::ParseError) -> ShellError {
+        ShellError::TimeParse(e)
+    }
+}
+
+impl From<str::Utf8Error> for ShellError {
+    fn from(e: str::Utf8Error) -> ShellError {
+        ShellError::Utf8(e)
+    }
+}
 
 /// The various `*_main` functions return this type. `main` catches it and
 /// `exit`s with the given `status`. If there is any `error`, `main` will print
 /// it to `stderr`.
 // TODO: This should be a struct and the error an Option.
-//
-// TODO: We can probably use an `enum` of all the error types we encounter,
-// instead of all this `Box dyn` stuff.
-pub type ShellResult = Result<i32, Box<dyn Error>>;
+pub type ShellResult = Result<i32, ShellError>;
 
 /// Prints `message` and `exit`s with `status`. If `status` is 0, prints
 /// `message` to `stdout`, otherwise to `stderr`.
@@ -58,39 +119,10 @@ pub fn run_command(command: &str, argument: &[u8], verbose: bool) -> ShellResult
     Ok(code.unwrap_or(0))
 }
 
-fn escape_error_to_str(e: EscapeError) -> &'static str {
-    match e {
-        EscapeError::ZeroChars => "zero chars",
-        EscapeError::MoreThanOneChar => "more than one char",
-        EscapeError::LoneSlash => "lone slash",
-        EscapeError::InvalidEscape => "invalid escape",
-        EscapeError::BareCarriageReturn => "bare carriage return",
-        EscapeError::BareCarriageReturnInRawString => "bare carriage return in raw string",
-        EscapeError::EscapeOnlyChar => "escape only char",
-        EscapeError::TooShortHexEscape => "too short hex escape",
-        EscapeError::InvalidCharInHexEscape => "invalid char in hex escape",
-        EscapeError::OutOfRangeHexEscape => "out of range hex escape",
-        EscapeError::NoBraceInUnicodeEscape => "no brace in Unicode escape",
-        EscapeError::InvalidCharInUnicodeEscape => "invalid char in Unicode escape",
-        EscapeError::EmptyUnicodeEscape => "empty Unicode escape",
-        EscapeError::UnclosedUnicodeEscape => "unclosed Unicode escape",
-        EscapeError::LeadingUnderscoreUnicodeEscape => "leading underscore Unicode escape",
-        EscapeError::OverlongUnicodeEscape => "overlong Unicode escape",
-        EscapeError::LoneSurrogateUnicodeEscape => "lone surrogate Unicode escape",
-        EscapeError::OutOfRangeUnicodeEscape => "out of range Unicode escape",
-        EscapeError::UnicodeEscapeInByte => "Unicode escape in byte",
-        EscapeError::NonAsciiCharInByte => "non-ASCII char in byte",
-        // Documented, but apparently not implemented:
-        //EscapeError::UnskippedWhitespaceWarning => "",
-        //EscapeError::MultipleSkippedLinesWarning => "",
-        _ => "",
-    }
-}
-
 /// Lexes `input` according to Rust’s lexical rules for strings, unescaping any
 /// backslash escape sequences. See `rustc_lexer::unescape`. Errors are of type
 /// `Box<dyn Error>` for easier compatibility with `ShellResult`.
-pub fn unescape_backslashes(input: &str) -> Result<String, Box<dyn Error>> {
+pub fn unescape_backslashes(input: &str) -> Result<String, ShellError> {
     let mut result = Ok(String::new());
     // Thanks to Steve Checkoway for help:
     let mut cb = |_, ch| match (&mut result, ch) {
@@ -101,7 +133,7 @@ pub fn unescape_backslashes(input: &str) -> Result<String, Box<dyn Error>> {
     unescape_str(input, &mut cb);
     match result {
         Ok(s) => Ok(s),
-        Err(e) => Err(Box::<dyn Error>::from(escape_error_to_str(e))),
+        Err(e) => Err(ShellError::Escape(e)),
     }
 }
 
