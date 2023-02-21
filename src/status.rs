@@ -1,6 +1,7 @@
-use glob::glob;
 use nix::sys::stat::{stat, FileStat};
 use serde::Serialize;
+use std::fs::read_dir;
+use std::path::Path;
 use users::{get_group_by_gid, get_user_by_uid};
 
 use crate::shell::{parse_options, ShellResult};
@@ -19,7 +20,7 @@ status [pathname [...]]
 ## Description
 
 Prints the filesystem metadata for each of the given `pathname`s in JSON format.
-If no pathnames are given, prints the status for each of `*`.
+If no pathnames are given, prints the status for each file in `.`.
 
 The metadata elements are:
 
@@ -104,38 +105,32 @@ pub fn status_main(arguments: &[String]) -> ShellResult {
     }
 
     let arguments = if arguments.is_empty() {
-        // TODO: This should really be `read_dir` instead of `glob`. Also, the
-        // horrendousness of this chunk of code highlights that we have a type
-        // problem — we're doing a lot of work to turn `OsStr`s into `String`s
-        // when maybe everything should stay `OsStr`? Or at least, there's got
-        // to be a cleaner way to do all this.
-        let paths = glob("*").unwrap();
-        paths
-            .map(|p| p.unwrap().as_os_str().to_string_lossy().into())
+        // TODO: The horrendousness of this chunk of code highlights that we
+        // have a type problem — we're doing a lot of work to turn `OsStr`s into
+        // `String`s when maybe everything should stay `OsStr`? Or at least,
+        // there's got to be a cleaner way to do all this.
+        read_dir(Path::new("."))?
+            .map(|p| p.unwrap().file_name().to_string_lossy().into())
             .collect()
     } else {
         Vec::from(arguments)
     };
 
-    let mut errors = 0;
+    let mut status = 0;
     println!("[");
     for (i, pathname) in arguments.iter().enumerate() {
         match stat(pathname.as_str()) {
-            Ok(status) => {
-                let status = Status::new(&status, pathname);
-                let status = serde_json::to_string(&status).unwrap();
-                println!(
-                    "{}{}",
-                    status,
-                    if i < arguments.len() - 1 { "," } else { "" }
-                );
+            Ok(s) => {
+                let s = Status::new(&s, pathname);
+                let s = serde_json::to_string(&s).unwrap();
+                println!("{}{}", s, if i < arguments.len() - 1 { "," } else { "" });
             }
             Err(e) => {
                 eprintln!("{}: {}", pathname, e);
-                errors += 1
+                status += 1
             }
         }
     }
     println!("]");
-    Ok(errors)
+    Ok(status)
 }
