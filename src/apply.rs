@@ -1,12 +1,9 @@
-use getopt::Opt;
-use regex::bytes::Regex;
 use std::fs::File;
 use std::io::{stdin, stdout, Write};
 
-use crate::shell::ShellResult;
+use crate::shell::{parse_options, ShellResult};
 use crate::stream_splitter::StreamSplitter;
 use crate::util::{help, run_command, unescape_backslashes};
-use crate::{DEFAULT_INPUT_RECORD_DELIMITER, DEFAULT_OUTPUT_RECORD_DELIMITER};
 
 pub const APPLY_HELP_MESSAGE: &str = "# `apply` - apply commands to records of input
 
@@ -61,37 +58,29 @@ fn apply(
 }
 
 pub fn apply_main(arguments: &[String]) -> ShellResult {
-    let mut options = getopt::Parser::new(arguments, "d:ho:x:v");
-    let mut input_delimiter = Regex::new(DEFAULT_INPUT_RECORD_DELIMITER)?;
-    let mut output_delimiter = String::from(DEFAULT_OUTPUT_RECORD_DELIMITER);
-    let mut commands = Vec::new();
-    let mut verbose = false;
-
-    loop {
-        match options.next().transpose()? {
-            None => break,
-            Some(opt) => match opt {
-                Opt('d', Some(string)) => input_delimiter = Regex::new(&string)?,
-                Opt('h', None) => help(0, APPLY_HELP_MESSAGE),
-                Opt('o', Some(string)) => output_delimiter = unescape_backslashes(&string)?,
-                Opt('x', Some(string)) => commands.push(string.clone()),
-                Opt('v', None) => verbose = true,
-                _ => help(-1, APPLY_HELP_MESSAGE),
-            },
-        }
+    let (options, arguments) = parse_options(arguments)?;
+    if options.help {
+        help(0, APPLY_HELP_MESSAGE);
     }
 
+    let output_delimiter = options
+        .output_record_delimiter
+        .expect("No output record delimiter specified");
+    let output_delimiter = unescape_backslashes(&output_delimiter)?;
     let output_delimiter = output_delimiter.as_bytes();
+    let input_delimiter = options
+        .input_record_delimiter
+        .expect("No input record delimiter specified");
 
-    let (_, arguments) = arguments.split_at(options.index());
+    // TODO: Unescape backslashes in output_delimiter
 
     let mut status = 0;
     if arguments.is_empty() {
         let mut stdin = stdin();
         apply(
             StreamSplitter::new(&mut stdin, &input_delimiter),
-            &commands,
-            verbose,
+            &options.match_commands,
+            options.verbose,
             output_delimiter,
         )?;
     } else {
@@ -100,8 +89,8 @@ pub fn apply_main(arguments: &[String]) -> ShellResult {
                 Ok(mut file) => {
                     match apply(
                         StreamSplitter::new(&mut file, &input_delimiter),
-                        &commands,
-                        verbose,
+                        &options.match_commands,
+                        options.verbose,
                         output_delimiter,
                     ) {
                         Ok(s) => status += s,

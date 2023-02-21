@@ -3,10 +3,9 @@ use regex::bytes::Regex;
 use std::fs::File;
 use std::io::{stdin, stdout, Write};
 
-use crate::shell::ShellResult;
+use crate::shell::{ShellResult, DEFAULT_INPUT_RECORD_DELIMITER, DEFAULT_OUTPUT_RECORD_DELIMITER};
 use crate::stream_splitter::{is_not_delimiter, StreamSplitter};
 use crate::util::{help, unescape_backslashes};
-use crate::{DEFAULT_INPUT_RECORD_DELIMITER, DEFAULT_OUTPUT_RECORD_DELIMITER};
 
 pub const RECORDS_HELP_MESSAGE: &str = "# `records` - splits a file into records
 

@@ -1,12 +1,10 @@
-use getopt::Opt;
 use regex::bytes::Regex;
 use std::fs::File;
 use std::io::{stdin, stdout, Write};
 
-use crate::shell::ShellResult;
+use crate::shell::{parse_options, ShellResult};
 use crate::stream_splitter::{is_not_delimiter, Record, StreamSplitter};
 use crate::util::{help, unescape_backslashes};
-use crate::{DEFAULT_OUTPUT_FIELD_DELIMITER, DEFAULT_OUTPUT_RECORD_DELIMITER};
 
 pub const FIELDS_HELP_MESSAGE: &str =
     "# `fields` — selects and formats the fields from input records
@@ -59,30 +57,21 @@ fn print_record(
 }
 
 pub fn fields_main(arguments: &[String]) -> ShellResult {
-    let mut options = getopt::Parser::new(arguments, "D:d:f:hO:o:");
-    let mut input_field_delimiter = Regex::new(r"\s+")?;
-    let mut input_record_delimiter = Regex::new(r"(\r\n|\n|\r)")?;
-    let mut output_record_delimiter = String::from(DEFAULT_OUTPUT_RECORD_DELIMITER);
-    let mut output_field_delimiter = String::from(DEFAULT_OUTPUT_FIELD_DELIMITER);
-    let mut fields = Vec::new();
-    loop {
-        match options.next().transpose()? {
-            None => break,
-            Some(opt) => match opt {
-                Opt('D', Some(string)) => input_field_delimiter = Regex::new(&string)?,
-                Opt('d', Some(string)) => input_record_delimiter = Regex::new(&string)?,
-                Opt('f', Some(string)) => fields.push(string.clone()),
-                Opt('h', None) => help(0, FIELDS_HELP_MESSAGE),
-                Opt('O', Some(string)) => output_field_delimiter = string.clone(),
-                Opt('o', Some(string)) => output_record_delimiter = string.clone(),
-                _ => help(-1, FIELDS_HELP_MESSAGE),
-            },
-        }
+    let (options, arguments) = parse_options(arguments)?;
+    if options.help {
+        help(0, FIELDS_HELP_MESSAGE);
     }
-    let (_, arguments) = arguments.split_at(options.index());
 
+    let input_record_delimiter = options.input_record_delimiter.expect("No input record delimiter specified");
+    let input_field_delimiter = options.input_field_delimiter.expect("No input field delimiter specified");
+    let output_record_delimiter = options
+        .output_record_delimiter
+        .expect("No output record delimiter specified");
     let output_record_delimiter = unescape_backslashes(&output_record_delimiter)?;
     let output_record_delimiter = output_record_delimiter.as_bytes();
+    let output_field_delimiter = options
+        .output_field_delimiter
+        .expect("No output field delimiter specified");
     let output_field_delimiter = unescape_backslashes(&output_field_delimiter)?;
     let output_field_delimiter = output_field_delimiter.as_bytes();
 
