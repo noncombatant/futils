@@ -63,16 +63,9 @@ pub fn apply_main(arguments: &[String]) -> ShellResult {
         help(0, APPLY_HELP_MESSAGE);
     }
 
-    let output_delimiter = options
-        .output_record_delimiter
-        .expect("No output record delimiter specified");
-    let output_delimiter = unescape_backslashes(&output_delimiter)?;
+    let input_delimiter = options.input_record_delimiter;
+    let output_delimiter = unescape_backslashes(&options.output_record_delimiter)?;
     let output_delimiter = output_delimiter.as_bytes();
-    let input_delimiter = options
-        .input_record_delimiter
-        .expect("No input record delimiter specified");
-
-    // TODO: Unescape backslashes in output_delimiter
 
     let mut status = 0;
     if arguments.is_empty() {

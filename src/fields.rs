@@ -62,17 +62,11 @@ pub fn fields_main(arguments: &[String]) -> ShellResult {
         help(0, FIELDS_HELP_MESSAGE);
     }
 
-    let input_record_delimiter = options.input_record_delimiter.expect("No input record delimiter specified");
-    let input_field_delimiter = options.input_field_delimiter.expect("No input field delimiter specified");
-    let output_record_delimiter = options
-        .output_record_delimiter
-        .expect("No output record delimiter specified");
-    let output_record_delimiter = unescape_backslashes(&output_record_delimiter)?;
+    let input_record_delimiter = options.input_record_delimiter;
+    let input_field_delimiter = options.input_field_delimiter;
+    let output_record_delimiter = unescape_backslashes(&options.output_record_delimiter)?;
     let output_record_delimiter = output_record_delimiter.as_bytes();
-    let output_field_delimiter = options
-        .output_field_delimiter
-        .expect("No output field delimiter specified");
-    let output_field_delimiter = unescape_backslashes(&output_field_delimiter)?;
+    let output_field_delimiter = unescape_backslashes(&options.output_field_delimiter)?;
     let output_field_delimiter = output_field_delimiter.as_bytes();
 
     let mut status = 0;

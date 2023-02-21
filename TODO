@@ -14,3 +14,6 @@ Tests for everything
 
 When options can be given more than once, note that in the help strings for
 every program.
+
+In files.rs, consider the move from regex::Regex to regex::bytes::Regex. Maybe
+options.match_expressions, et c., should be enums with both variants.

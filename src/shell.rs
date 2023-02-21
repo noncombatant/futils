@@ -5,6 +5,8 @@ use rustc_lexer::unescape::EscapeError;
 use std::fmt::{Debug, Display};
 use std::{io, str};
 
+use crate::time::Time;
+
 #[derive(Debug)]
 pub enum ShellError {
     Escape(EscapeError),
@@ -104,17 +106,25 @@ pub const DEFAULT_INPUT_RECORD_DELIMITER: &str = r"(\r|\n)+";
 pub const DEFAULT_INPUT_FIELD_DELIMITER: &str = r"\s+";
 pub const DEFAULT_OUTPUT_RECORD_DELIMITER: &str = "\n";
 pub const DEFAULT_OUTPUT_FIELD_DELIMITER: &str = "\t";
+pub const DEFAULT_FILE_TYPES: &str = "dfs";
 
 pub struct Options {
-    pub input_record_delimiter: Option<Regex>,
-    pub input_field_delimiter: Option<Regex>,
-    pub output_record_delimiter: Option<String>,
-    pub output_field_delimiter: Option<String>,
+    pub input_record_delimiter: Regex,
+    pub input_field_delimiter: Regex,
+    pub output_record_delimiter: String,
+    pub output_field_delimiter: String,
 
     pub match_expressions: Vec<Regex>,
     pub prune_expressions: Vec<Regex>,
     pub match_commands: Vec<String>,
+    pub mtime_expressions: Vec<Time>,
 
+    // TODO: We don't need to make the `Option` fields be options. It's
+    // cluttering up calling code and there doesn't seem to be much
+    // semipredicate risk.
+    pub file_types: String,
+
+    pub show_all: bool,
     pub enumerate: bool,
     pub help: bool,
     pub verbose: bool,
@@ -123,15 +133,19 @@ pub struct Options {
 impl Options {
     pub fn with_defaults() -> Result<Options, ShellError> {
         Ok(Options {
-            input_record_delimiter: Some(Regex::new(DEFAULT_INPUT_RECORD_DELIMITER)?),
-            input_field_delimiter: Some(Regex::new(DEFAULT_INPUT_FIELD_DELIMITER)?),
-            output_record_delimiter: Some(String::from(DEFAULT_OUTPUT_RECORD_DELIMITER)),
-            output_field_delimiter: Some(String::from(DEFAULT_OUTPUT_FIELD_DELIMITER)),
+            input_record_delimiter: Regex::new(DEFAULT_INPUT_RECORD_DELIMITER)?,
+            input_field_delimiter: Regex::new(DEFAULT_INPUT_FIELD_DELIMITER)?,
+            output_record_delimiter: String::from(DEFAULT_OUTPUT_RECORD_DELIMITER),
+            output_field_delimiter: String::from(DEFAULT_OUTPUT_FIELD_DELIMITER),
 
             match_expressions: Vec::new(),
             prune_expressions: Vec::new(),
             match_commands: Vec::new(),
+            mtime_expressions: Vec::new(),
 
+            file_types: String::from(DEFAULT_FILE_TYPES),
+
+            show_all: false,
             enumerate: false,
             help: false,
             verbose: false,
@@ -150,14 +164,17 @@ pub fn parse_options(arguments: &[String]) -> Result<(Options, &[String]), Shell
         match parsed.next().transpose()? {
             None => break,
             Some(opt) => match opt {
-                Opt('D', Some(s)) => options.input_field_delimiter = Some(Regex::new(&s)?),
-                Opt('d', Some(s)) => options.input_record_delimiter = Some(Regex::new(&s)?),
+                Opt('a', None) => options.show_all = true,
+                Opt('D', Some(s)) => options.input_field_delimiter = Regex::new(&s)?,
+                Opt('d', Some(s)) => options.input_record_delimiter = Regex::new(&s)?,
                 Opt('h', None) => options.help = true,
+                Opt('M', Some(s)) => options.mtime_expressions.push(Time::new(&s)?),
                 Opt('m', Some(s)) => options.match_expressions.push(Regex::new(&s)?),
                 Opt('n', None) => options.enumerate = true,
-                Opt('O', Some(s)) => options.output_field_delimiter = Some(s.clone()),
-                Opt('o', Some(s)) => options.output_record_delimiter = Some(s.clone()),
+                Opt('O', Some(s)) => options.output_field_delimiter = s.clone(),
+                Opt('o', Some(s)) => options.output_record_delimiter = s.clone(),
                 Opt('p', Some(s)) => options.prune_expressions.push(Regex::new(&s)?),
+                Opt('t', Some(s)) => options.file_types = s.clone(),
                 Opt('v', None) => options.verbose = true,
                 Opt('x', Some(s)) => options.match_commands.push(s.clone()),
                 Opt(_o, _) => return Err(ShellError::Usage(UsageError::new("Unknown option"))),

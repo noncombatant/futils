@@ -1,11 +1,10 @@
 use chrono::NaiveDateTime;
-use getopt::Opt;
-use regex::Regex;
+use regex::bytes::Regex;
 use std::io::{stdout, Write};
 use std::time::SystemTime;
 use walkdir::{DirEntry, WalkDir};
 
-use crate::shell::{ShellResult, DEFAULT_OUTPUT_RECORD_DELIMITER};
+use crate::shell::{parse_options, ShellResult};
 use crate::time::{Comparison, Time};
 use crate::util::{help, run_command, unescape_backslashes};
 
@@ -134,7 +133,7 @@ fn print_matches(
         };
 
         for re in prune_expressions {
-            if re.is_match(pathname) {
+            if re.is_match(pathname.as_bytes()) {
                 if entry.file_type().is_dir() {
                     it.skip_current_dir();
                 }
@@ -143,7 +142,7 @@ fn print_matches(
         }
 
         for re in match_expressions {
-            if !re.is_match(pathname) {
+            if !re.is_match(pathname.as_bytes()) {
                 continue 'outer;
             }
         }
@@ -181,35 +180,12 @@ fn print_matches(
 }
 
 pub fn files_main(arguments: &[String]) -> ShellResult {
-    let mut options = getopt::Parser::new(arguments, "ahm:M:o:p:t:vx:");
-    let mut show_all = false;
-    let mut match_expressions = Vec::new();
-    let mut output_delimiter = String::from(DEFAULT_OUTPUT_RECORD_DELIMITER);
-    let mut prune_expressions = Vec::new();
-    let mut file_types = String::from("dfs");
-    let mut verbose = false;
-    let mut match_commands = Vec::new();
-    let mut mtime_expressions = Vec::new();
-
-    loop {
-        match options.next().transpose()? {
-            None => break,
-            Some(opt) => match opt {
-                Opt('a', None) => show_all = true,
-                Opt('h', None) => help(0, FILES_HELP_MESSAGE),
-                Opt('m', Some(string)) => match_expressions.push(Regex::new(&string)?),
-                Opt('M', Some(string)) => mtime_expressions.push(Time::new(&string)?),
-                Opt('o', Some(string)) => output_delimiter = string.clone(),
-                Opt('p', Some(string)) => prune_expressions.push(Regex::new(&string)?),
-                Opt('t', Some(string)) => file_types = string.clone(),
-                Opt('v', None) => verbose = true,
-                Opt('x', Some(string)) => match_commands.push(string.clone()),
-                _ => help(-1, FILES_HELP_MESSAGE),
-            },
-        }
+    let (options, arguments) = parse_options(arguments)?;
+    if options.help {
+        help(0, FILES_HELP_MESSAGE);
     }
-    let (_, arguments) = arguments.split_at(options.index());
 
+    let output_delimiter = options.output_record_delimiter;
     let output_delimiter = unescape_backslashes(&output_delimiter)?;
     let output_delimiter = output_delimiter.as_bytes();
 
@@ -221,13 +197,13 @@ pub fn files_main(arguments: &[String]) -> ShellResult {
     for p in pathnames {
         match print_matches(
             &p,
-            show_all,
-            &file_types,
-            &prune_expressions,
-            &match_expressions,
-            &mtime_expressions,
-            &match_commands,
-            verbose,
+            options.show_all,
+            &options.file_types,
+            &options.prune_expressions,
+            &options.match_expressions,
+            &options.mtime_expressions,
+            &options.match_commands,
+            options.verbose,
             output_delimiter,
         ) {
             Ok(s) => status += s,
