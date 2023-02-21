@@ -1,9 +1,8 @@
-use getopt::Opt;
 use regex::bytes::Regex;
 use std::fs::File;
 use std::io::{stdin, stdout, Write};
 
-use crate::shell::{ShellResult, DEFAULT_INPUT_RECORD_DELIMITER, DEFAULT_OUTPUT_RECORD_DELIMITER};
+use crate::shell::{parse_options, ShellResult};
 use crate::stream_splitter::{is_not_delimiter, StreamSplitter};
 use crate::util::{help, run_command, unescape_backslashes};
 
@@ -83,43 +82,23 @@ fn print_matches(
 }
 
 pub fn filter_main(arguments: &[String]) -> ShellResult {
-    // TODO: Somehow, make this whole options parsing chunk reusable.
-    let mut options = getopt::Parser::new(arguments, "d:hm:o:p:x:");
-    let mut input_delimiter = Regex::new(DEFAULT_INPUT_RECORD_DELIMITER)?;
-    let mut output_delimiter = String::from(DEFAULT_OUTPUT_RECORD_DELIMITER);
-    let mut match_expressions = Vec::new();
-    let mut prune_expressions = Vec::new();
-    let mut match_commands = Vec::new();
-    let mut verbose = false;
-    loop {
-        match options.next().transpose()? {
-            None => break,
-            Some(opt) => match opt {
-                Opt('d', Some(string)) => input_delimiter = Regex::new(&string)?,
-                Opt('h', None) => help(0, FILTER_HELP_MESSAGE),
-                Opt('m', Some(string)) => match_expressions.push(Regex::new(&string)?),
-                Opt('o', Some(string)) => output_delimiter = string.clone(),
-                Opt('p', Some(string)) => prune_expressions.push(Regex::new(&string)?),
-                Opt('x', Some(string)) => match_commands.push(string.clone()),
-                Opt('v', None) => verbose = true,
-                _ => help(-1, FILTER_HELP_MESSAGE),
-            },
-        }
+    let (options, arguments) = parse_options(arguments)?;
+    if options.help {
+        help(0, FILTER_HELP_MESSAGE);
     }
-    let (_, arguments) = arguments.split_at(options.index());
 
-    let output_delimiter = unescape_backslashes(&output_delimiter)?;
+    let output_delimiter = unescape_backslashes(&options.output_record_delimiter)?;
     let output_delimiter = output_delimiter.as_bytes();
 
     let mut status = 0;
     if arguments.is_empty() {
         let mut stdin = stdin();
         print_matches(
-            StreamSplitter::new(&mut stdin, &input_delimiter),
-            &prune_expressions,
-            &match_expressions,
-            &match_commands,
-            verbose,
+            StreamSplitter::new(&mut stdin, &options.input_record_delimiter),
+            &options.prune_expressions,
+            &options.match_expressions,
+            &options.match_commands,
+            options.verbose,
             output_delimiter,
         )?;
     } else {
@@ -127,11 +106,11 @@ pub fn filter_main(arguments: &[String]) -> ShellResult {
             match File::open(pathname) {
                 Ok(mut file) => {
                     print_matches(
-                        StreamSplitter::new(&mut file, &input_delimiter),
-                        &prune_expressions,
-                        &match_expressions,
-                        &match_commands,
-                        verbose,
+                        StreamSplitter::new(&mut file, &options.input_record_delimiter),
+                        &options.prune_expressions,
+                        &options.match_expressions,
+                        &options.match_commands,
+                        options.verbose,
                         output_delimiter,
                     )?;
                 }

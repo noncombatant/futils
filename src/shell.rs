@@ -119,9 +119,6 @@ pub struct Options {
     pub match_commands: Vec<String>,
     pub mtime_expressions: Vec<Time>,
 
-    // TODO: We don't need to make the `Option` fields be options. It's
-    // cluttering up calling code and there doesn't seem to be much
-    // semipredicate risk.
     pub file_types: String,
 
     pub show_all: bool,
