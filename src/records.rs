@@ -1,9 +1,7 @@
-use getopt::Opt;
-use regex::bytes::Regex;
 use std::fs::File;
 use std::io::{stdin, stdout, Write};
 
-use crate::shell::{ShellResult, DEFAULT_INPUT_RECORD_DELIMITER, DEFAULT_OUTPUT_RECORD_DELIMITER};
+use crate::shell::{parse_options, ShellResult};
 use crate::stream_splitter::{is_not_delimiter, StreamSplitter};
 use crate::util::{help, unescape_backslashes};
 
@@ -79,46 +77,32 @@ fn print_record(n: usize, record: &[u8], enumerate: bool, output_delimiter: &[u8
 }
 
 pub fn records_main(arguments: &[String]) -> ShellResult {
-    let mut options = getopt::Parser::new(arguments, "d:hno:");
-    let mut input_delimiter = Regex::new(DEFAULT_INPUT_RECORD_DELIMITER)?;
-    let mut output_delimiter = String::from(DEFAULT_OUTPUT_RECORD_DELIMITER);
-    let mut enumerate = false;
-    loop {
-        match options.next().transpose()? {
-            None => break,
-            Some(opt) => match opt {
-                Opt('d', Some(string)) => input_delimiter = Regex::new(&string)?,
-                Opt('h', None) => help(0, RECORDS_HELP_MESSAGE),
-                Opt('n', None) => enumerate = true,
-                Opt('o', Some(string)) => output_delimiter = string.clone(),
-                _ => help(-1, RECORDS_HELP_MESSAGE),
-            },
-        }
+    let (options, arguments) = parse_options(arguments)?;
+    if options.help {
+        help(0, RECORDS_HELP_MESSAGE);
     }
 
-    let output_delimiter = unescape_backslashes(&output_delimiter)?;
+    let output_delimiter = unescape_backslashes(&options.output_record_delimiter)?;
     let output_delimiter = output_delimiter.as_bytes();
-
-    let (_, arguments) = arguments.split_at(options.index());
 
     let mut status = 0;
     if arguments.is_empty() {
         let mut stdin = stdin();
-        for (n, r) in StreamSplitter::new(&mut stdin, &input_delimiter)
+        for (n, r) in StreamSplitter::new(&mut stdin, &options.input_field_delimiter)
             .filter(is_not_delimiter)
             .enumerate()
         {
-            print_record(n + 1, &r.bytes, enumerate, output_delimiter)?;
+            print_record(n + 1, &r.bytes, options.enumerate, output_delimiter)?;
         }
     } else {
         for pathname in arguments {
             match File::open(pathname) {
                 Ok(mut file) => {
-                    for (n, r) in StreamSplitter::new(&mut file, &input_delimiter)
+                    for (n, r) in StreamSplitter::new(&mut file, &options.input_field_delimiter)
                         .filter(is_not_delimiter)
                         .enumerate()
                     {
-                        print_record(n + 1, &r.bytes, enumerate, output_delimiter)?;
+                        print_record(n + 1, &r.bytes, options.enumerate, output_delimiter)?;
                     }
                 }
                 Err(e) => {
