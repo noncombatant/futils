@@ -1,10 +1,9 @@
-use getopt::Opt;
 use glob::glob;
 use nix::sys::stat::{stat, FileStat};
 use serde::Serialize;
 use users::{get_group_by_gid, get_user_by_uid};
 
-use crate::shell::ShellResult;
+use crate::shell::{parse_options, ShellResult};
 use crate::time::utc_timestamp_to_string;
 use crate::util::help;
 
@@ -99,17 +98,10 @@ impl<'a> Status<'a> {
 }
 
 pub fn status_main(arguments: &[String]) -> ShellResult {
-    let mut options = getopt::Parser::new(arguments, "h");
-    loop {
-        match options.next().transpose()? {
-            None => break,
-            Some(opt) => match opt {
-                Opt('h', None) => help(0, STATUS_HELP_MESSAGE),
-                _ => help(-1, STATUS_HELP_MESSAGE),
-            },
-        }
+    let (options, arguments) = parse_options(arguments)?;
+    if options.help {
+        help(0, STATUS_HELP_MESSAGE);
     }
-    let (_, arguments) = arguments.split_at(options.index());
 
     let arguments = if arguments.is_empty() {
         // TODO: This should really be `read_dir` instead of `glob`. Also, the
