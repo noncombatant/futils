@@ -5,6 +5,7 @@ const DEFAULT_CAPACITY: usize = 64 * 1024;
 
 // TODO: With some lifetime magic, we might be able to make `bytes` a `&'a [u8]`
 // and avoid the copy.
+#[derive(Debug)]
 pub struct Record {
     pub is_delimiter: bool,
     pub bytes: Vec<u8>,
@@ -39,7 +40,7 @@ impl<'a> StreamSplitter<'a> {
 }
 
 fn fill(s: &mut StreamSplitter) -> Result<()> {
-    if s.end == s.buffer.capacity() - 1 {
+    if s.end == s.buffer.capacity() {
         if s.start == s.end {
             // We have consumed the buffer. Reset it:
             s.start = 0;
@@ -63,6 +64,7 @@ impl<'a> Iterator for StreamSplitter<'a> {
 
     fn next(&mut self) -> Option<Self::Item> {
         if let Err(e) = fill(self) {
+            // TODO: This is not great.
             eprintln!("{}", e);
             return None;
         }
@@ -74,13 +76,23 @@ impl<'a> Iterator for StreamSplitter<'a> {
         match self.delimiter.find(&self.buffer[self.start..self.end]) {
             Some(m) => {
                 let r = if m.start() == 0 {
-                    // We matched the delimiter. Set us up to start at the
-                    // delimiter end next time.
-                    let start = self.start;
-                    self.start += m.end();
-                    Record {
-                        is_delimiter: true,
-                        bytes: self.buffer[start..self.start].to_vec(),
+                    if self.start + m.end() == self.end && !self.eof {
+                        // `self.buffer` ends in delimiter-matching bytes, yet
+                        // we are not at EOF. So we might not have matched the
+                        // entirety of the delimiter. Therefore, start back at
+                        // the top, which incurs a `fill`, which will grow
+                        // `self.buffer`. The `unwrap` is OK because we must at
+                        // least match the same match again.
+                        self.next().unwrap()
+                    } else {
+                        // We matched the delimiter. Set us up to start at the
+                        // delimiter end next time.
+                        let start = self.start;
+                        self.start += m.end();
+                        Record {
+                            is_delimiter: true,
+                            bytes: self.buffer[start..self.start].to_vec(),
+                        }
                     }
                 } else {
                     // We matched a record. Set us up to start at the delimiter
@@ -92,14 +104,81 @@ impl<'a> Iterator for StreamSplitter<'a> {
                         bytes: self.buffer[start..self.start].to_vec(),
                     }
                 };
-
-                // TODO: What if `self.buffer` ends in delimiter-matching
-                // characters, and we are not at EOF, and reading more bytes
-                // yields more delimiter characters?
-
                 Some(r)
             }
-            None => None,
+            None => {
+                let start = self.start;
+                self.start = self.end;
+                Some(Record {
+                    is_delimiter: false,
+                    bytes: self.buffer[start..self.end].to_vec(),
+                })
+            }
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use regex::bytes::Regex;
+    use std::io::{Seek, SeekFrom, Write};
+    use tempfile::tempfile;
+
+    use crate::stream_splitter::{StreamSplitter, DEFAULT_CAPACITY};
+
+    #[test]
+    fn test_simple() {
+        let mut file = tempfile().unwrap();
+        file.write_all(b"hello\n\nworld\n").unwrap();
+
+        file.seek(SeekFrom::Start(0)).unwrap();
+        let delimiter = Regex::new(r"\s+").unwrap();
+        let mut splitter = StreamSplitter::new(&mut file, &delimiter);
+
+        let r = splitter.next().unwrap();
+        assert_eq!(false, r.is_delimiter);
+        assert_eq!(b"hello", r.bytes.as_slice());
+
+        let r = splitter.next().unwrap();
+        assert_eq!(true, r.is_delimiter);
+        assert_eq!(b"\n\n", r.bytes.as_slice());
+
+        let r = splitter.next().unwrap();
+        assert_eq!(false, r.is_delimiter);
+        assert_eq!(b"world", r.bytes.as_slice());
+
+        let r = splitter.next().unwrap();
+        assert_eq!(true, r.is_delimiter);
+        assert_eq!(b"\n", r.bytes.as_slice());
+
+        assert!(splitter.next().is_none());
+    }
+
+    #[test]
+    fn test_delimiter_straddles_buffer() {
+        let spaces = vec![b' '; DEFAULT_CAPACITY];
+
+        let mut file = tempfile().unwrap();
+        file.write_all(b"hello").unwrap();
+        file.write_all(&spaces).unwrap();
+        file.write_all(b"world").unwrap();
+
+        file.seek(SeekFrom::Start(0)).unwrap();
+        let delimiter = Regex::new(r"\s+").unwrap();
+        let mut splitter = StreamSplitter::new(&mut file, &delimiter);
+
+        let r = splitter.next().unwrap();
+        assert_eq!(false, r.is_delimiter);
+        assert_eq!(b"hello", r.bytes.as_slice());
+
+        let r = splitter.next().unwrap();
+        assert_eq!(true, r.is_delimiter);
+        assert_eq!(spaces, r.bytes);
+
+        let r = splitter.next().unwrap();
+        assert_eq!(false, r.is_delimiter);
+        assert_eq!(b"world", r.bytes.as_slice());
+
+        assert!(splitter.next().is_none());
     }
 }
