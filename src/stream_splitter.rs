@@ -3,8 +3,6 @@ use std::io::{Read, Result};
 
 const DEFAULT_CAPACITY: usize = 64 * 1024;
 
-// TODO: With some lifetime magic, we might be able to make `bytes` a `&'a [u8]`
-// and avoid the copy.
 #[derive(Debug)]
 pub struct Record {
     pub is_delimiter: bool,
