@@ -60,22 +60,39 @@ pub fn unescape_backslashes(input: &str) -> Result<String, ShellError> {
     }
 }
 
-#[test]
-fn test_unescape_backslashes() {
-    let r = unescape_backslashes("\\ngoat\\t").expect("Should parse");
-    assert_eq!("\ngoat\t", r);
-    let r = unescape_backslashes("\\ngoat\t").expect("Should parse");
-    assert_eq!("\ngoat	", r);
-    let r = unescape_backslashes("\ngoat\t").expect("Should parse");
-    assert_eq!(
-        "
-goat	",
-        r
-    );
-}
-
 /// Returns the basename of `pathname`. (Rust calls this `file_name` instead of
 /// `basename`, so we do, too.
 pub fn file_name(pathname: &str) -> Option<&str> {
     Path::new(pathname).file_name()?.to_str()
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::util::{file_name, unescape_backslashes};
+
+    #[test]
+    fn test_unescape_backslashes() {
+        let r = unescape_backslashes("\\ngoat\\t").expect("Should parse");
+        assert_eq!("\ngoat\t", r);
+        let r = unescape_backslashes("\\ngoat\t").expect("Should parse");
+        assert_eq!("\ngoat	", r);
+        let r = unescape_backslashes("\ngoat\t").expect("Should parse");
+        assert_eq!(
+            "
+goat	",
+            r
+        );
+    }
+
+    #[test]
+    fn test_file_name() {
+        assert_eq!("test", file_name("test").unwrap());
+        assert_eq!("test", file_name("./test").unwrap());
+        assert_eq!("test", file_name("/leg/foot/../test").unwrap());
+        assert_eq!("test", file_name("twerb/twib/test noodle/test").unwrap());
+        assert_eq!(
+            "test.exe",
+            file_name("twerb/twib/test noodle/test.exe").unwrap()
+        );
+    }
 }
