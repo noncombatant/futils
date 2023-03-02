@@ -43,8 +43,8 @@ pub fn run_command(command: &str, argument: &[u8], verbose: bool) -> ShellResult
 }
 
 /// Lexes `input` according to Rust’s lexical rules for strings, unescaping any
-/// backslash escape sequences. See `rustc_lexer::unescape`. Errors are of type
-/// `Box<dyn Error>` for easier compatibility with `ShellResult`.
+/// backslash escape sequences. See `rustc_lexer::unescape`. Returns
+/// `ShellError` for easier compatibility with `ShellResult`.
 pub fn unescape_backslashes(input: &str) -> Result<String, ShellError> {
     let mut result = Ok(String::new());
     // Thanks to Steve Checkoway for help:
@@ -61,7 +61,7 @@ pub fn unescape_backslashes(input: &str) -> Result<String, ShellError> {
 }
 
 /// Returns the basename of `pathname`. (Rust calls this `file_name` instead of
-/// `basename`, so we do, too.
+/// `basename`, so we do, too.)
 pub fn file_name(pathname: &str) -> Option<&str> {
     Path::new(pathname).file_name()?.to_str()
 }
