@@ -17,3 +17,6 @@ every program.
 
 In files.rs, consider the move from regex::Regex to regex::bytes::Regex. Maybe
 options.match_expressions, et c., should be enums with both variants.
+
+Create a `trash` program that puts things in a trashcan, for 2-phase delete?
+Hard to do safely and correctly, and therefore fun?
