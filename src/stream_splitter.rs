@@ -1,18 +1,40 @@
 use regex::bytes::Regex;
 use std::io::{Read, Result};
 
-const DEFAULT_CAPACITY: usize = 64 * 1024;
-
+/// A *record* lexed from the input that `StreamSplitter` is splitting.
 #[derive(Debug)]
 pub struct Record {
+    /// `StreamSplitter` yields both data records and the bytes of the delimiter
+    /// that was matched when splitting. Use this field to see which you got.
     pub is_delimiter: bool,
+
+    /// The bytes lexed from the input.
     pub bytes: Vec<u8>,
 }
 
+/// A convenience for callers who want to filter out delimiters when iterating
+/// over a `StreamSplitter`:
+///
+///     for r in StreamSplitter::new(...).filter(is_not_delimiter) {
+///         // Your beautiful, magical functionality here...
+///     }
 pub fn is_not_delimiter(r: &Record) -> bool {
     !r.is_delimiter
 }
 
+/// An `Iterator` that lexes a `Read`, searching for the arbitrary `delimiter`,
+/// and yields `Record`s containing (alternately) data bytes and delimiter
+/// bytes.
+///
+/// This implementation incurs a new allocation when yielding a `Record`, and
+/// the caller owns it. An alternate implementation using generic associated
+/// types that avoids the allocation is available in a Git branch, but it cannot
+/// implement `Iterator`.
+///
+/// This implementation uses a private buffer that may, in pathological cases,
+/// grow large (depending on how long it takes to match `delimiter`). The
+/// starting size of the buffer is an implementation detail that could be
+/// exposed if callers end up needing it.
 pub struct StreamSplitter<'a> {
     reader: &'a mut dyn Read,
     delimiter: &'a Regex,
@@ -24,7 +46,14 @@ pub struct StreamSplitter<'a> {
     eof: bool,
 }
 
+// This value comes from Pumpkin Town. (For those who have never visited:
+// Pumpkin Town is a special place where everyone you meet makes semi-educated
+// guesses about quantities, but has not actually done any measurement.)
+const DEFAULT_CAPACITY: usize = 64 * 1024;
+
 impl<'a> StreamSplitter<'a> {
+    /// Creates a new `StreamSplitter` that will split the bytes of `reader`
+    /// into `Record`s.
     pub fn new(reader: &'a mut dyn Read, delimiter: &'a Regex) -> StreamSplitter<'a> {
         StreamSplitter {
             reader,
