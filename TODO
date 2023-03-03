@@ -22,3 +22,5 @@ Create a `trash` program that puts things in a trashcan, for 2-phase delete?
 Hard to do safely and correctly, and therefore fun?
 
 Rayon for e.g. `files`, et c.?
+
+Consider switching to using clap for parsing options, et c.
