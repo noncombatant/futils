@@ -19,7 +19,7 @@ pub fn help(status: i32, message: &str) {
 
 /// Runs the shell command `command`, passing it `argument`. If `verbose` is
 /// true, will print any resulting `stdout`. Prints `stderr` unconditionally.
-// TODO: `arguments` should be `&[String]`.
+// TODO: `arguments` should be `&[OsString]`.
 pub fn run_command(command: &str, argument: &[u8], verbose: bool) -> ShellResult {
     let argument = str::from_utf8(argument)?;
     let output = if cfg!(target_os = "windows") {
