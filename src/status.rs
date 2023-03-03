@@ -141,12 +141,12 @@ pub fn status_main(arguments: &[String]) -> ShellResult {
     }
 
     let arguments = if arguments.is_empty() {
-        // TODO: The horrendousness of this chunk of code highlights that we
-        // have a type problem — we're doing a lot of work to turn `OsStr`s into
-        // `String`s when maybe everything should stay `OsStr`? Or at least,
-        // there's got to be a cleaner way to do all this.
+        // TODO: This crunchy code highlights that we have a type problem
+        // — we're doing a lot of work to turn `OsStr`s into `String`s, but
+        // ultimately we'll be changing CLI arguments to be always `OsString`.
+        // See also the conversion code at the top of `main`.
         read_dir(Path::new("."))?
-            .map(|p| p.unwrap().file_name().to_string_lossy().into())
+            .map(|entry| entry.unwrap().file_name().to_string_lossy().into())
             .collect()
     } else {
         Vec::from(arguments)

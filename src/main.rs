@@ -67,8 +67,21 @@ files -h
 …and so on.";
 
 fn main() {
-    // TODO: Use `args_os`, and propagate the API change throughout (!).
-    let mut arguments = env::args().collect::<Vec<String>>();
+    // TODO: Make `arguments` be `Vec<OsString>`, and propagate the API change
+    // throughout (!). This probably means we can't use `getopt`, which seems to
+    // want only `String`s. Perhaps `clap` is the way to go. Until then, the
+    // least we can do is warn people:
+    let args_os = env::args_os();
+    let mut arguments: Vec<String> = Vec::with_capacity(args_os.size_hint().0);
+    for a in args_os {
+        match a.to_str() {
+            Some(s) => arguments.push(String::from(s)),
+            None => eprintln!(
+                "Could not convert \"{}\" to UTF-8. Skipping.",
+                a.to_string_lossy()
+            ),
+        }
+    }
 
     // If we were invoked as `futils`, shift the arguments left.
     let program_name = arguments[0].clone();
