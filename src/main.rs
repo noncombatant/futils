@@ -67,36 +67,38 @@ files -h
 …and so on.";
 
 fn main() {
+    // TODO: Use `args_os`, and propagate the API change throughout (!).
     let mut arguments = env::args().collect::<Vec<String>>();
-    let conversion_error_message = "Need a valid program name";
-    let basename = file_name(&arguments[0]).expect(conversion_error_message);
-    if basename.eq("futils") {
-        if arguments.len() < 2 {
-            help(-1, HELP_MESSAGE);
-        }
+
+    // If we were invoked as `futils`, shift the arguments left.
+    let program_name = arguments[0].clone();
+    let mut program_name = file_name(&program_name).unwrap();
+    if program_name.eq("futils") {
         arguments.remove(0);
-        if arguments[0] == "help" || arguments[0] == "-h" {
-            if arguments.len() < 2 {
-                help(0, HELP_MESSAGE);
-            } else {
-                match arguments[1].as_str() {
-                    "apply" => help(0, APPLY_HELP_MESSAGE),
-                    "fields" => help(0, FIELDS_HELP_MESSAGE),
-                    "files" => help(0, FILES_HELP_MESSAGE),
-                    "filter" => help(0, FILTER_HELP_MESSAGE),
-                    "records" => help(0, RECORDS_HELP_MESSAGE),
-                    "status" => help(0, STATUS_HELP_MESSAGE),
-                    &_ => help(-1, HELP_MESSAGE),
-                };
-            }
+    }
+    if arguments.is_empty() {
+        help(-1, HELP_MESSAGE);
+    } else {
+        program_name = file_name(&arguments[0]).unwrap();
+    }
+
+    if program_name == "help" || program_name == "-h" || program_name == "--help" {
+        if arguments.len() < 2 {
+            help(0, HELP_MESSAGE);
+        } else {
+            match arguments[1].as_str() {
+                "apply" => help(0, APPLY_HELP_MESSAGE),
+                "fields" => help(0, FIELDS_HELP_MESSAGE),
+                "files" => help(0, FILES_HELP_MESSAGE),
+                "filter" => help(0, FILTER_HELP_MESSAGE),
+                "records" => help(0, RECORDS_HELP_MESSAGE),
+                "status" => help(0, STATUS_HELP_MESSAGE),
+                &_ => help(-1, HELP_MESSAGE),
+            };
         }
     }
 
-    let basename = file_name(&arguments[0]).expect(conversion_error_message);
-    if basename == "help" {
-        help(0, HELP_MESSAGE);
-    }
-    if let Err(e) = match basename {
+    if let Err(e) = match program_name {
         "apply" => apply_main(&arguments),
         "fields" => fields_main(&arguments),
         "files" => files_main(&arguments),
