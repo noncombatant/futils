@@ -1,4 +1,4 @@
-use nix::sys::stat::{stat, FileStat};
+use nix::sys::stat::{stat, FileStat, Mode};
 use serde::Serialize;
 use std::fs::read_dir;
 use std::path::Path;
@@ -61,9 +61,8 @@ fn format_gid(gid: u32) -> String {
 struct Status<'a> {
     name: &'a str,
     device: i32,
-    // TODO: Make this human-friendly. Possibly split it up into type and
-    // permissions.
     mode: u16,
+    permissions: String,
     links: u16,
     inode: u64,
     user: String,
@@ -77,12 +76,49 @@ struct Status<'a> {
     block_size: i32,
 }
 
+fn permissions_string(mode: u16) -> String {
+    let mode = Mode::from_bits(
+        mode & (Mode::S_IRWXU.bits() | Mode::S_IRWXG.bits() | Mode::S_IRWXO.bits()),
+    )
+    .unwrap();
+    let mut bytes = vec![b'-'; 9];
+    if mode.contains(Mode::S_IRUSR) {
+        bytes[0] = b'r';
+    }
+    if mode.contains(Mode::S_IWUSR) {
+        bytes[1] = b'w';
+    }
+    if mode.contains(Mode::S_IXUSR) {
+        bytes[2] = b'x';
+    }
+    if mode.contains(Mode::S_IRGRP) {
+        bytes[3] = b'r';
+    }
+    if mode.contains(Mode::S_IWGRP) {
+        bytes[4] = b'w';
+    }
+    if mode.contains(Mode::S_IXGRP) {
+        bytes[5] = b'x';
+    }
+    if mode.contains(Mode::S_IROTH) {
+        bytes[6] = b'r';
+    }
+    if mode.contains(Mode::S_IWOTH) {
+        bytes[7] = b'w';
+    }
+    if mode.contains(Mode::S_IXOTH) {
+        bytes[8] = b'x';
+    }
+    String::from_utf8(bytes).unwrap()
+}
+
 impl<'a> Status<'a> {
     fn new(status: &FileStat, name: &'a str) -> Status<'a> {
         Status {
             name,
             device: status.st_dev,
             mode: status.st_mode,
+            permissions: permissions_string(status.st_mode),
             links: status.st_nlink,
             inode: status.st_ino,
             user: format_uid(status.st_uid),
