@@ -72,6 +72,8 @@ mod tests {
 
     #[test]
     fn test_unescape_backslashes() {
+        let r = unescape_backslashes("\\0").expect("Should parse");
+        assert_eq!("\0", r);
         let r = unescape_backslashes("\\ngoat\\t").expect("Should parse");
         assert_eq!("\ngoat\t", r);
         let r = unescape_backslashes("\\ngoat\t").expect("Should parse");
