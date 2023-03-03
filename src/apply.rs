@@ -2,7 +2,7 @@ use std::fs::File;
 use std::io::{stdin, stdout, Write};
 
 use crate::shell::{parse_options, ShellResult};
-use crate::stream_splitter::StreamSplitter;
+use crate::stream_splitter::{is_not_delimiter, StreamSplitter};
 use crate::util::{help, run_command, unescape_backslashes};
 
 pub const APPLY_HELP_MESSAGE: &str = "# `apply` - apply commands to records of input
@@ -36,7 +36,7 @@ fn apply(
     output_delimiter: &[u8],
 ) -> ShellResult {
     let mut status = 0;
-    for r in splitter.filter(|r| !r.is_delimiter) {
+    for r in splitter.filter(is_not_delimiter) {
         for command in commands {
             match run_command(command, &r.bytes, verbose) {
                 Ok(s) => {
