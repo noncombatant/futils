@@ -2,6 +2,9 @@ use chrono::format::ParseError;
 use chrono::{DateTime, NaiveDate, NaiveDateTime, NaiveTime, Utc};
 use chrono::{Datelike, Local, Timelike};
 
+/// Given the number of seconds from the Unix epoch in UTC, returns a sortable
+/// string representation in the format `%Y-%m-%d %H:%M:%S`. If `utc` cannot be
+/// interpreted for some raisin, returns `utc` `format!`ed as a `String`.
 pub fn utc_timestamp_to_string(utc: i64) -> String {
     match NaiveDateTime::from_timestamp_opt(utc, 0) {
         Some(naive) => {
@@ -12,6 +15,8 @@ pub fn utc_timestamp_to_string(utc: i64) -> String {
     }
 }
 
+/// Indicates which comparison operation to perform on 2 `NaiveDateTime`s. See
+/// `Time`.
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum Comparison {
     Before,
@@ -19,12 +24,32 @@ pub enum Comparison {
     Exactly,
 }
 
+/// A comparison operation on a `NaiveDateTime`. This is essentially a curried
+/// function (or, rather, 1 of 3 curried functions) on `date_time`.
 pub struct Time {
+    /// A date-time that another date-time will be compared to.
     pub date_time: NaiveDateTime,
+
+    /// What kind of comparison to perform. See `Comparison`.
     pub comparison: Comparison,
 }
 
 impl Time {
+    /// Parses `string`, which is parsed as having come from a grammar not
+    /// entirely unlike:
+    ///
+    ///   s ::= <operator> <datetime>
+    ///   operator ::= "<" | ">" | "="
+    ///   datetime ::= <date> " " <time>
+    ///       | <time>
+    ///       | <date>
+    ///   date ::= digit{4} "-" digit{2} "-" digit{2}
+    ///   time ::= digit{2} ":" digit{2} ":" digit{2}
+    ///
+    /// and returns a `Time`.
+    ///
+    /// This function also accepts the empty string as a special case, in which
+    /// case it returns a `Time` indicating 0 in the Unix epoch.
     pub fn new(string: &str) -> Result<Time, ParseError> {
         if string.is_empty() {
             return Ok(Time {
@@ -130,4 +155,8 @@ fn parse_time() {
     assert_eq!(12, t.date_time.hour());
     assert_eq!(34, t.date_time.minute());
     assert_eq!(56, t.date_time.second());
+
+    assert!(Time::new("charbity bimborfs?").is_err());
+    assert!(Time::new("<charbity bimborfs?").is_err());
+    assert!(Time::new("=1, 2, 3, 4, I declare a thumb war").is_err());
 }
