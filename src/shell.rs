@@ -7,6 +7,10 @@ use std::{io, str};
 
 use crate::time::Time;
 
+/// `ShellError` accounts for a variety of errors that can happen when running
+/// shell commands, enabling many `main` `fn`s for shell programs to declare
+/// they return it and easily use the `?` operator. We can extend this `enum`
+/// arbitrarily, as needed.
 #[derive(Debug)]
 pub enum ShellError {
     Escape(EscapeError),
@@ -34,6 +38,7 @@ impl Display for ShellError {
 
 impl std::error::Error for ShellError {}
 
+/// Return this error for invalid invocations of shell commands.
 #[derive(Debug)]
 pub struct UsageError {
     details: String,
@@ -98,16 +103,44 @@ impl From<str::Utf8Error> for ShellError {
 /// The various `*_main` functions return this type. `main` catches it and
 /// `exit`s with the given `status`. If there is any `error`, `main` will print
 /// it to `stderr`.
-// TODO: This should be a struct and the error an Option.
+// TODO: This should be a struct and the error an Option. That is, even error
+// returns have a status code.
 pub type ShellResult = Result<i32, ShellError>;
 
-pub const DEFAULT_OPTION_SPEC: &str = "D:d:hm:O:o:p:vx:";
+/// These are the standard command line options for `futils` programs. Their
+/// meanings are:
+///
+///   -D  `Regex`   input field delimiter
+///   -d  `Regex`   input record delimiter
+///   -h  `bool`    help
+///   -m  `Regex`   match
+///   -O  `String`  output field delimiter
+///   -o  `String`  output record delimiter
+///   -p  `Regex`   prune
+///   -t  `String`  file or object types
+///   -v  `bool`    verbose
+///   -x  `String`  command
+///
+/// Not all programs use all options. Some programs may not use this option
+/// spec, depending on their needs.
+pub const DEFAULT_OPTION_SPEC: &str = "D:d:hm:O:o:p:t:vx:";
+
+/// The default input record delimiter.
 pub const DEFAULT_INPUT_RECORD_DELIMITER: &str = r"(\r|\n)+";
+
+/// The default input field delimiter.
 pub const DEFAULT_INPUT_FIELD_DELIMITER: &str = r"\s+";
+
+/// The default output record delimiter.
 pub const DEFAULT_OUTPUT_RECORD_DELIMITER: &str = "\n";
+
+/// The default output field delimiter.
 pub const DEFAULT_OUTPUT_FIELD_DELIMITER: &str = "\t";
+
+/// The default file types.
 pub const DEFAULT_FILE_TYPES: &str = "dfs";
 
+/// Gathers all the command line options into a single handy object.
 pub struct Options {
     pub input_record_delimiter: Regex,
     pub input_field_delimiter: Regex,
@@ -128,6 +161,8 @@ pub struct Options {
 }
 
 impl Options {
+    /// Returns an `Options` with all the fields set to their `DEFAULT_*`
+    /// values.
     pub fn with_defaults() -> Result<Options, ShellError> {
         Ok(Options {
             input_record_delimiter: Regex::new(DEFAULT_INPUT_RECORD_DELIMITER)?,
@@ -150,10 +185,10 @@ impl Options {
     }
 }
 
-/// Given `options`, pre-populated with relevant defaults, parses `arguments`
-/// according to `DEFAULT_OPTION_SPEC` and populates the fields of `options`.
-///
-/// Returns the remaining positional arguments.
+/// Parses `arguments` according to `DEFAULT_OPTION_SPEC`. Returns the parsed
+/// `Options` and the remaining positional arguments. Any options not given on
+/// the command line will have their `DEFAULT_*` values in the returned
+/// `Options` (see `Options::with_defaults`).
 pub fn parse_options(arguments: &[String]) -> Result<(Options, &[String]), ShellError> {
     let mut options = Options::with_defaults()?;
     let mut parsed = getopt::Parser::new(arguments, DEFAULT_OPTION_SPEC);
