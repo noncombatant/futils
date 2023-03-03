@@ -70,10 +70,11 @@ fn compare_times(e: &DirEntry, t: &Time) -> Result<bool, std::io::Error> {
         .as_secs();
     let modified = NaiveDateTime::from_timestamp_opt(modified.try_into().unwrap(), 0).unwrap();
     let given = t.date_time;
-    let c = t.comparison;
-    Ok(c == Comparison::After && given <= modified
-        || c == Comparison::Before && given >= modified
-        || c == Comparison::Exactly && given == modified)
+    Ok(match t.comparison {
+        Comparison::After => given <= modified,
+        Comparison::Before => given >= modified,
+        Comparison::Exactly => given == modified,
+    })
 }
 
 #[allow(clippy::too_many_arguments)]
