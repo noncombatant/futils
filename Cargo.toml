@@ -17,3 +17,8 @@ serde_json = "*"
 tempfile = "*"
 users = "*"
 walkdir = "*"
+
+[profile.release]
+opt-level = "s"
+lto = true
+panic = "abort"
