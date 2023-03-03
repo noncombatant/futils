@@ -101,10 +101,8 @@ impl From<str::Utf8Error> for ShellError {
 }
 
 /// The various `*_main` functions return this type. `main` catches it and
-/// `exit`s with the given `status`. If there is any `error`, `main` will print
-/// it to `stderr`.
-// TODO: This should be a struct and the error an Option. That is, even error
-// returns have a status code.
+/// `exit`s with the given `i32` status code. If there is a `ShellError`, `main`
+/// will print it to `stderr` and `exit(-1)`.
 pub type ShellResult = Result<i32, ShellError>;
 
 /// These are the standard command line options for `futils` programs. Their

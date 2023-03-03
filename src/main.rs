@@ -111,7 +111,7 @@ fn main() {
         }
     }
 
-    if let Err(e) = match program_name {
+    match match program_name {
         "apply" => apply_main(&arguments),
         "fields" => fields_main(&arguments),
         "files" => files_main(&arguments),
@@ -123,8 +123,10 @@ fn main() {
             unreachable!()
         }
     } {
-        eprintln!("{}", e);
-        // TODO: Exit with the exit code from the `*_main` callee.
-        exit(-1)
+        Ok(status) => exit(status),
+        Err(e) => {
+            eprintln!("{}", e);
+            exit(-1)
+        }
     }
 }
