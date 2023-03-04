@@ -37,8 +37,8 @@ failure.
 | Exit Status | Meaning            |
 +-------------+--------------------+
 |           0 | Success            |
-+          -1 | Generic failure    +
-+         > 1 | Number of errors   |
+|          -1 | Generic failure    |
+|         > 1 | Number of errors   |
 +-------------+--------------------+
 
 When a program fails, it always prints a meaningful error message to `stderr`.
