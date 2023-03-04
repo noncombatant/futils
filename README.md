@@ -3,19 +3,26 @@
 A suite of functional(-like) command shell utilities.
 
 The attempt to make modern, rational shell utilities is admittedly somewhat
-futile. French speakers may pronounce it « foutils » if they like.
+futile. I intend for the name to be pronounced “eff-utils”. French speakers may
+pronounce it « foutils », given that the project is a bit mad.
 
 ## Goals
 
-* Structured data; JSON everywhere
+* Structured data: JSON everywhere
 * Modern: Unicode everywhere, complete Markdown documentation, complete tests
-* Consistently flexible: regular expressions everywhere applicable
+* Flexible: regular expressions everywhere applicable
 * Consistent command line structure and behavior
 * At least as time- and space- efficient as classic equivalents
 * Safe: Memory-safe, typeful, mistake-resistant UX, as side-effect safe as
   possible
 
 ## Consistent UX Conventions
+
+### Consistent Options For All Utilities
+
+To the extent possible, all `futils` utilities interpret command line options
+to have the same meaning. This consistency hopefully makes the utilities less
+difficult to learn.
 
 ### Help And Documentation
 
@@ -67,3 +74,10 @@ Every function has thorough unit tests.
 Every command line program has thorough functional tests.
 
 Never `panic!`.
+
+### TODO
+
+There are TODOs in 3 places: in comments in the source code, in [the TODO
+document](TODO.md), and stated as assertions in this document. Whenever behavior
+or functionality as documented differs from the implementation, the
+documentation is probably right.
