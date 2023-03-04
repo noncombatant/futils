@@ -38,7 +38,7 @@ impl Time {
     /// Parses `string`, which is parsed as having come from a grammar not
     /// entirely unlike:
     ///
-    ///   s ::= <operator> <datetime>
+    ///   s ::= space* <operator> space* <datetime> space*
     ///   operator ::= "<" | ">" | "="
     ///   datetime ::= <date> " " <time>
     ///       | <time>
@@ -51,12 +51,14 @@ impl Time {
     /// This function also accepts the empty string as a special case, in which
     /// case it returns a `Time` indicating 0 in the Unix epoch.
     pub fn new(string: &str) -> Result<Time, ParseError> {
+        let string = string.trim();
         if string.is_empty() {
             return Ok(Time {
                 date_time: NaiveDateTime::from_timestamp_opt(0, 0).unwrap(),
                 comparison: Comparison::After,
             });
         }
+
         let mut operator = Comparison::Exactly;
         let mut string = string;
         let (o, s) = string.split_at(1);
@@ -66,7 +68,7 @@ impl Time {
                 ">" => Comparison::After,
                 _ => Comparison::Exactly,
             };
-            string = s;
+            string = s.trim();
         }
 
         let time = Self::from_date_time_string(string, operator);
@@ -147,6 +149,16 @@ fn parse_time() {
     assert_eq!(0, t.date_time.second());
 
     let t = Time::new("=12:34:56").unwrap();
+    let now = Local::now();
+    assert_eq!(Comparison::Exactly, t.comparison);
+    assert_eq!(now.year(), t.date_time.year());
+    assert_eq!(now.month(), t.date_time.month());
+    assert_eq!(now.day(), t.date_time.day());
+    assert_eq!(12, t.date_time.hour());
+    assert_eq!(34, t.date_time.minute());
+    assert_eq!(56, t.date_time.second());
+
+    let t = Time::new(" =\n\n12:34:56 ").unwrap();
     let now = Local::now();
     assert_eq!(Comparison::Exactly, t.comparison);
     assert_eq!(now.year(), t.date_time.year());
