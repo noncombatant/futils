@@ -1,3 +1,6 @@
+INSTALL_ROOT = /usr/local
+INSTALL_ROOT = $(HOME)
+
 default:
 	cargo build
 	cargo test
@@ -5,11 +8,12 @@ default:
 
 install:
 	cargo build --release
-	cp target/release/futils ~/bin
-	strip ~/bin/futils
-	ln -f ~/bin/futils ~/bin/apply
-	ln -f ~/bin/futils ~/bin/fields
-	ln -f ~/bin/futils ~/bin/files
-	ln -f ~/bin/futils ~/bin/filter
-	ln -f ~/bin/futils ~/bin/records
-	ln -f ~/bin/futils ~/bin/status
+	mkdir -p $(INSTALL_ROOT)/bin
+	cp target/release/futils $(INSTALL_ROOT)/bin
+	strip $(INSTALL_ROOT)/bin/futils
+	ln -f $(INSTALL_ROOT)/bin/futils $(INSTALL_ROOT)/bin/apply
+	ln -f $(INSTALL_ROOT)/bin/futils $(INSTALL_ROOT)/bin/fields
+	ln -f $(INSTALL_ROOT)/bin/futils $(INSTALL_ROOT)/bin/files
+	ln -f $(INSTALL_ROOT)/bin/futils $(INSTALL_ROOT)/bin/filter
+	ln -f $(INSTALL_ROOT)/bin/futils $(INSTALL_ROOT)/bin/records
+	ln -f $(INSTALL_ROOT)/bin/futils $(INSTALL_ROOT)/bin/status
