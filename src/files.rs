@@ -1,12 +1,13 @@
 use chrono::NaiveDateTime;
-use regex::bytes::Regex;
 use std::io::{stdout, Write};
 use std::time::SystemTime;
 use walkdir::{DirEntry, WalkDir};
 
-use crate::shell::{parse_options, ShellResult};
+use crate::shell::{parse_options, Options, ShellResult};
 use crate::time::{Comparison, Time};
 use crate::util::{help, run_command, unescape_backslashes};
+
+// TODO: Add a depth option, and parallelize -x.
 
 pub const FILES_HELP_MESSAGE: &str = "# `files` - print the pathnames of matching files
 
@@ -77,18 +78,7 @@ fn compare_times(e: &DirEntry, t: &Time) -> Result<bool, std::io::Error> {
     })
 }
 
-#[allow(clippy::too_many_arguments)]
-fn print_matches(
-    pathname: &str,
-    show_all: bool,
-    file_types: &str,
-    prune_expressions: &[Regex],
-    match_expressions: &[Regex],
-    mtime_expressions: &[Time],
-    match_commands: &[String],
-    verbose: bool,
-    output_delimiter: &[u8],
-) -> ShellResult {
+fn print_matches(pathname: &str, options: &Options, output_delimiter: &[u8]) -> ShellResult {
     let mut it = WalkDir::new(pathname).into_iter();
     let mut status = 0;
     'outer: loop {
@@ -109,14 +99,14 @@ fn print_matches(
         let is_dir = file_type.is_dir();
         let is_file = file_type.is_file();
         let is_symlink = file_type.is_symlink();
-        if (is_dir && !file_types.contains('d'))
-            || (is_file && !file_types.contains('f'))
-            || (is_symlink && !file_types.contains('s'))
+        if (is_dir && !options.file_types.contains('d'))
+            || (is_file && !options.file_types.contains('f'))
+            || (is_symlink && !options.file_types.contains('s'))
         {
             continue;
         }
 
-        if !show_all && is_hidden(&entry) {
+        if !options.show_all && is_hidden(&entry) {
             if is_dir {
                 it.skip_current_dir();
             }
@@ -133,7 +123,7 @@ fn print_matches(
             }
         };
 
-        for re in prune_expressions {
+        for re in &options.prune_expressions {
             if re.is_match(pathname.as_bytes()) {
                 if entry.file_type().is_dir() {
                     it.skip_current_dir();
@@ -142,13 +132,13 @@ fn print_matches(
             }
         }
 
-        for re in match_expressions {
+        for re in &options.match_expressions {
             if !re.is_match(pathname.as_bytes()) {
                 continue 'outer;
             }
         }
 
-        for mtime in mtime_expressions {
+        for mtime in &options.mtime_expressions {
             match compare_times(&entry, mtime) {
                 Ok(true) => continue,
                 Ok(false) => continue 'outer,
@@ -160,8 +150,8 @@ fn print_matches(
             }
         }
 
-        for command in match_commands {
-            match run_command(command, pathname.as_bytes(), verbose) {
+        for command in &options.match_commands {
+            match run_command(command, pathname.as_bytes(), options.verbose) {
                 Ok(status) => {
                     if status != 0 {
                         continue 'outer;
@@ -186,7 +176,7 @@ pub fn files_main(arguments: &[String]) -> ShellResult {
         help(0, FILES_HELP_MESSAGE);
     }
 
-    let output_delimiter = options.output_record_delimiter;
+    let output_delimiter = options.output_record_delimiter.clone();
     let output_delimiter = unescape_backslashes(&output_delimiter)?;
     let output_delimiter = output_delimiter.as_bytes();
 
@@ -196,17 +186,7 @@ pub fn files_main(arguments: &[String]) -> ShellResult {
     }
     let mut status = 0;
     for p in pathnames {
-        match print_matches(
-            &p,
-            options.show_all,
-            &options.file_types,
-            &options.prune_expressions,
-            &options.match_expressions,
-            &options.mtime_expressions,
-            &options.match_commands,
-            options.verbose,
-            output_delimiter,
-        ) {
+        match print_matches(&p, &options, output_delimiter) {
             Ok(s) => status += s,
             Err(e) => {
                 eprintln!("{}: {}", p, e);
