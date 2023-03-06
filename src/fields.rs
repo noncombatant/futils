@@ -44,6 +44,8 @@ syntax](https://docs.rs/regex/latest/regex/).
 
     -h  Prints this help message.";
 
+// TODO: Implement support for named fields.
+
 fn print_record(
     r: Record,
     requested_fields: &[usize],
