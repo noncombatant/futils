@@ -48,12 +48,15 @@ syntax](https://docs.rs/regex/latest/regex/).
 
 fn print_record(
     r: Record,
+    number: Option<usize>,
     requested_fields: &[usize],
     input_field_delimiter: &Regex,
     output_field_delimiter: &[u8],
     output_record_delimiter: &[u8],
 ) -> ShellResult {
-    let mut fields = input_field_delimiter.split(&r.bytes).collect::<Vec<&[u8]>>();
+    let mut fields = input_field_delimiter
+        .split(&r.bytes)
+        .collect::<Vec<&[u8]>>();
     if !requested_fields.is_empty() {
         let mut selected_fields: Vec<&[u8]> = Vec::new();
         for i in requested_fields {
@@ -72,6 +75,10 @@ fn print_record(
         fields = selected_fields;
     };
     let record = fields.join(output_field_delimiter);
+    if let Some(n) = number {
+        write!(stdout(), "{}", n + 1)?;
+        stdout().write_all(output_field_delimiter)?;
+    }
     stdout().write_all(&record)?;
     stdout().write_all(output_record_delimiter)?;
     Ok(0)
@@ -101,9 +108,13 @@ pub fn fields_main(arguments: &[String]) -> ShellResult {
     let mut status = 0;
     if arguments.is_empty() {
         let mut stdin = stdin();
-        for r in StreamSplitter::new(&mut stdin, &input_record_delimiter).filter(is_not_delimiter) {
+        for (n, r) in StreamSplitter::new(&mut stdin, &input_record_delimiter)
+            .filter(is_not_delimiter)
+            .enumerate()
+        {
             print_record(
                 r,
+                if options.enumerate { Some(n) } else { None },
                 &fields,
                 &input_field_delimiter,
                 output_field_delimiter,
@@ -114,11 +125,13 @@ pub fn fields_main(arguments: &[String]) -> ShellResult {
         for pathname in arguments {
             match File::open(pathname) {
                 Ok(mut file) => {
-                    for r in StreamSplitter::new(&mut file, &input_record_delimiter)
+                    for (n, r) in StreamSplitter::new(&mut file, &input_record_delimiter)
                         .filter(is_not_delimiter)
+                        .enumerate()
                     {
                         print_record(
                             r,
+                            if options.enumerate { Some(n) } else { None },
                             &fields,
                             &input_field_delimiter,
                             output_field_delimiter,
