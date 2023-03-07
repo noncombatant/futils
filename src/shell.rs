@@ -4,6 +4,7 @@ use regex::bytes::Regex;
 use rustc_lexer::unescape::EscapeError;
 use std::fmt::{Debug, Display};
 use std::{io, str};
+use std::num::ParseIntError;
 
 use crate::time::Time;
 
@@ -15,6 +16,7 @@ use crate::time::Time;
 pub enum ShellError {
     Escape(EscapeError),
     Getopt(getopt::Error),
+    IntParse(ParseIntError),
     Io(io::Error),
     Regex(regex::Error),
     TimeParse(format::ParseError),
@@ -27,6 +29,7 @@ impl Display for ShellError {
         match self {
             ShellError::Escape(e) => write!(f, "{:?}", e),
             ShellError::Getopt(e) => Display::fmt(e, f),
+            ShellError::IntParse(e) => Display::fmt(e, f),
             ShellError::Io(e) => Display::fmt(e, f),
             ShellError::Regex(e) => Display::fmt(e, f),
             ShellError::TimeParse(e) => Display::fmt(e, f),
@@ -55,6 +58,12 @@ impl UsageError {
 impl Display for UsageError {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> Result<(), std::fmt::Error> {
         write!(f, "{}", self.details)
+    }
+}
+
+impl From<ParseIntError> for ShellError {
+    fn from(e: ParseIntError) -> ShellError {
+        ShellError::IntParse(e)
     }
 }
 

@@ -2,6 +2,7 @@ use lazy_static::lazy_static;
 use regex::bytes::Regex;
 use std::fs::File;
 use std::io::{stdin, stdout, Write};
+use std::num::ParseIntError;
 
 use crate::shell::{parse_options, ShellResult};
 use crate::stream_splitter::{is_not_delimiter, Record, StreamSplitter};
@@ -119,13 +120,12 @@ pub fn fields_main(arguments: &[String]) -> ShellResult {
     let output_field_delimiter = unescape_backslashes(&options.output_field_delimiter)?;
     let output_field_delimiter = output_field_delimiter.as_bytes();
 
-    // TODO: `unwrap` is inappropriate here. Instead, if any parse failed,
-    // return an error from `fields_main`.
-    let fields: Vec<usize> = options
+    let fields = options
         .fields
         .iter()
-        .map(|f| str::parse::<usize>(f).unwrap() - 1)
-        .collect();
+        .map(|f| str::parse::<usize>(f))
+        .collect::<Result<Vec<usize>, ParseIntError>>()?;
+    let fields = fields.iter().map(|f| f - 1).collect::<Vec<usize>>();
 
     let mut status = 0;
     if arguments.is_empty() {
