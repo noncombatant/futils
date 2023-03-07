@@ -13,7 +13,7 @@ pub const FIELDS_HELP_MESSAGE: &str =
 
 ```
 fields -h
-fields [-D delimiter] [-d delimiter] [-O delimiter] [-o delimiter] [-f field] [pathname [...]]
+fields [-n] [-D delimiter] [-d delimiter] [-O delimiter] [-o delimiter] [-f field] [pathname [...]]
 ```
 
 ## Description
@@ -45,6 +45,7 @@ syntax](https://docs.rs/regex/latest/regex/).
     -h  Prints this help message.";
 
 // TODO: Implement support for named fields.
+// TODO: Add an option to skip leading spaces in records.
 
 fn print_record(
     r: Record,
