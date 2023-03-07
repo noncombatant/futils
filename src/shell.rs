@@ -117,13 +117,14 @@ pub type ShellResult = Result<i32, ShellError>;
 ///   -O  `String`  output field delimiter
 ///   -o  `String`  output record delimiter
 ///   -p  `Regex`   prune
+///   -s  `bool`    skip
 ///   -t  `String`  file or object types
 ///   -v  `bool`    verbose
 ///   -x  `String`  command
 ///
 /// Not all programs use all options. Some programs may not use this option
 /// spec, depending on their needs.
-pub const DEFAULT_OPTION_SPEC: &str = "D:d:f:hm:nO:o:p:t:vx:";
+pub const DEFAULT_OPTION_SPEC: &str = "D:d:f:hm:nO:o:p:st:vx:";
 
 /// The default input record delimiter.
 pub const DEFAULT_INPUT_RECORD_DELIMITER: &str = r"(\r|\n)+";
@@ -155,9 +156,10 @@ pub struct Options {
     pub fields: Vec<String>,
     pub file_types: String,
 
-    pub show_all: bool,
     pub enumerate: bool,
     pub help: bool,
+    pub show_all: bool,
+    pub skip: bool,
     pub verbose: bool,
 }
 
@@ -179,9 +181,10 @@ impl Options {
             fields: Vec::new(),
             file_types: String::from(DEFAULT_FILE_TYPES),
 
-            show_all: false,
             enumerate: false,
             help: false,
+            show_all: false,
+            skip: false,
             verbose: false,
         })
     }
@@ -209,6 +212,7 @@ pub fn parse_options(arguments: &[String]) -> Result<(Options, &[String]), Shell
                 Opt('O', Some(s)) => options.output_field_delimiter = s.clone(),
                 Opt('o', Some(s)) => options.output_record_delimiter = s.clone(),
                 Opt('p', Some(s)) => options.prune_expressions.push(Regex::new(&s)?),
+                Opt('s', None) => options.skip = true,
                 Opt('t', Some(s)) => options.file_types = s.clone(),
                 Opt('v', None) => options.verbose = true,
                 Opt('x', Some(s)) => options.match_commands.push(s.clone()),

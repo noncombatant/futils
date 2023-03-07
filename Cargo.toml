@@ -9,6 +9,7 @@ edition = "2021"
 
 chrono = "*"
 getopt = "*"
+lazy_static = "*"
 nix = "*"
 regex = "*"
 rustc_lexer = "*"

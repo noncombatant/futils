@@ -1,3 +1,4 @@
+use lazy_static::lazy_static;
 use regex::bytes::Regex;
 use std::fs::File;
 use std::io::{stdin, stdout, Write};
@@ -13,7 +14,7 @@ pub const FIELDS_HELP_MESSAGE: &str =
 
 ```
 fields -h
-fields [-n] [-D delimiter] [-d delimiter] [-O delimiter] [-o delimiter] [-f field] [pathname [...]]
+fields [-ns] [-D delimiter] [-d delimiter] [-O delimiter] [-o delimiter] [-f field] [pathname [...]]
 ```
 
 ## Description
@@ -34,6 +35,7 @@ them with the output field and record delimiters.
   numbering starts from 1. If no `-f` options are given, `fields` will print all
   fields.
 * `-n`: Prefix each record with a record number.
+* `-s`: Skip leading space characters in records.
 * `-O`: Use the given output field `delimiter`. The default delimiter is `\\t`.
 * `-o`: Use the given output record `delimiter`. The default delimiter is `\\n`.
 
@@ -45,18 +47,37 @@ syntax](https://docs.rs/regex/latest/regex/).
     -h  Prints this help message.";
 
 // TODO: Implement support for named fields.
-// TODO: Add an option to skip leading spaces in records.
+
+lazy_static! {
+    static ref SPACE_CADET: Regex = Regex::new(r"\S").unwrap();
+}
+
+// Returns the index of the first byte that is not a space character.
+fn skip_leading_spaces(record: &[u8]) -> Option<usize> {
+    SPACE_CADET.find(record).map(|m| m.start())
+}
 
 fn print_record(
     r: Record,
     number: Option<usize>,
+    skip_leading: bool,
     requested_fields: &[usize],
     input_field_delimiter: &Regex,
     output_field_delimiter: &[u8],
     output_record_delimiter: &[u8],
 ) -> ShellResult {
+    let start = if skip_leading {
+        match skip_leading_spaces(&r.bytes) {
+            Some(start) => start,
+            None => {
+                return Ok(0)
+            }
+        }
+    } else {
+        0
+    };
     let mut fields = input_field_delimiter
-        .split(&r.bytes)
+        .split(&r.bytes[start..])
         .collect::<Vec<&[u8]>>();
     if !requested_fields.is_empty() {
         let mut selected_fields: Vec<&[u8]> = Vec::new();
@@ -116,6 +137,7 @@ pub fn fields_main(arguments: &[String]) -> ShellResult {
             print_record(
                 r,
                 if options.enumerate { Some(n) } else { None },
+                options.skip,
                 &fields,
                 &input_field_delimiter,
                 output_field_delimiter,
@@ -133,6 +155,7 @@ pub fn fields_main(arguments: &[String]) -> ShellResult {
                         print_record(
                             r,
                             if options.enumerate { Some(n) } else { None },
+                            options.skip,
                             &fields,
                             &input_field_delimiter,
                             output_field_delimiter,
