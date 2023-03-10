@@ -70,9 +70,7 @@ fn print_record(
     let start = if skip_leading {
         match skip_leading_spaces(&r.bytes) {
             Some(start) => start,
-            None => {
-                return Ok(0)
-            }
+            None => return Ok(0),
         }
     } else {
         0

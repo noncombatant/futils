@@ -3,8 +3,8 @@ use getopt::Opt;
 use regex::bytes::Regex;
 use rustc_lexer::unescape::EscapeError;
 use std::fmt::{Debug, Display};
-use std::{io, str};
 use std::num::ParseIntError;
+use std::{io, str};
 
 use crate::time::Time;
 
