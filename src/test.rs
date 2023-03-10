@@ -38,25 +38,25 @@ mod tests {
         let expectations = [
             Expectation {
                 program: "files",
-                arguments: &["-m", "goat"],
-                expected: "./test/goat\n",
+                arguments: &["-m", "goat", "test-data"],
+                expected: "test-data/goat\n",
             },
             Expectation {
                 program: "files",
-                arguments: &["-m", "(?i)goat"],
-                expected: "./test/Goats
-./test/goat
+                arguments: &["-m", "(?i)goat", "test-data"],
+                expected: "test-data/Goats
+test-data/goat
 ",
             },
             Expectation {
                 program: "files",
-                arguments: &["-m", "(?i)goats"],
-                expected: "./test/Goats\n",
+                arguments: &["-m", "(?i)goats", "test-data"],
+                expected: "test-data/Goats\n",
             },
             Expectation {
                 program: "files",
-                arguments: &["-m", "p/y"],
-                expected: "./test/lurp/norp/yibb\n",
+                arguments: &["-m", "p/y", "test-data"],
+                expected: "test-data/lurp/norp/yibb\n",
             },
         ];
         run_tests(&expectations);
@@ -67,14 +67,14 @@ mod tests {
         let expectations = [
             Expectation {
                 program: "fields",
-                arguments: &["-f1", "test/columns.txt"],
+                arguments: &["-f1", "test-data/columns.txt"],
                 expected: "yeah
 whee
 ",
             },
             Expectation {
                 program: "fields",
-                arguments: &["-f1", "-f3", "-n", "test/columns.txt"],
+                arguments: &["-f1", "-f3", "-n", "test-data/columns.txt"],
                 expected: "1	yeah	hey
 2	whee	ouch
 ",
