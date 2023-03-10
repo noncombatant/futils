@@ -28,3 +28,5 @@ Parallelize `-x`, for sure.
 Consider switching to using `clap` for parsing options, et c. This is related to
 the overall problem of `OsString` vs. `String` for arguments, options,
 pathnames, et c.
+
+Use David Cook’s non-copying `StreamSplitter`.
