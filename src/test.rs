@@ -35,7 +35,7 @@ mod tests {
 
     #[test]
     fn test_files_match_basic() {
-        let expectations = [
+        run_tests(&[
             Expectation {
                 program: "files",
                 arguments: &["-m", "goat", "test-data"],
@@ -58,13 +58,37 @@ test-data/goat
                 arguments: &["-m", "p/y", "test-data"],
                 expected: "test-data/lurp/norp/yibb\n",
             },
-        ];
-        run_tests(&expectations);
+        ]);
+    }
+
+    #[test]
+    fn test_files_prune_basic() {
+        run_tests(&[
+            Expectation {
+                program: "files",
+                arguments: &["-p", "(?i)goat", "test-data"],
+                expected: "test-data
+test-data/columns.txt
+test-data/lurp
+test-data/lurp/norp
+test-data/lurp/norp/yibb
+",
+            },
+            Expectation {
+                program: "files",
+                arguments: &["-p", "(?i)(goat|yibb)", "test-data"],
+                expected: "test-data
+test-data/columns.txt
+test-data/lurp
+test-data/lurp/norp
+",
+            },
+        ]);
     }
 
     #[test]
     fn test_fields_basic() {
-        let expectations = [
+        run_tests(&[
             Expectation {
                 program: "fields",
                 arguments: &["-f1", "test-data/columns.txt"],
@@ -79,7 +103,11 @@ whee
 2	whee	ouch
 ",
             },
-        ];
-        run_tests(&expectations);
+            Expectation {
+                program: "fields",
+                arguments: &["-oX", "-OY", "test-data/columns.txt"],
+                expected: "yeahYwowYheyYfriendsXwheeYbonkYouchYboingX",
+            },
+        ]);
     }
 }
