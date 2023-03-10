@@ -4,13 +4,21 @@ mod tests {
 
     const FUTILS: &str = "target/debug/futils";
 
-    struct Expectation<'a> {
+    struct TestCase<'a> {
         program: &'a str,
         arguments: &'a [&'a str],
         expected: &'a str,
     }
 
-    fn run_test(e: &Expectation) {
+    fn new<'a>(program: &'a str, arguments: &'a [&'a str], expected: &'a str) -> TestCase<'a> {
+        TestCase {
+            program,
+            arguments,
+            expected,
+        }
+    }
+
+    fn run_test(e: &TestCase) {
         let output = Command::new(FUTILS)
             .arg(e.program)
             .args(e.arguments)
@@ -27,7 +35,7 @@ mod tests {
         }
     }
 
-    fn run_tests(es: &[Expectation]) {
+    fn run_tests(es: &[TestCase]) {
         for e in es {
             run_test(&e);
         }
@@ -36,78 +44,74 @@ mod tests {
     #[test]
     fn test_files_match_basic() {
         run_tests(&[
-            Expectation {
-                program: "files",
-                arguments: &["-m", "goat", "test-data"],
-                expected: "test-data/goat\n",
-            },
-            Expectation {
-                program: "files",
-                arguments: &["-m", "(?i)goat", "test-data"],
-                expected: "test-data/Goats
+            new("files", &["-m", "goat", "test-data"], "test-data/goat\n"),
+            new(
+                "files",
+                &["-m", "(?i)goat", "test-data"],
+                "test-data/Goats
 test-data/goat
 ",
-            },
-            Expectation {
-                program: "files",
-                arguments: &["-m", "(?i)goats", "test-data"],
-                expected: "test-data/Goats\n",
-            },
-            Expectation {
-                program: "files",
-                arguments: &["-m", "p/y", "test-data"],
-                expected: "test-data/lurp/norp/yibb\n",
-            },
+            ),
+            new(
+                "files",
+                &["-m", "(?i)goats", "test-data"],
+                "test-data/Goats\n",
+            ),
+            new(
+                "files",
+                &["-m", "p/y", "test-data"],
+                "test-data/lurp/norp/yibb\n",
+            ),
         ]);
     }
 
     #[test]
     fn test_files_prune_basic() {
         run_tests(&[
-            Expectation {
-                program: "files",
-                arguments: &["-p", "(?i)goat", "test-data"],
-                expected: "test-data
+            new(
+                "files",
+                &["-p", "(?i)goat", "test-data"],
+                "test-data
 test-data/columns.txt
 test-data/lurp
 test-data/lurp/norp
 test-data/lurp/norp/yibb
 ",
-            },
-            Expectation {
-                program: "files",
-                arguments: &["-p", "(?i)(goat|yibb)", "test-data"],
-                expected: "test-data
+            ),
+            new(
+                "files",
+                &["-p", "(?i)(goat|yibb)", "test-data"],
+                "test-data
 test-data/columns.txt
 test-data/lurp
 test-data/lurp/norp
 ",
-            },
+            ),
         ]);
     }
 
     #[test]
     fn test_fields_basic() {
         run_tests(&[
-            Expectation {
-                program: "fields",
-                arguments: &["-f1", "test-data/columns.txt"],
-                expected: "yeah
+            new(
+                "fields",
+                &["-f1", "test-data/columns.txt"],
+                "yeah
 whee
 ",
-            },
-            Expectation {
-                program: "fields",
-                arguments: &["-f1", "-f3", "-n", "test-data/columns.txt"],
-                expected: "1	yeah	hey
+            ),
+            new(
+                "fields",
+                &["-f1", "-f3", "-n", "test-data/columns.txt"],
+                "1	yeah	hey
 2	whee	ouch
 ",
-            },
-            Expectation {
-                program: "fields",
-                arguments: &["-oX", "-OY", "test-data/columns.txt"],
-                expected: "yeahYwowYheyYfriendsXwheeYbonkYouchYboingX",
-            },
+            ),
+            new(
+                "fields",
+                &["-oX", "-OY", "test-data/columns.txt"],
+                "yeahYwowYheyYfriendsXwheeYbonkYouchYboingX",
+            ),
         ]);
     }
 }
