@@ -9,6 +9,7 @@ mod records;
 mod shell;
 mod status;
 mod stream_splitter;
+mod test;
 mod time;
 mod util;
 

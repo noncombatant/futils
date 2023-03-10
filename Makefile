@@ -5,7 +5,6 @@ default:
 	cargo build
 	cargo test
 	cargo clippy
-	./test.sh
 
 install:
 	cargo build --release
