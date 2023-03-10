@@ -6,6 +6,9 @@ default:
 	cargo test
 	cargo clippy
 
+doc:
+	cargo doc
+
 install:
 	cargo build --release
 	mkdir -p $(INSTALL_ROOT)/bin

@@ -46,9 +46,9 @@ pub struct StreamSplitter<'a> {
     eof: bool,
 }
 
-// This value comes from Pumpkin Town. (For those who have never visited:
-// Pumpkin Town is a special place where everyone you meet makes semi-educated
-// guesses about quantities, but has not actually done any measurement.)
+/// This value comes from Pumpkin Town. (For those who have never visited:
+/// Pumpkin Town is a special place where everyone you meet makes semi-educated
+/// guesses about quantities, but has not actually done any measurement.)
 const DEFAULT_CAPACITY: usize = 64 * 1024;
 
 impl<'a> StreamSplitter<'a> {
@@ -66,6 +66,7 @@ impl<'a> StreamSplitter<'a> {
     }
 }
 
+/// Fills the `StreamSplitter`’s buffer, growing it if it is already full.
 fn fill(s: &mut StreamSplitter) -> Result<()> {
     if s.end == s.buffer.capacity() {
         if s.start == s.end {

@@ -1,3 +1,5 @@
+//! The `apply` command.
+
 use std::fs::File;
 use std::io::{stdin, stdout, Write};
 
@@ -5,6 +7,7 @@ use crate::shell::{parse_options, ShellResult};
 use crate::stream_splitter::{is_not_delimiter, StreamSplitter};
 use crate::util::{help, run_command, unescape_backslashes};
 
+/// Command line usage help.
 pub const APPLY_HELP_MESSAGE: &str = "# `apply` - apply commands to records of input
 
 ## Usage
@@ -29,6 +32,9 @@ instance of `-x command`, to run multiple commands on each input record.
 * `-v`: Print the standard output of commands given with the `-x` option. (By
   default, `apply` only prints their standard error.)";
 
+/// Iterates over `StreamSplitter` and runs each of the `commands` on each
+/// record. `verbose` enables printing `stdout` from the `commands`. Each
+/// record’s output is delimited by `output_delimiter`.
 fn apply(
     splitter: StreamSplitter,
     commands: &[String],
@@ -57,6 +63,7 @@ fn apply(
     Ok(status)
 }
 
+/// Runs the `apply` command on `arguments`.
 pub fn apply_main(arguments: &[String]) -> ShellResult {
     let (options, arguments) = parse_options(arguments)?;
     if options.help {
