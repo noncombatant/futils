@@ -1,8 +1,7 @@
 use regex::bytes::Regex;
-use std::fs::File;
-use std::io::{stdin, stdout, Write};
+use std::io::{stdout, Write};
 
-use crate::shell::{parse_options, ShellResult};
+use crate::shell::{parse_options, FileOpener, ShellResult};
 use crate::stream_splitter::{is_not_delimiter, StreamSplitter};
 use crate::util::{help, run_command, unescape_backslashes};
 
@@ -52,6 +51,7 @@ fn print_matches(
     Ok(0)
 }
 
+/// Runs the `filter` command on `arguments`.
 pub(crate) fn filter_main(arguments: &[String]) -> ShellResult {
     let (options, arguments) = parse_options(arguments)?;
     if options.help {
@@ -62,33 +62,21 @@ pub(crate) fn filter_main(arguments: &[String]) -> ShellResult {
     let output_delimiter = output_delimiter.as_bytes();
 
     let mut status = 0;
-    if arguments.is_empty() {
-        let mut stdin = stdin();
-        print_matches(
-            StreamSplitter::new(&mut stdin, &options.input_record_delimiter),
-            &options.prune_expressions,
-            &options.match_expressions,
-            &options.match_commands,
-            options.verbose,
-            output_delimiter,
-        )?;
-    } else {
-        for pathname in arguments {
-            match File::open(pathname) {
-                Ok(mut file) => {
-                    print_matches(
-                        StreamSplitter::new(&mut file, &options.input_record_delimiter),
-                        &options.prune_expressions,
-                        &options.match_expressions,
-                        &options.match_commands,
-                        options.verbose,
-                        output_delimiter,
-                    )?;
-                }
-                Err(e) => {
-                    eprintln!("{}", e);
-                    status += 1;
-                }
+    for file in FileOpener::new(arguments) {
+        match file {
+            Ok(mut file) => {
+                print_matches(
+                    StreamSplitter::new(&mut file, &options.input_record_delimiter),
+                    &options.prune_expressions,
+                    &options.match_expressions,
+                    &options.match_commands,
+                    options.verbose,
+                    output_delimiter,
+                )?;
+            }
+            Err(e) => {
+                eprintln!("{}", e);
+                status += 1;
             }
         }
     }
