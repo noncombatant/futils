@@ -1,10 +1,9 @@
 use lazy_static::lazy_static;
 use regex::bytes::Regex;
-use std::fs::File;
-use std::io::{stdin, stdout, Write};
+use std::io::{stdout, Write};
 use std::num::ParseIntError;
 
-use crate::shell::{parse_options, ShellResult};
+use crate::shell::{parse_options, FileOpener, ShellResult};
 use crate::stream_splitter::{is_not_delimiter, Record, StreamSplitter};
 use crate::util::{help, unescape_backslashes};
 
@@ -69,6 +68,7 @@ fn print_record(
     Ok(0)
 }
 
+/// Runs the `fields` command on `arguments`.
 pub(crate) fn fields_main(arguments: &[String]) -> ShellResult {
     let (options, arguments) = parse_options(arguments)?;
     if options.help {
@@ -90,45 +90,27 @@ pub(crate) fn fields_main(arguments: &[String]) -> ShellResult {
     let fields = fields.iter().map(|f| f - 1).collect::<Vec<usize>>();
 
     let mut status = 0;
-    if arguments.is_empty() {
-        let mut stdin = stdin();
-        for (n, r) in StreamSplitter::new(&mut stdin, &input_record_delimiter)
-            .filter(is_not_delimiter)
-            .enumerate()
-        {
-            print_record(
-                r,
-                if options.enumerate { Some(n) } else { None },
-                options.skip,
-                &fields,
-                &input_field_delimiter,
-                output_field_delimiter,
-                output_record_delimiter,
-            )?;
-        }
-    } else {
-        for pathname in arguments {
-            match File::open(pathname) {
-                Ok(mut file) => {
-                    for (n, r) in StreamSplitter::new(&mut file, &input_record_delimiter)
-                        .filter(is_not_delimiter)
-                        .enumerate()
-                    {
-                        print_record(
-                            r,
-                            if options.enumerate { Some(n) } else { None },
-                            options.skip,
-                            &fields,
-                            &input_field_delimiter,
-                            output_field_delimiter,
-                            output_record_delimiter,
-                        )?;
-                    }
+    for file in FileOpener::new(arguments) {
+        match file {
+            Ok(mut file) => {
+                for (n, r) in StreamSplitter::new(&mut file, &input_record_delimiter)
+                    .filter(is_not_delimiter)
+                    .enumerate()
+                {
+                    print_record(
+                        r,
+                        if options.enumerate { Some(n) } else { None },
+                        options.skip,
+                        &fields,
+                        &input_field_delimiter,
+                        output_field_delimiter,
+                        output_record_delimiter,
+                    )?;
                 }
-                Err(e) => {
-                    eprintln!("{}", e);
-                    status += 1;
-                }
+            }
+            Err(e) => {
+                eprintln!("{}", e);
+                status += 1;
             }
         }
     }
