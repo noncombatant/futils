@@ -3,8 +3,10 @@ use getopt::Opt;
 use regex::bytes::Regex;
 use rustc_lexer::unescape::EscapeError;
 use std::fmt::{Debug, Display};
+use std::fs::File;
 use std::num::ParseIntError;
-use std::{io, str};
+use std::str;
+use std::io::{self, stdin, Read};
 
 use crate::time::Time;
 
@@ -231,4 +233,38 @@ pub(crate) fn parse_options(arguments: &[String]) -> Result<(Options, &[String])
     }
     let (_, arguments) = arguments.split_at(parsed.index());
     Ok((options, arguments))
+}
+
+pub struct FileOpener<'a> {
+    pathnames: &'a [String],
+    position: usize,
+}
+
+impl<'a> FileOpener<'a> {
+    pub fn new(pathnames: &'a [String]) -> Self {
+        FileOpener {
+            pathnames,
+            position: 0,
+        }
+    }
+}
+
+impl<'a> Iterator for FileOpener<'a> {
+    type Item = Result<Box<dyn Read>, io::Error>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.pathnames.is_empty() && self.position == 0 {
+            self.position += 1;
+            Some(Ok(Box::new(stdin()) as Box<dyn Read>))
+        } else if self.position < self.pathnames.len() {
+            let r = match File::open(&self.pathnames[self.position]) {
+                Ok(f) => Ok(Box::new(f) as Box<dyn Read>),
+                Err(e) => Err(e),
+            };
+            self.position += 1;
+            Some(r)
+        } else {
+            None
+        }
+    }
 }
