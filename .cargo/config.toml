@@ -1,2 +1,2 @@
-[build]
-rustdocflags = ["-Z", "unstable-options", "--show-coverage"]
+#[build]
+#rustdocflags = ["-Z", "unstable-options", "--show-coverage"]
