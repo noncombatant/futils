@@ -30,3 +30,7 @@ the overall problem of `OsString` vs. `String` for arguments, options,
 pathnames, et c.
 
 Use David Cook’s non-copying `StreamSplitter`.
+
+Enable negative field indices in `fields`
+
+Use `FileOpener` everywhere.
