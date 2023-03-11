@@ -102,6 +102,7 @@ impl<'a> Status<'a> {
     }
 }
 
+/// Runs the `status` command on `arguments`.
 pub(crate) fn status_main(arguments: &[String]) -> ShellResult {
     let (options, arguments) = parse_options(arguments)?;
     if options.help {

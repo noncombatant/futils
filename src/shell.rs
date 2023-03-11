@@ -4,9 +4,9 @@ use regex::bytes::Regex;
 use rustc_lexer::unescape::EscapeError;
 use std::fmt::{Debug, Display};
 use std::fs::File;
+use std::io::{self, stdin, Read};
 use std::num::ParseIntError;
 use std::str;
-use std::io::{self, stdin, Read};
 
 use crate::time::Time;
 
@@ -242,10 +242,7 @@ pub struct FileOpener<'a> {
 
 impl<'a> FileOpener<'a> {
     pub fn new(pathnames: &'a [String]) -> Self {
-        FileOpener {
-            pathnames,
-            i: 0,
-        }
+        FileOpener { pathnames, i: 0 }
     }
 }
 

@@ -1,7 +1,6 @@
-use std::fs::File;
-use std::io::{stdin, stdout, Write};
+use std::io::{stdout, Write};
 
-use crate::shell::{parse_options, ShellResult};
+use crate::shell::{parse_options, FileOpener, ShellResult};
 use crate::stream_splitter::{is_not_delimiter, StreamSplitter};
 use crate::util::{help, unescape_backslashes};
 
@@ -20,6 +19,7 @@ fn print_record(n: usize, record: &[u8], enumerate: bool, output_delimiter: &[u8
     Ok(0)
 }
 
+/// Runs the `records` command on `arguments`.
 pub(crate) fn records_main(arguments: &[String]) -> ShellResult {
     let (options, arguments) = parse_options(arguments)?;
     if options.help {
@@ -30,29 +30,19 @@ pub(crate) fn records_main(arguments: &[String]) -> ShellResult {
     let output_delimiter = output_delimiter.as_bytes();
 
     let mut status = 0;
-    if arguments.is_empty() {
-        let mut stdin = stdin();
-        for (n, r) in StreamSplitter::new(&mut stdin, &options.input_field_delimiter)
-            .filter(is_not_delimiter)
-            .enumerate()
-        {
-            print_record(n + 1, &r.bytes, options.enumerate, output_delimiter)?;
-        }
-    } else {
-        for pathname in arguments {
-            match File::open(pathname) {
-                Ok(mut file) => {
-                    for (n, r) in StreamSplitter::new(&mut file, &options.input_field_delimiter)
-                        .filter(is_not_delimiter)
-                        .enumerate()
-                    {
-                        print_record(n + 1, &r.bytes, options.enumerate, output_delimiter)?;
-                    }
+    for file in FileOpener::new(arguments) {
+        match file {
+            Ok(mut file) => {
+                for (n, r) in StreamSplitter::new(&mut file, &options.input_field_delimiter)
+                    .filter(is_not_delimiter)
+                    .enumerate()
+                {
+                    print_record(n + 1, &r.bytes, options.enumerate, output_delimiter)?;
                 }
-                Err(e) => {
-                    eprintln!("{}", e);
-                    status += 1;
-                }
+            }
+            Err(e) => {
+                eprintln!("{}", e);
+                status += 1;
             }
         }
     }
