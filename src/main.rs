@@ -21,51 +21,8 @@ use records::{records_main, RECORDS_HELP_MESSAGE};
 use status::{status_main, STATUS_HELP_MESSAGE};
 use util::{file_name, help};
 
-const HELP_MESSAGE: &str = "# `futils` - functional shell utilities
-
-## Usage
-
-```
-futils -h
-futiles help
-```
-
-## Description
-
-`futils` is a suite of shell utilities that somewhat resemble functional
-programming primitives and operate on streams.
-
-`futils` has various sub-commands:
-
-* `apply`
-* `fields`
-* `files`
-* `filter`
-* `records`
-* `status`
-
-…and more to come.
-
-To learn more about each one, run
-
-```
-futils sub-command -h
-```
-
-e.g.
-
-```
-futils apply -h
-```
-
-You can also invoke `futils` utilities directly, e.g.
-
-```
-apply -h
-files -h
-```
-
-…and so on.";
+/// Command line usage help.
+const HELP_MESSAGE: &str = include_str!("main_help.md");
 
 fn main() {
     // TODO: Make `arguments` be `Vec<OsString>`, and propagate the API change
