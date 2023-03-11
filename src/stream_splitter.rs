@@ -54,7 +54,7 @@ const DEFAULT_CAPACITY: usize = 64 * 1024;
 impl<'a> StreamSplitter<'a> {
     /// Creates a new `StreamSplitter` that will split the bytes of `reader`
     /// into `Record`s.
-    pub(crate) fn new(reader: &'a mut dyn Read, delimiter: &'a Regex) -> StreamSplitter<'a> {
+    pub(crate) fn new(reader: &'a mut dyn Read, delimiter: &'a Regex) -> Self {
         StreamSplitter {
             reader,
             delimiter,
