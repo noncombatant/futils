@@ -38,13 +38,13 @@ impl Time {
     /// Parses `string`, which is parsed as having come from a grammar not
     /// entirely unlike:
     ///
-    ///   s ::= space* <operator> space* <datetime> space*
-    ///   operator ::= "<" | ">" | "="
-    ///   datetime ::= <date> " " <time>
-    ///       | <time>
-    ///       | <date>
-    ///   date ::= digit{4} "-" digit{2} "-" digit{2}
-    ///   time ::= digit{2} ":" digit{2} ":" digit{2}
+    ///     s ::= space* <operator> space* <datetime> space*
+    ///     operator ::= "<" | ">" | "="
+    ///     datetime ::= <date> " " <time>
+    ///         | <time>
+    ///         | <date>
+    ///     date ::= digit{4} "-" digit{2} "-" digit{2}
+    ///     time ::= digit{2} ":" digit{2} ":" digit{2}
     ///
     /// and returns a `Time`.
     ///
