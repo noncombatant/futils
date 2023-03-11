@@ -1,9 +1,8 @@
 //! The `apply` command.
 
-use std::fs::File;
-use std::io::{stdin, stdout, Write};
+use std::io::{stdout, Write};
 
-use crate::shell::{parse_options, ShellResult};
+use crate::shell::{parse_options, FileOpener, ShellResult};
 use crate::stream_splitter::{is_not_delimiter, StreamSplitter};
 use crate::util::{help, run_command, unescape_backslashes};
 
@@ -53,35 +52,25 @@ pub(crate) fn apply_main(arguments: &[String]) -> ShellResult {
     let output_delimiter = output_delimiter.as_bytes();
 
     let mut status = 0;
-    if arguments.is_empty() {
-        let mut stdin = stdin();
-        apply(
-            StreamSplitter::new(&mut stdin, &input_delimiter),
-            &options.match_commands,
-            options.verbose,
-            output_delimiter,
-        )?;
-    } else {
-        for pathname in arguments {
-            match File::open(pathname) {
-                Ok(mut file) => {
-                    match apply(
-                        StreamSplitter::new(&mut file, &input_delimiter),
-                        &options.match_commands,
-                        options.verbose,
-                        output_delimiter,
-                    ) {
-                        Ok(s) => status += s,
-                        Err(e) => {
-                            eprintln!("{}", e);
-                            status += 1;
-                        }
+    for file in FileOpener::new(arguments) {
+        match file {
+            Ok(mut file) => {
+                match apply(
+                    StreamSplitter::new(&mut file, &input_delimiter),
+                    &options.match_commands,
+                    options.verbose,
+                    output_delimiter,
+                ) {
+                    Ok(s) => status += s,
+                    Err(e) => {
+                        eprintln!("{}", e);
+                        status += 1;
                     }
                 }
-                Err(e) => {
-                    eprintln!("{}", e);
-                    status += 1;
-                }
+            }
+            Err(e) => {
+                eprintln!("{}", e);
+                status += 1;
             }
         }
     }
