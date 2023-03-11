@@ -13,7 +13,7 @@ https://github.com/charmbracelet/glow.
 
 Tests for everything.
 
-Rustdoc for all `pub` identifiers (except help messages and `foo_main`s).
+Rustdoc for all `pub` identifiers.
 
 Make sure that when options can be given more than once, the help strings for
 every program note this.
@@ -31,6 +31,4 @@ pathnames, et c.
 
 Use David Cook’s non-copying `StreamSplitter`.
 
-Enable negative field indices in `fields`
-
-Use `FileOpener` everywhere.
+Enable negative field indices in `fields`.
