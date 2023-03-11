@@ -127,6 +127,7 @@ fn print_matches(pathname: &str, options: &Options, output_delimiter: &[u8]) -> 
     }
 }
 
+/// Runs the `files` command on `arguments`.
 pub(crate) fn files_main(arguments: &[String]) -> ShellResult {
     let (options, arguments) = parse_options(arguments)?;
     if options.help {
