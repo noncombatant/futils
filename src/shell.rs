@@ -237,14 +237,14 @@ pub(crate) fn parse_options(arguments: &[String]) -> Result<(Options, &[String])
 
 pub struct FileOpener<'a> {
     pathnames: &'a [String],
-    position: usize,
+    i: usize,
 }
 
 impl<'a> FileOpener<'a> {
     pub fn new(pathnames: &'a [String]) -> Self {
         FileOpener {
             pathnames,
-            position: 0,
+            i: 0,
         }
     }
 }
@@ -253,15 +253,15 @@ impl<'a> Iterator for FileOpener<'a> {
     type Item = Result<Box<dyn Read>, io::Error>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        if self.pathnames.is_empty() && self.position == 0 {
-            self.position += 1;
+        if self.pathnames.is_empty() && self.i == 0 {
+            self.i += 1;
             Some(Ok(Box::new(stdin()) as Box<dyn Read>))
-        } else if self.position < self.pathnames.len() {
-            let r = match File::open(&self.pathnames[self.position]) {
+        } else if self.i < self.pathnames.len() {
+            let r = match File::open(&self.pathnames[self.i]) {
                 Ok(f) => Ok(Box::new(f) as Box<dyn Read>),
                 Err(e) => Err(e),
             };
-            self.position += 1;
+            self.i += 1;
             Some(r)
         } else {
             None
