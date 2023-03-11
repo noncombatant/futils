@@ -42,6 +42,14 @@ mod tests {
     }
 
     #[test]
+    fn test_apply_basic() {
+        run_tests(&[
+            new("apply", &["-x", "ls", "test-data/goat"], ""),
+            new("apply", &["-x", "cat -v", "test-data/Goats"], ""),
+        ]);
+    }
+
+    #[test]
     fn test_files_match_basic() {
         run_tests(&[
             new("files", &["-m", "goat", "test-data"], "test-data/goat\n"),
