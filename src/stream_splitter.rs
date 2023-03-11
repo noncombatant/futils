@@ -3,13 +3,13 @@ use std::io::{Read, Result};
 
 /// A *record* lexed from the input that `StreamSplitter` is splitting.
 #[derive(Debug)]
-pub struct Record {
+pub(crate) struct Record {
     /// `StreamSplitter` yields both data records and the bytes of the delimiter
     /// that was matched when splitting. Use this field to see which you got.
-    pub is_delimiter: bool,
+    pub(crate) is_delimiter: bool,
 
     /// The bytes lexed from the input.
-    pub bytes: Vec<u8>,
+    pub(crate) bytes: Vec<u8>,
 }
 
 /// A convenience for callers who want to filter out delimiters when iterating
@@ -18,7 +18,7 @@ pub struct Record {
 ///     for r in StreamSplitter::new(...).filter(is_not_delimiter) {
 ///         // Your beautiful, magical functionality here...
 ///     }
-pub fn is_not_delimiter(r: &Record) -> bool {
+pub(crate) fn is_not_delimiter(r: &Record) -> bool {
     !r.is_delimiter
 }
 
@@ -35,7 +35,7 @@ pub fn is_not_delimiter(r: &Record) -> bool {
 /// grow large (depending on how long it takes to match `delimiter`). The
 /// starting size of the buffer is an implementation detail that could be
 /// exposed if callers end up needing it.
-pub struct StreamSplitter<'a> {
+pub(crate) struct StreamSplitter<'a> {
     reader: &'a mut dyn Read,
     delimiter: &'a Regex,
     buffer: Vec<u8>,
@@ -54,7 +54,7 @@ const DEFAULT_CAPACITY: usize = 64 * 1024;
 impl<'a> StreamSplitter<'a> {
     /// Creates a new `StreamSplitter` that will split the bytes of `reader`
     /// into `Record`s.
-    pub fn new(reader: &'a mut dyn Read, delimiter: &'a Regex) -> StreamSplitter<'a> {
+    pub(crate) fn new(reader: &'a mut dyn Read, delimiter: &'a Regex) -> StreamSplitter<'a> {
         StreamSplitter {
             reader,
             delimiter,

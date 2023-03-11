@@ -8,7 +8,7 @@ use crate::shell::{parse_options, ShellResult};
 use crate::time::utc_timestamp_to_string;
 use crate::util::help;
 
-pub const STATUS_HELP_MESSAGE: &str = "# `status` - print the status of files
+pub(crate) const STATUS_HELP_MESSAGE: &str = "# `status` - print the status of files
 
 ## Usage
 
@@ -134,7 +134,7 @@ impl<'a> Status<'a> {
     }
 }
 
-pub fn status_main(arguments: &[String]) -> ShellResult {
+pub(crate) fn status_main(arguments: &[String]) -> ShellResult {
     let (options, arguments) = parse_options(arguments)?;
     if options.help {
         help(0, STATUS_HELP_MESSAGE);

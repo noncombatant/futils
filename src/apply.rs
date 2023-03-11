@@ -8,7 +8,7 @@ use crate::stream_splitter::{is_not_delimiter, StreamSplitter};
 use crate::util::{help, run_command, unescape_backslashes};
 
 /// Command line usage help.
-pub const APPLY_HELP_MESSAGE: &str = "# `apply` - apply commands to records of input
+pub(crate) const APPLY_HELP_MESSAGE: &str = "# `apply` - apply commands to records of input
 
 ## Usage
 
@@ -64,7 +64,7 @@ fn apply(
 }
 
 /// Runs the `apply` command on `arguments`.
-pub fn apply_main(arguments: &[String]) -> ShellResult {
+pub(crate) fn apply_main(arguments: &[String]) -> ShellResult {
     let (options, arguments) = parse_options(arguments)?;
     if options.help {
         help(0, APPLY_HELP_MESSAGE);

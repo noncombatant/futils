@@ -5,7 +5,7 @@ use chrono::{Datelike, Local, Timelike};
 /// Given the number of seconds from the Unix epoch in UTC, returns a sortable
 /// string representation in the format `%Y-%m-%d %H:%M:%S`. If `utc` cannot be
 /// interpreted for some raisin, returns `utc` `format!`ed as a `String`.
-pub fn utc_timestamp_to_string(utc: i64) -> String {
+pub(crate) fn utc_timestamp_to_string(utc: i64) -> String {
     match NaiveDateTime::from_timestamp_opt(utc, 0) {
         Some(naive) => {
             let datetime: DateTime<Utc> = DateTime::from_utc(naive, Utc);
@@ -18,7 +18,7 @@ pub fn utc_timestamp_to_string(utc: i64) -> String {
 /// Indicates which comparison operation to perform on 2 `NaiveDateTime`s. See
 /// `Time`.
 #[derive(Clone, Copy, Debug, PartialEq)]
-pub enum Comparison {
+pub(crate) enum Comparison {
     Before,
     After,
     Exactly,
@@ -26,12 +26,12 @@ pub enum Comparison {
 
 /// A comparison operation on a `NaiveDateTime`. This is essentially a curried
 /// function (or, rather, 1 of 3 curried functions) on `date_time`.
-pub struct Time {
+pub(crate) struct Time {
     /// A date-time that another date-time will be compared to.
-    pub date_time: NaiveDateTime,
+    pub(crate) date_time: NaiveDateTime,
 
     /// What kind of comparison to perform. See `Comparison`.
-    pub comparison: Comparison,
+    pub(crate) comparison: Comparison,
 }
 
 impl Time {
@@ -50,7 +50,7 @@ impl Time {
     ///
     /// This function also accepts the empty string as a special case, in which
     /// case it returns a `Time` indicating 0 in the Unix epoch.
-    pub fn new(string: &str) -> Result<Time, ParseError> {
+    pub(crate) fn new(string: &str) -> Result<Time, ParseError> {
         let string = string.trim();
         if string.is_empty() {
             return Ok(Time {

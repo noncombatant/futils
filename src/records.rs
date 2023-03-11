@@ -5,7 +5,7 @@ use crate::shell::{parse_options, ShellResult};
 use crate::stream_splitter::{is_not_delimiter, StreamSplitter};
 use crate::util::{help, unescape_backslashes};
 
-pub const RECORDS_HELP_MESSAGE: &str = "# `records` - splits a file into records
+pub(crate) const RECORDS_HELP_MESSAGE: &str = "# `records` - splits a file into records
 
 ## Usage
 
@@ -76,7 +76,7 @@ fn print_record(n: usize, record: &[u8], enumerate: bool, output_delimiter: &[u8
     Ok(0)
 }
 
-pub fn records_main(arguments: &[String]) -> ShellResult {
+pub(crate) fn records_main(arguments: &[String]) -> ShellResult {
     let (options, arguments) = parse_options(arguments)?;
     if options.help {
         help(0, RECORDS_HELP_MESSAGE);

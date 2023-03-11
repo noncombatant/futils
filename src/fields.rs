@@ -8,7 +8,7 @@ use crate::shell::{parse_options, ShellResult};
 use crate::stream_splitter::{is_not_delimiter, Record, StreamSplitter};
 use crate::util::{help, unescape_backslashes};
 
-pub const FIELDS_HELP_MESSAGE: &str =
+pub(crate) const FIELDS_HELP_MESSAGE: &str =
     "# `fields` — selects and formats the fields from input records
 
 ## Usage
@@ -105,7 +105,7 @@ fn print_record(
     Ok(0)
 }
 
-pub fn fields_main(arguments: &[String]) -> ShellResult {
+pub(crate) fn fields_main(arguments: &[String]) -> ShellResult {
     let (options, arguments) = parse_options(arguments)?;
     if options.help {
         help(0, FIELDS_HELP_MESSAGE);

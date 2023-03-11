@@ -6,7 +6,7 @@ use crate::shell::{parse_options, ShellResult};
 use crate::stream_splitter::{is_not_delimiter, StreamSplitter};
 use crate::util::{help, run_command, unescape_backslashes};
 
-pub const FILTER_HELP_MESSAGE: &str = "# `filter` - filter records from files by patterns
+pub(crate) const FILTER_HELP_MESSAGE: &str = "# `filter` - filter records from files by patterns
 
 ## Usage
 
@@ -81,7 +81,7 @@ fn print_matches(
     Ok(0)
 }
 
-pub fn filter_main(arguments: &[String]) -> ShellResult {
+pub(crate) fn filter_main(arguments: &[String]) -> ShellResult {
     let (options, arguments) = parse_options(arguments)?;
     if options.help {
         help(0, FILTER_HELP_MESSAGE);

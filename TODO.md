@@ -30,3 +30,5 @@ the overall problem of `OsString` vs. `String` for arguments, options,
 pathnames, et c.
 
 Use David Cook’s non-copying `StreamSplitter`.
+
+Use `include_str!` for command line help strings — easier editing.

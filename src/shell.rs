@@ -13,7 +13,7 @@ use crate::time::Time;
 /// they return it and easily use the `?` operator. We can extend this `enum`
 /// arbitrarily, as needed.
 #[derive(Debug)]
-pub enum ShellError {
+pub(crate) enum ShellError {
     Escape(EscapeError),
     Getopt(getopt::Error),
     IntParse(ParseIntError),
@@ -43,7 +43,7 @@ impl std::error::Error for ShellError {}
 
 /// Return this error for invalid invocations of shell commands.
 #[derive(Debug)]
-pub struct UsageError {
+pub(crate) struct UsageError {
     details: String,
 }
 
@@ -112,7 +112,7 @@ impl From<str::Utf8Error> for ShellError {
 /// The various `*_main` functions return this type. `main` catches it and
 /// `exit`s with the given `i32` status code. If there is a `ShellError`, `main`
 /// will print it to `stderr` and `exit(-1)`.
-pub type ShellResult = Result<i32, ShellError>;
+pub(crate) type ShellResult = Result<i32, ShellError>;
 
 /// These are the standard command line options for `futils` programs. Their
 /// meanings are:
@@ -133,49 +133,49 @@ pub type ShellResult = Result<i32, ShellError>;
 ///
 /// Not all programs use all options. Some programs may not use this option
 /// spec, depending on their needs.
-pub const DEFAULT_OPTION_SPEC: &str = "D:d:f:hm:nO:o:p:st:vx:";
+pub(crate) const DEFAULT_OPTION_SPEC: &str = "D:d:f:hm:nO:o:p:st:vx:";
 
 /// The default input record delimiter.
-pub const DEFAULT_INPUT_RECORD_DELIMITER: &str = r"(\r|\n)+";
+pub(crate) const DEFAULT_INPUT_RECORD_DELIMITER: &str = r"(\r|\n)+";
 
 /// The default input field delimiter.
-pub const DEFAULT_INPUT_FIELD_DELIMITER: &str = r"\s+";
+pub(crate) const DEFAULT_INPUT_FIELD_DELIMITER: &str = r"\s+";
 
 /// The default output record delimiter.
-pub const DEFAULT_OUTPUT_RECORD_DELIMITER: &str = "\n";
+pub(crate) const DEFAULT_OUTPUT_RECORD_DELIMITER: &str = "\n";
 
 /// The default output field delimiter.
-pub const DEFAULT_OUTPUT_FIELD_DELIMITER: &str = "\t";
+pub(crate) const DEFAULT_OUTPUT_FIELD_DELIMITER: &str = "\t";
 
 /// The default file types.
-pub const DEFAULT_FILE_TYPES: &str = "dfs";
+pub(crate) const DEFAULT_FILE_TYPES: &str = "dfs";
 
 /// Gathers all the command line options into a single handy object.
-pub struct Options {
-    pub input_record_delimiter: Regex,
-    pub input_field_delimiter: Regex,
-    pub output_record_delimiter: String,
-    pub output_field_delimiter: String,
+pub(crate) struct Options {
+    pub(crate) input_record_delimiter: Regex,
+    pub(crate) input_field_delimiter: Regex,
+    pub(crate) output_record_delimiter: String,
+    pub(crate) output_field_delimiter: String,
 
-    pub match_expressions: Vec<Regex>,
-    pub prune_expressions: Vec<Regex>,
-    pub match_commands: Vec<String>,
-    pub mtime_expressions: Vec<Time>,
+    pub(crate) match_expressions: Vec<Regex>,
+    pub(crate) prune_expressions: Vec<Regex>,
+    pub(crate) match_commands: Vec<String>,
+    pub(crate) mtime_expressions: Vec<Time>,
 
-    pub fields: Vec<String>,
-    pub file_types: String,
+    pub(crate) fields: Vec<String>,
+    pub(crate) file_types: String,
 
-    pub enumerate: bool,
-    pub help: bool,
-    pub show_all: bool,
-    pub skip: bool,
-    pub verbose: bool,
+    pub(crate) enumerate: bool,
+    pub(crate) help: bool,
+    pub(crate) show_all: bool,
+    pub(crate) skip: bool,
+    pub(crate) verbose: bool,
 }
 
 impl Options {
     /// Returns an `Options` with all the fields set to their `DEFAULT_*`
     /// values.
-    pub fn with_defaults() -> Result<Options, ShellError> {
+    pub(crate) fn with_defaults() -> Result<Options, ShellError> {
         Ok(Options {
             input_record_delimiter: Regex::new(DEFAULT_INPUT_RECORD_DELIMITER)?,
             input_field_delimiter: Regex::new(DEFAULT_INPUT_FIELD_DELIMITER)?,
@@ -203,7 +203,7 @@ impl Options {
 /// `Options` and the remaining positional arguments. Any options not given on
 /// the command line will have their `DEFAULT_*` values in the returned
 /// `Options` (see `Options::with_defaults`).
-pub fn parse_options(arguments: &[String]) -> Result<(Options, &[String]), ShellError> {
+pub(crate) fn parse_options(arguments: &[String]) -> Result<(Options, &[String]), ShellError> {
     let mut options = Options::with_defaults()?;
     let mut parsed = getopt::Parser::new(arguments, DEFAULT_OPTION_SPEC);
     loop {

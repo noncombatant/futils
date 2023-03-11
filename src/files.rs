@@ -9,7 +9,7 @@ use crate::util::{help, run_command, unescape_backslashes};
 
 // TODO: Add a depth option, and parallelize -x.
 
-pub const FILES_HELP_MESSAGE: &str = "# `files` - print the pathnames of matching files
+pub(crate) const FILES_HELP_MESSAGE: &str = "# `files` - print the pathnames of matching files
 
 ## Usage
 
@@ -170,7 +170,7 @@ fn print_matches(pathname: &str, options: &Options, output_delimiter: &[u8]) -> 
     }
 }
 
-pub fn files_main(arguments: &[String]) -> ShellResult {
+pub(crate) fn files_main(arguments: &[String]) -> ShellResult {
     let (options, arguments) = parse_options(arguments)?;
     if options.help {
         help(0, FILES_HELP_MESSAGE);

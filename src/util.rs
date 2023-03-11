@@ -8,7 +8,7 @@ use crate::shell::{ShellError, ShellResult};
 
 /// Prints `message` and `exit`s with `status`. If `status` is 0, prints
 /// `message` to `stdout`, otherwise to `stderr`.
-pub fn help(status: i32, message: &str) {
+pub(crate) fn help(status: i32, message: &str) {
     if status == 0 {
         println!("{}", message);
     } else {
@@ -20,7 +20,7 @@ pub fn help(status: i32, message: &str) {
 /// Runs the shell command `command`, passing it `argument`. If `verbose` is
 /// true, will print any resulting `stdout`. Prints `stderr` unconditionally.
 // TODO: `arguments` should be `&[OsString]`.
-pub fn run_command(command: &str, argument: &[u8], verbose: bool) -> ShellResult {
+pub(crate) fn run_command(command: &str, argument: &[u8], verbose: bool) -> ShellResult {
     let argument = str::from_utf8(argument)?;
     let output = if cfg!(target_os = "windows") {
         Command::new("cmd")
@@ -45,7 +45,7 @@ pub fn run_command(command: &str, argument: &[u8], verbose: bool) -> ShellResult
 /// Lexes `input` according to Rust’s lexical rules for strings, unescaping any
 /// backslash escape sequences. See `rustc_lexer::unescape`. Returns
 /// `ShellError` for easier compatibility with `ShellResult`.
-pub fn unescape_backslashes(input: &str) -> Result<String, ShellError> {
+pub(crate) fn unescape_backslashes(input: &str) -> Result<String, ShellError> {
     let mut result = Ok(String::new());
     // Thanks to Steve Checkoway for help:
     let mut cb = |_, ch| match (&mut result, ch) {
@@ -62,7 +62,7 @@ pub fn unescape_backslashes(input: &str) -> Result<String, ShellError> {
 
 /// Returns the basename of `pathname`. (Rust calls this `file_name` instead of
 /// `basename`, so we do, too.)
-pub fn file_name(pathname: &str) -> Option<&str> {
+pub(crate) fn file_name(pathname: &str) -> Option<&str> {
     Path::new(pathname).file_name()?.to_str()
 }
 
