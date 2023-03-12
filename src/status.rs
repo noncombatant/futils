@@ -1,3 +1,4 @@
+use atty::Stream;
 use nix::sys::stat::{stat, FileStat, Mode};
 use serde::Serialize;
 use std::fs::read_dir;
@@ -121,14 +122,23 @@ pub(crate) fn status_main(arguments: &[String]) -> ShellResult {
         Vec::from(arguments)
     };
 
+    let to_json = if atty::is(Stream::Stdout) {
+        serde_json::to_string_pretty
+    } else {
+        serde_json::to_string
+    };
+
     let mut status = 0;
-    println!("[");
+    let count = arguments.len();
+    if count != 1 {
+        println!("[");
+    }
     for (i, pathname) in arguments.iter().enumerate() {
         match stat(pathname.as_str()) {
             Ok(s) => {
                 let s = Status::new(&s, pathname);
-                let s = serde_json::to_string(&s).unwrap();
-                println!("{}{}", s, if i < arguments.len() - 1 { "," } else { "" });
+                let s = to_json(&s).unwrap();
+                println!("{}{}", s, if i < count - 1 { "," } else { "" });
             }
             Err(e) => {
                 eprintln!("{}: {}", pathname, e);
@@ -136,6 +146,8 @@ pub(crate) fn status_main(arguments: &[String]) -> ShellResult {
             }
         }
     }
-    println!("]");
+    if count != 1 {
+        println!("]");
+    }
     Ok(status)
 }
