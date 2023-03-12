@@ -33,3 +33,12 @@ Use David Cook’s non-copying `StreamSplitter`.
 
 Enable negative field indices in `fields`, and a way to suppress fields while
 printing all others (perhaps `-F`).
+
+Process all the output delimiters when constructing `Options` — no more:
+
+```
+let output_record_delimiter = unescape_backslashes(&options.output_record_delimiter)?;
+let output_record_delimiter = output_record_delimiter.as_bytes();
+let output_field_delimiter = unescape_backslashes(&options.output_field_delimiter)?;
+let output_field_delimiter = output_field_delimiter.as_bytes();
+```
