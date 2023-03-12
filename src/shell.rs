@@ -118,13 +118,18 @@ impl From<str::Utf8Error> for ShellError {
 /// will print it to `stderr` and `exit(-1)`.
 pub(crate) type ShellResult = Result<i32, ShellError>;
 
+/// The default list of command line flags. See `Options`, below.
+pub(crate) const DEFAULT_OPTION_SPEC: &str = "D:d:Ff:hl:m:nO:o:p:st:vx:";
+
 /// These are the standard command line options for `futils` programs. Their
 /// meanings are:
 ///
 ///   -D  `Regex`   input field delimiter
 ///   -d  `Regex`   input record delimiter
+///   -F  `bool`    invert field selection
 ///   -f  `String`  field
 ///   -h  `bool`    help
+///   -l  `isize`   limit
 ///   -m  `Regex`   match
 ///   -n  `bool`    enumerate
 ///   -O  `String`  output field delimiter
@@ -137,24 +142,6 @@ pub(crate) type ShellResult = Result<i32, ShellError>;
 ///
 /// Not all programs use all options. Some programs may not use this option
 /// spec, depending on their needs.
-pub(crate) const DEFAULT_OPTION_SPEC: &str = "D:d:Ff:hm:nO:o:p:st:vx:";
-
-/// The default input record delimiter.
-pub(crate) const DEFAULT_INPUT_RECORD_DELIMITER: &str = r"(\r|\n)+";
-
-/// The default input field delimiter.
-pub(crate) const DEFAULT_INPUT_FIELD_DELIMITER: &str = r"\s+";
-
-/// The default output record delimiter.
-pub(crate) const DEFAULT_OUTPUT_RECORD_DELIMITER: &[u8] = b"\n";
-
-/// The default output field delimiter.
-pub(crate) const DEFAULT_OUTPUT_FIELD_DELIMITER: &[u8] = b"\t";
-
-/// The default file types.
-pub(crate) const DEFAULT_FILE_TYPES: &str = "dfs";
-
-/// Gathers all the command line options into a single handy object.
 pub(crate) struct Options {
     pub(crate) input_record_delimiter: Regex,
     pub(crate) input_field_delimiter: Regex,
@@ -165,6 +152,8 @@ pub(crate) struct Options {
     pub(crate) prune_expressions: Vec<Regex>,
     pub(crate) match_commands: Vec<String>,
     pub(crate) mtime_expressions: Vec<Time>,
+
+    pub(crate) limit: Option<isize>,
 
     pub(crate) fields: Vec<String>,
     pub(crate) file_types: String,
@@ -178,6 +167,21 @@ pub(crate) struct Options {
     pub(crate) skip: bool,
     pub(crate) verbose: bool,
 }
+
+/// The default input record delimiter.
+const DEFAULT_INPUT_RECORD_DELIMITER: &str = r"(\r|\n)+";
+
+/// The default input field delimiter.
+const DEFAULT_INPUT_FIELD_DELIMITER: &str = r"\s+";
+
+/// The default output record delimiter.
+const DEFAULT_OUTPUT_RECORD_DELIMITER: &[u8] = b"\n";
+
+/// The default output field delimiter.
+const DEFAULT_OUTPUT_FIELD_DELIMITER: &[u8] = b"\t";
+
+/// The default file types.
+const DEFAULT_FILE_TYPES: &str = "dfs";
 
 impl Options {
     /// Returns an `Options` with all the fields set to their `DEFAULT_*`
@@ -193,6 +197,8 @@ impl Options {
             prune_expressions: Vec::new(),
             match_commands: Vec::new(),
             mtime_expressions: Vec::new(),
+
+            limit: None,
 
             fields: Vec::new(),
             file_types: String::from(DEFAULT_FILE_TYPES),
@@ -225,6 +231,7 @@ pub(crate) fn parse_options(arguments: &[String]) -> Result<(Options, &[String])
                 Opt('F', None) => options.invert_fields = true,
                 Opt('f', Some(s)) => options.fields.push(s.clone()),
                 Opt('h', None) => options.help = true,
+                Opt('l', Some(s)) => options.limit = Some(str::parse::<isize>(&s)?),
                 Opt('M', Some(s)) => options.mtime_expressions.push(Time::new(&s)?),
                 Opt('m', Some(s)) => options.match_expressions.push(Regex::new(&s)?),
                 Opt('n', None) => options.enumerate = true,

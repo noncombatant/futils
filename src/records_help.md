@@ -4,7 +4,7 @@
 
 ```
 records -h
-records [-n] [-d delimiter] [-o delimiter] [pathname [...]]
+records [-n] [-l limit] [-d delimiter] [-o delimiter] [pathname [...]]
 ```
 
 ## Description
@@ -17,6 +17,8 @@ output delimiter.
 
 * `-d`: Use the given input record `delimiter`, a regular expression. The
   default delimiter is `r\"(\\r|\\n)+\"`.
+* `-l`: Limit the number of records printed. If `limit` is < 0, the limit is
+  counted back from the last record in the input.
 * `-n`: Prefix each record with a record number.
 * `-o`: Use the given output record `delimiter`. The default delimiter is `\\n`.
 

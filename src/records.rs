@@ -1,3 +1,4 @@
+use itertools::Either;
 use std::io::{stdout, Write};
 
 use crate::shell::{parse_options, FileOpener, Options, ShellResult, STDIN_PATHNAME};
@@ -30,10 +31,22 @@ pub(crate) fn records_main(arguments: &[String]) -> ShellResult {
     for file in FileOpener::new(arguments) {
         match file.read {
             Ok(mut read) => {
-                for (n, r) in StreamSplitter::new(&mut read, &options.input_record_delimiter)
-                    .filter(is_not_delimiter)
-                    .enumerate()
-                {
+                let records = StreamSplitter::new(&mut read, &options.input_record_delimiter)
+                    .filter(is_not_delimiter);
+                let records = match options.limit {
+                    Some(limit) => {
+                        if limit >= 0 {
+                            Either::Right(records.take(limit as usize))
+                        } else {
+                            // Need to `impl DoubleEndedIterator for StreamSplitter`
+                            // for this to work:
+                            //Either::Right(records.rev().take(limit.abs() as usize))
+                            unimplemented!()
+                        }
+                    }
+                    None => Either::Left(records),
+                };
+                for (n, r) in records.enumerate() {
                     print_record(n + 1, &r.bytes, &options)?;
                 }
             }
