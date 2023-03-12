@@ -17,7 +17,7 @@ instance of `-x command`, to run multiple commands on each input record.
 
 * `-h`: Print this help message.
 * `-d`: Use the given input record delimiter. The default delimiter is
-  `r\"(\\r|\\n)+\"`.
-* `-o`: Use the given output record delimiter. The default delimiter is `\\n`.
+  `r"(\r|\n)+"`.
+* `-o`: Use the given output record delimiter. The default delimiter is `\n`.
 * `-v`: Print the standard output of commands given with the `-x` option. (By
   default, `apply` only prints their standard error.)

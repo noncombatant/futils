@@ -17,9 +17,9 @@ them with the output field and record delimiters.
 ## Options
 
 * `-D`: Use the given input field `delimiter`, a regular expression. The
-  default delimiter is `r\"\\s+\"`.
+  default delimiter is `r"\s+"`.
 * `-d`: Use the given input record `delimiter`, a regular expression. The
-  default delimiter is `r\"(\\r|\\n)+\"`.
+  default delimiter is `r"(\r|\n)+"`.
 * `-F`: Inverts the behavior of `-f`: selects the fields *not* listed. This
   option makes no sense without at least 1 `-f` option.
 * `-f`: Select the given `field`(s). This option can be given multiple times,
@@ -29,8 +29,8 @@ them with the output field and record delimiters.
   given, `fields` will print all fields.
 * `-n`: Prefix each record with a record number.
 * `-s`: Skip leading space characters in records.
-* `-O`: Use the given output field `delimiter`. The default delimiter is `\\t`.
-* `-o`: Use the given output record `delimiter`. The default delimiter is `\\n`.
+* `-O`: Use the given output field `delimiter`. The default delimiter is `\t`.
+* `-o`: Use the given output record `delimiter`. The default delimiter is `\n`.
 
 Regular expressions use [the Rust regex library
 syntax](https://docs.rs/regex/latest/regex/).
