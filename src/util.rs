@@ -22,15 +22,17 @@ pub(crate) fn help(status: i32, message: &str) {
 // TODO: `arguments` should be `&[OsString]`.
 pub(crate) fn run_command(command: &str, argument: &[u8], verbose: bool) -> ShellResult {
     let argument = str::from_utf8(argument)?;
-    let output = if cfg!(target_os = "windows") {
+    let output = if cfg!(windows) {
         Command::new("cmd")
             .arg("/C")
             .arg(command)
             .arg(argument)
             .output()?
-    } else {
+    } else if cfg!(unix) {
         let command = [command, argument].join(" ");
         Command::new("sh").arg("-c").arg(command).output()?
+    } else {
+        unimplemented!()
     };
 
     if verbose && !output.stdout.is_empty() {
