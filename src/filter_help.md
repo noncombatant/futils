@@ -26,6 +26,7 @@ syntax](https://docs.rs/regex/latest/regex/).
 * `-h`: Print this help message.
 * `-d`: Use the given input record `delimiter`. The default delimiter is
   `r\"(\\r|\\n)+\"`.
+* `-O`: Use the given output field `delimiter`. The default delimiter is `\\t`.
 * `-o`: Use the given output record `delimiter`. The default delimiter is `\\n`.
 * `-v`: Print the standard output of commands given with the `-x` option. (By
   default, `filter` only prints their standard error.

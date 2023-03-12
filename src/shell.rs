@@ -1,5 +1,6 @@
 use chrono::format;
 use getopt::Opt;
+use lazy_static::lazy_static;
 use regex::bytes::Regex;
 use rustc_lexer::unescape::EscapeError;
 use std::fmt::{Debug, Display};
@@ -235,31 +236,54 @@ pub(crate) fn parse_options(arguments: &[String]) -> Result<(Options, &[String])
     Ok((options, arguments))
 }
 
-pub struct FileOpener<'a> {
+lazy_static! {
+    /// A placeholder pathname for the standard input.
+    pub(crate) static ref STDIN_PATHNAME: String = "<stdin>".to_string();
+}
+
+/// An open `Read`.
+pub(crate) struct OpenFile<'a> {
+    /// The pathname by which the file was opened. If `None`, the file was
+    /// already open (e.g. `stdin()`; see ).
+    pub(crate) pathname: Option<&'a String>,
+    /// The `Read`.
+    pub(crate) read: Result<Box<dyn Read>, io::Error>,
+}
+
+/// An `Iterator` that iterates over a slice of pathnames, and yields
+/// `OpenFile`s.
+pub(crate) struct FileOpener<'a> {
     pathnames: &'a [String],
     i: usize,
 }
 
 impl<'a> FileOpener<'a> {
-    pub fn new(pathnames: &'a [String]) -> Self {
+    pub(crate) fn new(pathnames: &'a [String]) -> Self {
         FileOpener { pathnames, i: 0 }
     }
 }
 
 impl<'a> Iterator for FileOpener<'a> {
-    type Item = Result<Box<dyn Read>, io::Error>;
+    type Item = OpenFile<'a>;
 
     fn next(&mut self) -> Option<Self::Item> {
         if self.pathnames.is_empty() && self.i == 0 {
             self.i += 1;
-            Some(Ok(Box::new(stdin()) as Box<dyn Read>))
+            Some(OpenFile {
+                pathname: None,
+                read: Ok(Box::new(stdin()) as Box<dyn Read>),
+            })
         } else if self.i < self.pathnames.len() {
-            let r = match File::open(&self.pathnames[self.i]) {
+            let pathname = &self.pathnames[self.i];
+            let r = match File::open(pathname) {
                 Ok(f) => Ok(Box::new(f) as Box<dyn Read>),
                 Err(e) => Err(e),
             };
             self.i += 1;
-            Some(r)
+            Some(OpenFile {
+                pathname: Some(pathname),
+                read: r,
+            })
         } else {
             None
         }

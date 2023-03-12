@@ -2,7 +2,7 @@
 
 use std::io::{stdout, Write};
 
-use crate::shell::{parse_options, FileOpener, ShellResult};
+use crate::shell::{parse_options, FileOpener, ShellResult, STDIN_PATHNAME};
 use crate::stream_splitter::{is_not_delimiter, StreamSplitter};
 use crate::util::{help, run_command, unescape_backslashes};
 
@@ -53,23 +53,24 @@ pub(crate) fn apply_main(arguments: &[String]) -> ShellResult {
 
     let mut status = 0;
     for file in FileOpener::new(arguments) {
-        match file {
-            Ok(mut file) => {
+        let pathname = file.pathname.unwrap_or(&STDIN_PATHNAME);
+        match file.read {
+            Ok(mut read) => {
                 match apply(
-                    StreamSplitter::new(&mut file, &input_delimiter),
+                    StreamSplitter::new(&mut read, &input_delimiter),
                     &options.match_commands,
                     options.verbose,
                     output_delimiter,
                 ) {
                     Ok(s) => status += s,
                     Err(e) => {
-                        eprintln!("{}", e);
+                        eprintln!("{}: {}", pathname, e);
                         status += 1;
                     }
                 }
             }
             Err(e) => {
-                eprintln!("{}", e);
+                eprintln!("{}: {}", pathname, e);
                 status += 1;
             }
         }

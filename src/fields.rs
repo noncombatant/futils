@@ -3,7 +3,7 @@ use regex::bytes::Regex;
 use std::io::{stdout, Write};
 use std::num::ParseIntError;
 
-use crate::shell::{parse_options, FileOpener, ShellResult};
+use crate::shell::{parse_options, FileOpener, ShellResult, STDIN_PATHNAME};
 use crate::stream_splitter::{is_not_delimiter, Record, StreamSplitter};
 use crate::util::{help, unescape_backslashes};
 
@@ -91,9 +91,9 @@ pub(crate) fn fields_main(arguments: &[String]) -> ShellResult {
 
     let mut status = 0;
     for file in FileOpener::new(arguments) {
-        match file {
-            Ok(mut file) => {
-                for (n, r) in StreamSplitter::new(&mut file, &input_record_delimiter)
+        match file.read {
+            Ok(mut read) => {
+                for (n, r) in StreamSplitter::new(&mut read, &input_record_delimiter)
                     .filter(is_not_delimiter)
                     .enumerate()
                 {
@@ -109,7 +109,8 @@ pub(crate) fn fields_main(arguments: &[String]) -> ShellResult {
                 }
             }
             Err(e) => {
-                eprintln!("{}", e);
+                let p = file.pathname.unwrap_or(&STDIN_PATHNAME);
+                eprintln!("{}: {}", p, e);
                 status += 1;
             }
         }
