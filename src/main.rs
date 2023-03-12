@@ -24,7 +24,17 @@ use util::{file_name, help};
 /// Command line usage help.
 const HELP_MESSAGE: &str = include_str!("main_help.md");
 
+fn reset_sigpipe() {
+    if cfg!(unix) {
+        unsafe {
+            libc::signal(libc::SIGPIPE, libc::SIG_DFL);
+        }
+    }
+}
+
 fn main() {
+    reset_sigpipe();
+
     // TODO: Make `arguments` be `Vec<OsString>`, and propagate the API change
     // throughout (!). This probably means we can't use `getopt`, which seems to
     // want only `String`s. Perhaps `clap` is the way to go. Until then, the

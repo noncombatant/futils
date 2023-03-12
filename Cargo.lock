@@ -153,6 +153,7 @@ dependencies = [
  "chrono",
  "getopt",
  "lazy_static",
+ "libc",
  "nix",
  "regex",
  "rustc_lexer",
