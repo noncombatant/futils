@@ -47,4 +47,5 @@ Implement `map`. Consider e.g. `ls | apply -x status -v`: it creates a new array
 By contrast, `ls | map -x status` would produce an array of _N_ records for each
 record in the input (and no `-v`). That is, `apply` is mostly about the
 side-effect; printing is a tangential option. By contrast, `map` is about
-transforming records.
+transforming records. Additionally, `map` should pass each field of the record
+as a distinct argument to the `-x` command.
