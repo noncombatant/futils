@@ -40,8 +40,6 @@ pathnames, et c.
 
 Use David Cook’s non-copying `StreamSplitter`.
 
-Enable negative field indices in `fields`.
-
 Provide an option for `records` to print delimiters, too.
 
 Implement `map`. Consider e.g. `ls | apply -x status -v`: it creates a new array
