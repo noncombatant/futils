@@ -120,6 +120,13 @@ whee
                 &["-oX", "-OY", "test-data/columns.txt"],
                 "yeahYwowYheyYfriendsXwheeYbonkYouchYboingX",
             ),
+            new(
+                "fields",
+                &["-F", "-f2", "test-data/columns.txt"],
+                "yeah	hey	friends
+whee	ouch	boing
+",
+            ),
         ]);
     }
 }

@@ -3,7 +3,7 @@ use regex::bytes::Regex;
 use std::io::{stdout, Write};
 use std::num::ParseIntError;
 
-use crate::shell::{parse_options, FileOpener, ShellResult, STDIN_PATHNAME};
+use crate::shell::{parse_options, FileOpener, Options, ShellResult, STDIN_PATHNAME};
 use crate::stream_splitter::{is_not_delimiter, Record, StreamSplitter};
 use crate::util::{help, unescape_backslashes};
 
@@ -24,14 +24,13 @@ fn skip_leading_spaces(record: &[u8]) -> Option<usize> {
 fn print_record(
     r: Record,
     number: Option<usize>,
-    skip_leading: bool,
+    options: &Options,
     requested_fields: &[usize],
-    input_field_delimiter: &Regex,
     output_field_delimiter: &[u8],
     output_record_delimiter: &[u8],
 ) -> ShellResult {
     let mut stdout = stdout();
-    let start = if skip_leading {
+    let start = if options.skip {
         match skip_leading_spaces(&r.bytes) {
             Some(start) => start,
             None => return Ok(0),
@@ -39,26 +38,37 @@ fn print_record(
     } else {
         0
     };
-    let mut fields = input_field_delimiter
+    let mut fields = options
+        .input_field_delimiter
         .split(&r.bytes[start..])
         .collect::<Vec<&[u8]>>();
     if !requested_fields.is_empty() {
         let mut selected_fields: Vec<&[u8]> = Vec::new();
-        for i in requested_fields {
-            // We use `get` instead of indexing with `[]` to avoid a `panic!` in
-            // case a record does not have the requested field. One could argue
-            // that we should panic, or print an error. For now I'm going with
-            // yielding an empty field. This is a semipredicate error: field not
-            // present vs. present and empty looks the same with this
-            // implementation. TODO: Consider that.
-            if let Some(f) = fields.get(*i) {
-                selected_fields.push(f);
-            } else {
-                selected_fields.push(b"");
+        // TODO: Both arms if this if block could probably be done in a
+        // functional way.
+        if options.invert_fields {
+            for (n, f) in fields.iter().enumerate() {
+                if !requested_fields.contains(&n) {
+                    selected_fields.push(f);
+                }
+            }
+        } else {
+            for i in requested_fields {
+                // We use `get` instead of indexing with `[]` to avoid a `panic!` in
+                // case a record does not have the requested field. One could argue
+                // that we should panic, or print an error. For now I'm going with
+                // yielding an empty field. This is a semipredicate error: field not
+                // present vs. present and empty looks the same with this
+                // implementation. TODO: Consider that.
+                if let Some(f) = fields.get(*i) {
+                    selected_fields.push(f);
+                } else {
+                    selected_fields.push(b"");
+                }
             }
         }
         fields = selected_fields;
-    };
+    }
     let record = fields.join(output_field_delimiter);
     if let Some(n) = number {
         write!(stdout, "{}", n + 1)?;
@@ -76,8 +86,6 @@ pub(crate) fn fields_main(arguments: &[String]) -> ShellResult {
         help(0, FIELDS_HELP_MESSAGE);
     }
 
-    let input_record_delimiter = options.input_record_delimiter;
-    let input_field_delimiter = options.input_field_delimiter;
     let output_record_delimiter = unescape_backslashes(&options.output_record_delimiter)?;
     let output_record_delimiter = output_record_delimiter.as_bytes();
     let output_field_delimiter = unescape_backslashes(&options.output_field_delimiter)?;
@@ -94,16 +102,15 @@ pub(crate) fn fields_main(arguments: &[String]) -> ShellResult {
     for file in FileOpener::new(arguments) {
         match file.read {
             Ok(mut read) => {
-                for (n, r) in StreamSplitter::new(&mut read, &input_record_delimiter)
+                for (n, r) in StreamSplitter::new(&mut read, &options.input_record_delimiter)
                     .filter(is_not_delimiter)
                     .enumerate()
                 {
                     print_record(
                         r,
                         if options.enumerate { Some(n) } else { None },
-                        options.skip,
+                        &options,
                         &fields,
-                        &input_field_delimiter,
                         output_field_delimiter,
                         output_record_delimiter,
                     )?;
