@@ -8,13 +8,13 @@ use crate::util::{help, unescape_backslashes};
 pub(crate) const RECORDS_HELP_MESSAGE: &str = include_str!("records_help.md");
 
 fn print_record(n: usize, record: &[u8], enumerate: bool, output_delimiter: &[u8]) -> ShellResult {
+    let mut stdout = stdout();
     if !record.is_empty() {
         if enumerate {
-            let s = format!("{:05}: ", n);
-            stdout().write_all(s.as_bytes())?;
+            write!(stdout, "{:05}: ", n)?;
         }
-        stdout().write_all(record)?;
-        stdout().write_all(output_delimiter)?;
+        stdout.write_all(record)?;
+        stdout.write_all(output_delimiter)?;
     }
     Ok(0)
 }
@@ -33,7 +33,7 @@ pub(crate) fn records_main(arguments: &[String]) -> ShellResult {
     for file in FileOpener::new(arguments) {
         match file.read {
             Ok(mut read) => {
-                for (n, r) in StreamSplitter::new(&mut read, &options.input_field_delimiter)
+                for (n, r) in StreamSplitter::new(&mut read, &options.input_record_delimiter)
                     .filter(is_not_delimiter)
                     .enumerate()
                 {
