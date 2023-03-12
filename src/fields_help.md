@@ -20,6 +20,7 @@ them with the output field and record delimiters.
   default delimiter is `r\"\\s+\"`.
 * `-d`: Use the given input record `delimiter`, a regular expression. The
   default delimiter is `r\"(\\r|\\n)+\"`.
+* `-F`: Inverts the behavior of `-f`: select the fields *not* listed.
 * `-f`: Select the given `field`(s). This option can be given multiple times,
   and fields will be output in the order given on the command line. Field
   numbering starts from 1. If no `-f` options are given, `fields` will print all
@@ -34,4 +35,4 @@ syntax](https://docs.rs/regex/latest/regex/).
 
 ## Additional Options
 
-    -h  Prints this help message.
+* `-h`: Prints this help message.
