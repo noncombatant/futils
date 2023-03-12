@@ -31,5 +31,4 @@ pathnames, et c.
 
 Use David Cook’s non-copying `StreamSplitter`.
 
-Enable negative field indices in `fields`, and a way to suppress fields while
-printing all others (perhaps `-F`).
+Enable negative field indices in `fields`.
