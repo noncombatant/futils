@@ -30,6 +30,7 @@ fn print_record(
     output_field_delimiter: &[u8],
     output_record_delimiter: &[u8],
 ) -> ShellResult {
+    let mut stdout = stdout();
     let start = if skip_leading {
         match skip_leading_spaces(&r.bytes) {
             Some(start) => start,
@@ -60,11 +61,11 @@ fn print_record(
     };
     let record = fields.join(output_field_delimiter);
     if let Some(n) = number {
-        write!(stdout(), "{}", n + 1)?;
-        stdout().write_all(output_field_delimiter)?;
+        write!(stdout, "{}", n + 1)?;
+        stdout.write_all(output_field_delimiter)?;
     }
-    stdout().write_all(&record)?;
-    stdout().write_all(output_record_delimiter)?;
+    stdout.write_all(&record)?;
+    stdout.write_all(output_record_delimiter)?;
     Ok(0)
 }
 
