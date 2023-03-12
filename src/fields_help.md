@@ -20,7 +20,8 @@ them with the output field and record delimiters.
   default delimiter is `r\"\\s+\"`.
 * `-d`: Use the given input record `delimiter`, a regular expression. The
   default delimiter is `r\"(\\r|\\n)+\"`.
-* `-F`: Inverts the behavior of `-f`: select the fields *not* listed.
+* `-F`: Inverts the behavior of `-f`: selects the fields *not* listed. This
+  option makes no sense without at least 1 `-f` option.
 * `-f`: Select the given `field`(s). This option can be given multiple times,
   and fields will be output in the order given on the command line. Field
   numbering starts from 1. If no `-f` options are given, `fields` will print all

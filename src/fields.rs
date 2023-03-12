@@ -21,6 +21,34 @@ fn skip_leading_spaces(record: &[u8]) -> Option<usize> {
     SPACE_CADET.find(record).map(|m| m.start())
 }
 
+fn select_fields<'a>(fields: &[&'a [u8]], requested: &[usize], invert: bool) -> Vec<&'a [u8]> {
+    if invert {
+        fields
+            .iter()
+            .enumerate()
+            .filter(|pair| !requested.contains(&pair.0))
+            .map(|pair| *pair.1)
+            .collect()
+    } else {
+        requested
+            .iter()
+            // We use `get` instead of indexing with `[]` to avoid a `panic!` in
+            // case a record does not have the requested field. One could argue
+            // that we should panic, or print an error. For now I'm going with
+            // yielding an empty field. This is a semipredicate error: field not
+            // present vs. present and empty looks the same with this
+            // implementation. TODO: Consider that.
+            .map(|n| {
+                if let Some(f) = fields.get(*n) {
+                    *f
+                } else {
+                    b""
+                }
+            })
+            .collect()
+    }
+}
+
 fn print_record(
     r: Record,
     number: Option<usize>,
@@ -43,31 +71,7 @@ fn print_record(
         .split(&r.bytes[start..])
         .collect::<Vec<&[u8]>>();
     if !requested_fields.is_empty() {
-        let mut selected_fields: Vec<&[u8]> = Vec::new();
-        // TODO: Both arms if this if block could probably be done in a
-        // functional way.
-        if options.invert_fields {
-            for (n, f) in fields.iter().enumerate() {
-                if !requested_fields.contains(&n) {
-                    selected_fields.push(f);
-                }
-            }
-        } else {
-            for i in requested_fields {
-                // We use `get` instead of indexing with `[]` to avoid a `panic!` in
-                // case a record does not have the requested field. One could argue
-                // that we should panic, or print an error. For now I'm going with
-                // yielding an empty field. This is a semipredicate error: field not
-                // present vs. present and empty looks the same with this
-                // implementation. TODO: Consider that.
-                if let Some(f) = fields.get(*i) {
-                    selected_fields.push(f);
-                } else {
-                    selected_fields.push(b"");
-                }
-            }
-        }
-        fields = selected_fields;
+        fields = select_fields(&fields, requested_fields, options.invert_fields);
     }
     let record = fields.join(output_field_delimiter);
     if let Some(n) = number {
@@ -84,6 +88,10 @@ pub(crate) fn fields_main(arguments: &[String]) -> ShellResult {
     let (options, arguments) = parse_options(arguments)?;
     if options.help {
         help(0, FIELDS_HELP_MESSAGE);
+    }
+
+    if options.invert_fields && options.fields.is_empty() {
+        help(-1, FIELDS_HELP_MESSAGE);
     }
 
     let output_record_delimiter = unescape_backslashes(&options.output_record_delimiter)?;
