@@ -42,6 +42,9 @@ Use David Cook’s non-copying `StreamSplitter`.
 
 Enable negative field indices in `fields`.
 
+Provide a limit option for `records`, that allows for negative limits (counting
+backwards), so that it can work like `head` and `tail`.
+
 Implement `map`. Consider e.g. `ls | apply -x status -v`: it creates a new array
 (of size 1) of records from the output of `status` for each record in the input.
 By contrast, `ls | map -x status` would produce an array of _N_ records for each
