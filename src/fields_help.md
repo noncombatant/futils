@@ -4,7 +4,7 @@
 
 ```
 fields -h
-fields [-ns] [-D delimiter] [-d delimiter] [-O delimiter] [-o delimiter] [-f field] [pathname [...]]
+fields [-Fns] [-D delimiter] [-d delimiter] [-O delimiter] [-o delimiter] [-f field] [pathname [...]]
 ```
 
 ## Description
