@@ -36,8 +36,10 @@ fn compare_times(e: &DirEntry, t: &Time) -> Result<bool, std::io::Error> {
 }
 
 fn print_matches(pathname: &str, options: &Options, output_delimiter: &[u8]) -> ShellResult {
+    let mut stdout = stdout();
     let mut it = WalkDir::new(pathname).into_iter();
     let mut status = 0;
+
     'outer: loop {
         let entry = match it.next() {
             None => break Ok(status),
@@ -122,8 +124,8 @@ fn print_matches(pathname: &str, options: &Options, output_delimiter: &[u8]) -> 
             }
         }
 
-        stdout().write_all(pathname.as_bytes())?;
-        stdout().write_all(output_delimiter)?;
+        stdout.write_all(pathname.as_bytes())?;
+        stdout.write_all(output_delimiter)?;
     }
 }
 

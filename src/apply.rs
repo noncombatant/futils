@@ -18,6 +18,7 @@ fn apply(
     verbose: bool,
     output_delimiter: &[u8],
 ) -> ShellResult {
+    let mut stdout = stdout();
     let mut status = 0;
     for r in splitter.filter(is_not_delimiter) {
         for command in commands {
@@ -33,7 +34,7 @@ fn apply(
                 }
             }
             if verbose {
-                stdout().write_all(output_delimiter)?;
+                stdout.write_all(output_delimiter)?;
             }
         }
     }
