@@ -16,17 +16,37 @@ lazy_static! {
     static ref SPACE_CADET: Regex = Regex::new(r"\S").unwrap();
 }
 
-// Returns the index of the first byte that is not a space character.
+/// Returns the index of the first byte that is not a space character.
 fn skip_leading_spaces(record: &[u8]) -> Option<usize> {
     SPACE_CADET.find(record).map(|m| m.start())
 }
 
-fn select_fields<'a>(fields: &[&'a [u8]], requested: &[usize], invert: bool) -> Vec<&'a [u8]> {
+fn compute_index(i: isize, length: usize) -> usize {
+    if i < 0 {
+        let length = length as isize;
+        let i = i.abs();
+        if i > length {
+            // Let the caller handle the invalid index, rather than panicking
+            // here on overflow.
+            i as usize
+        } else {
+            (length - i) as usize
+        }
+    } else {
+        i as usize
+    }
+}
+
+fn select_fields<'a>(fields: &[&'a [u8]], requested: &[isize], invert: bool) -> Vec<&'a [u8]> {
+    let requested: Vec<usize> = requested
+        .iter()
+        .map(|f| compute_index(*f, fields.len()))
+        .collect();
     if invert {
         fields
             .iter()
             .enumerate()
-            .filter(|pair| !requested.contains(&pair.0))
+            .filter(|pair| !requested.contains(&(pair.0)))
             .map(|pair| *pair.1)
             .collect()
     } else {
@@ -53,7 +73,7 @@ fn print_record(
     r: Record,
     number: Option<usize>,
     options: &Options,
-    requested_fields: &[usize],
+    requested_fields: &[isize],
 ) -> ShellResult {
     let mut stdout = stdout();
     let start = if options.skip {
@@ -95,9 +115,8 @@ pub(crate) fn fields_main(arguments: &[String]) -> ShellResult {
     let fields = options
         .fields
         .iter()
-        .map(|f| str::parse::<usize>(f))
-        .collect::<Result<Vec<usize>, ParseIntError>>()?;
-    let fields = fields.iter().map(|f| f - 1).collect::<Vec<usize>>();
+        .map(|f| str::parse::<isize>(f))
+        .collect::<Result<Vec<isize>, ParseIntError>>()?;
 
     let mut status = 0;
     for file in FileOpener::new(arguments) {

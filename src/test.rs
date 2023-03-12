@@ -103,14 +103,14 @@ test-data/lurp/norp
         run_tests(&[
             new(
                 "fields",
-                &["-f1", "test-data/columns.txt"],
+                &["-f0", "test-data/columns.txt"],
                 "yeah
 whee
 ",
             ),
             new(
                 "fields",
-                &["-f1", "-f3", "-n", "test-data/columns.txt"],
+                &["-f0", "-f2", "-n", "test-data/columns.txt"],
                 "1	yeah	hey
 2	whee	ouch
 ",
@@ -122,9 +122,30 @@ whee
             ),
             new(
                 "fields",
-                &["-F", "-f2", "test-data/columns.txt"],
+                &["-F", "-f1", "test-data/columns.txt"],
                 "yeah	hey	friends
 whee	ouch	boing
+",
+            ),
+            new(
+                "fields",
+                &["-f-1", "-f-2", "test-data/columns.txt"],
+                "friends	hey
+boing	ouch
+",
+            ),
+            new(
+                "fields",
+                &["-F", "-f-1", "-f-2", "-n", "test-data/columns.txt"],
+                "1	yeah	wow
+2	whee	bonk
+",
+            ),
+            new(
+                "fields",
+                &["-f-1", "-f-2", "-n", "test-data/columns.txt"],
+                "1	friends	hey
+2	boing	ouch
 ",
             ),
         ]);

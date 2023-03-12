@@ -24,8 +24,9 @@ them with the output field and record delimiters.
   option makes no sense without at least 1 `-f` option.
 * `-f`: Select the given `field`(s). This option can be given multiple times,
   and fields will be output in the order given on the command line. Field
-  numbering starts from 1. If no `-f` options are given, `fields` will print all
-  fields.
+  numbering starts from 0. Negative field indices count from the end starting at
+  -1; i.e. `-f-1` prints the last field of each record. If no `-f` options are
+  given, `fields` will print all fields.
 * `-n`: Prefix each record with a record number.
 * `-s`: Skip leading space characters in records.
 * `-O`: Use the given output field `delimiter`. The default delimiter is `\\t`.
