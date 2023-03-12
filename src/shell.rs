@@ -10,6 +10,7 @@ use std::num::ParseIntError;
 use std::str;
 
 use crate::time::Time;
+use crate::util::unescape_backslashes;
 
 /// `ShellError` accounts for a variety of errors that can happen when running
 /// shell commands, enabling many `main` `fn`s for shell programs to declare
@@ -145,10 +146,10 @@ pub(crate) const DEFAULT_INPUT_RECORD_DELIMITER: &str = r"(\r|\n)+";
 pub(crate) const DEFAULT_INPUT_FIELD_DELIMITER: &str = r"\s+";
 
 /// The default output record delimiter.
-pub(crate) const DEFAULT_OUTPUT_RECORD_DELIMITER: &str = "\n";
+pub(crate) const DEFAULT_OUTPUT_RECORD_DELIMITER: &[u8] = b"\n";
 
 /// The default output field delimiter.
-pub(crate) const DEFAULT_OUTPUT_FIELD_DELIMITER: &str = "\t";
+pub(crate) const DEFAULT_OUTPUT_FIELD_DELIMITER: &[u8] = b"\t";
 
 /// The default file types.
 pub(crate) const DEFAULT_FILE_TYPES: &str = "dfs";
@@ -157,8 +158,8 @@ pub(crate) const DEFAULT_FILE_TYPES: &str = "dfs";
 pub(crate) struct Options {
     pub(crate) input_record_delimiter: Regex,
     pub(crate) input_field_delimiter: Regex,
-    pub(crate) output_record_delimiter: String,
-    pub(crate) output_field_delimiter: String,
+    pub(crate) output_record_delimiter: Vec<u8>,
+    pub(crate) output_field_delimiter: Vec<u8>,
 
     pub(crate) match_expressions: Vec<Regex>,
     pub(crate) prune_expressions: Vec<Regex>,
@@ -185,8 +186,8 @@ impl Options {
         Ok(Options {
             input_record_delimiter: Regex::new(DEFAULT_INPUT_RECORD_DELIMITER)?,
             input_field_delimiter: Regex::new(DEFAULT_INPUT_FIELD_DELIMITER)?,
-            output_record_delimiter: String::from(DEFAULT_OUTPUT_RECORD_DELIMITER),
-            output_field_delimiter: String::from(DEFAULT_OUTPUT_FIELD_DELIMITER),
+            output_record_delimiter: Vec::from(DEFAULT_OUTPUT_RECORD_DELIMITER),
+            output_field_delimiter: Vec::from(DEFAULT_OUTPUT_FIELD_DELIMITER),
 
             match_expressions: Vec::new(),
             prune_expressions: Vec::new(),
@@ -213,6 +214,7 @@ impl Options {
 pub(crate) fn parse_options(arguments: &[String]) -> Result<(Options, &[String]), ShellError> {
     let mut options = Options::with_defaults()?;
     let mut parsed = getopt::Parser::new(arguments, DEFAULT_OPTION_SPEC);
+
     loop {
         match parsed.next().transpose()? {
             None => break,
@@ -226,8 +228,13 @@ pub(crate) fn parse_options(arguments: &[String]) -> Result<(Options, &[String])
                 Opt('M', Some(s)) => options.mtime_expressions.push(Time::new(&s)?),
                 Opt('m', Some(s)) => options.match_expressions.push(Regex::new(&s)?),
                 Opt('n', None) => options.enumerate = true,
-                Opt('O', Some(s)) => options.output_field_delimiter = s.clone(),
-                Opt('o', Some(s)) => options.output_record_delimiter = s.clone(),
+                Opt('O', Some(s)) => {
+                    options.output_field_delimiter = Vec::from(unescape_backslashes(&s)?.as_bytes())
+                }
+                Opt('o', Some(s)) => {
+                    options.output_record_delimiter =
+                        Vec::from(unescape_backslashes(&s)?.as_bytes())
+                }
                 Opt('p', Some(s)) => options.prune_expressions.push(Regex::new(&s)?),
                 Opt('s', None) => options.skip = true,
                 Opt('t', Some(s)) => options.file_types = s.clone(),

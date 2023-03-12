@@ -5,7 +5,7 @@ use walkdir::{DirEntry, WalkDir};
 
 use crate::shell::{parse_options, Options, ShellResult};
 use crate::time::{Comparison, Time};
-use crate::util::{help, run_command, unescape_backslashes};
+use crate::util::{help, run_command};
 
 // TODO: Add a depth option, and parallelize -x.
 
@@ -35,7 +35,7 @@ fn compare_times(e: &DirEntry, t: &Time) -> Result<bool, std::io::Error> {
     })
 }
 
-fn print_matches(pathname: &str, options: &Options, output_delimiter: &[u8]) -> ShellResult {
+fn print_matches(pathname: &str, options: &Options) -> ShellResult {
     let mut stdout = stdout();
     let mut it = WalkDir::new(pathname).into_iter();
     let mut status = 0;
@@ -125,7 +125,7 @@ fn print_matches(pathname: &str, options: &Options, output_delimiter: &[u8]) -> 
         }
 
         stdout.write_all(pathname.as_bytes())?;
-        stdout.write_all(output_delimiter)?;
+        stdout.write_all(&options.output_record_delimiter)?;
     }
 }
 
@@ -136,17 +136,13 @@ pub(crate) fn files_main(arguments: &[String]) -> ShellResult {
         help(0, FILES_HELP_MESSAGE);
     }
 
-    let output_delimiter = options.output_record_delimiter.clone();
-    let output_delimiter = unescape_backslashes(&output_delimiter)?;
-    let output_delimiter = output_delimiter.as_bytes();
-
     let mut pathnames = vec![".".to_string()];
     if !arguments.is_empty() {
         pathnames = arguments.into()
     }
     let mut status = 0;
     for p in pathnames {
-        match print_matches(&p, &options, output_delimiter) {
+        match print_matches(&p, &options) {
             Ok(s) => status += s,
             Err(e) => {
                 eprintln!("{}: {}", p, e);

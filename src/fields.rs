@@ -5,7 +5,7 @@ use std::num::ParseIntError;
 
 use crate::shell::{parse_options, FileOpener, Options, ShellResult, STDIN_PATHNAME};
 use crate::stream_splitter::{is_not_delimiter, Record, StreamSplitter};
-use crate::util::{help, unescape_backslashes};
+use crate::util::help;
 
 /// Command line usage help.
 pub(crate) const FIELDS_HELP_MESSAGE: &str = include_str!("fields_help.md");
@@ -54,8 +54,6 @@ fn print_record(
     number: Option<usize>,
     options: &Options,
     requested_fields: &[usize],
-    output_field_delimiter: &[u8],
-    output_record_delimiter: &[u8],
 ) -> ShellResult {
     let mut stdout = stdout();
     let start = if options.skip {
@@ -73,13 +71,13 @@ fn print_record(
     if !requested_fields.is_empty() {
         fields = select_fields(&fields, requested_fields, options.invert_fields);
     }
-    let record = fields.join(output_field_delimiter);
+    let record = fields.join(options.output_field_delimiter.as_slice());
     if let Some(n) = number {
         write!(stdout, "{}", n + 1)?;
-        stdout.write_all(output_field_delimiter)?;
+        stdout.write_all(&options.output_field_delimiter)?;
     }
     stdout.write_all(&record)?;
-    stdout.write_all(output_record_delimiter)?;
+    stdout.write_all(&options.output_record_delimiter)?;
     Ok(0)
 }
 
@@ -93,11 +91,6 @@ pub(crate) fn fields_main(arguments: &[String]) -> ShellResult {
     if options.invert_fields && options.fields.is_empty() {
         help(-1, FIELDS_HELP_MESSAGE);
     }
-
-    let output_record_delimiter = unescape_backslashes(&options.output_record_delimiter)?;
-    let output_record_delimiter = output_record_delimiter.as_bytes();
-    let output_field_delimiter = unescape_backslashes(&options.output_field_delimiter)?;
-    let output_field_delimiter = output_field_delimiter.as_bytes();
 
     let fields = options
         .fields
@@ -119,8 +112,6 @@ pub(crate) fn fields_main(arguments: &[String]) -> ShellResult {
                         if options.enumerate { Some(n) } else { None },
                         &options,
                         &fields,
-                        output_field_delimiter,
-                        output_record_delimiter,
                     )?;
                 }
             }
