@@ -30,19 +30,19 @@ fn format_gid(gid: u32) -> String {
 #[derive(Serialize, Debug)]
 struct Status<'a> {
     name: &'a str,
-    device: i32,
-    // TODO: Use the non-permission bits into a `type: String` field.
-    mode: u16,
-    permissions: String,
-    links: u16,
-    inode: u64,
+    size: i64,
+    modified_time: String,
     user: String,
     group: String,
+    permissions: String,
+    links: u16,
+    device: i32,
+    inode: u64,
     accessed_time: String,
-    modified_time: String,
     changed_time: String,
     birth_time: String,
-    size: i64,
+    // TODO: Use the non-permission bits into a `type: String` field.
+    mode: u16,
     blocks: i64,
     block_size: i32,
 }
@@ -87,18 +87,18 @@ impl<'a> Status<'a> {
     fn new(status: &FileStat, name: &'a str) -> Status<'a> {
         Status {
             name,
-            device: status.st_dev,
-            mode: status.st_mode,
-            permissions: permissions_string(status.st_mode),
-            links: status.st_nlink,
-            inode: status.st_ino,
+            size: status.st_size,
+            modified_time: utc_timestamp_to_string(status.st_mtime),
             user: format_uid(status.st_uid),
             group: format_gid(status.st_gid),
+            permissions: permissions_string(status.st_mode),
+            links: status.st_nlink,
+            device: status.st_dev,
+            inode: status.st_ino,
             accessed_time: utc_timestamp_to_string(status.st_atime),
             changed_time: utc_timestamp_to_string(status.st_ctime),
-            modified_time: utc_timestamp_to_string(status.st_mtime),
             birth_time: utc_timestamp_to_string(status.st_birthtime),
-            size: status.st_size,
+            mode: status.st_mode,
             blocks: status.st_blocks,
             block_size: status.st_blksize,
         }
@@ -108,29 +108,29 @@ impl<'a> Status<'a> {
         let mut output = stdout();
         output.write_all(self.name.as_bytes())?;
         output.write_all(field_delimiter)?;
-        output.write_all(format!("{}", self.device).as_bytes())?;
+        output.write_all(format!("{}", self.size).as_bytes())?;
         output.write_all(field_delimiter)?;
-        output.write_all(format!("{}", self.mode).as_bytes())?;
-        output.write_all(field_delimiter)?;
-        output.write_all(self.permissions.as_bytes())?;
-        output.write_all(field_delimiter)?;
-        output.write_all(format!("{}", self.links).as_bytes())?;
-        output.write_all(field_delimiter)?;
-        output.write_all(format!("{}", self.inode).as_bytes())?;
+        output.write_all(self.modified_time.as_bytes())?;
         output.write_all(field_delimiter)?;
         output.write_all(self.user.as_bytes())?;
         output.write_all(field_delimiter)?;
         output.write_all(self.group.as_bytes())?;
         output.write_all(field_delimiter)?;
+        output.write_all(self.permissions.as_bytes())?;
+        output.write_all(field_delimiter)?;
+        output.write_all(format!("{}", self.links).as_bytes())?;
+        output.write_all(field_delimiter)?;
+        output.write_all(format!("{}", self.device).as_bytes())?;
+        output.write_all(field_delimiter)?;
+        output.write_all(format!("{}", self.inode).as_bytes())?;
+        output.write_all(field_delimiter)?;
         output.write_all(self.accessed_time.as_bytes())?;
         output.write_all(field_delimiter)?;
         output.write_all(self.changed_time.as_bytes())?;
         output.write_all(field_delimiter)?;
-        output.write_all(self.modified_time.as_bytes())?;
-        output.write_all(field_delimiter)?;
         output.write_all(self.birth_time.as_bytes())?;
         output.write_all(field_delimiter)?;
-        output.write_all(format!("{}", self.size).as_bytes())?;
+        output.write_all(format!("{}", self.mode).as_bytes())?;
         output.write_all(field_delimiter)?;
         output.write_all(format!("{}", self.blocks).as_bytes())?;
         output.write_all(field_delimiter)?;
@@ -175,18 +175,18 @@ pub(crate) fn status_main(arguments: &[String]) -> ShellResult {
         // TODO: Document -O and -j
         let headers = vec![
             b"Name".as_slice(),
-            b"Device".as_slice(),
-            b"Mode".as_slice(),
-            b"Permissions".as_slice(),
-            b"Links".as_slice(),
-            b"Inode".as_slice(),
+            b"Size".as_slice(),
+            b"Modified".as_slice(),
             b"User".as_slice(),
             b"Group".as_slice(),
+            b"Permissions".as_slice(),
+            b"Links".as_slice(),
+            b"Device".as_slice(),
+            b"Inode".as_slice(),
             b"Accessed".as_slice(),
             b"Changed".as_slice(),
-            b"Modified".as_slice(),
             b"Birth".as_slice(),
-            b"Size".as_slice(),
+            b"Mode".as_slice(),
             b"Blocks".as_slice(),
             b"Block Size".as_slice(),
         ];
