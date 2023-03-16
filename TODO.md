@@ -60,3 +60,5 @@ for each argument:
     serialized = serialize as columns or as JSON
     write serialized to stdout
 ```
+
+Add `version` command.
