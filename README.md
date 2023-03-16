@@ -64,6 +64,30 @@ as appropriate).
 Wherever possible and appropriate, `futils` programs use Rust regular
 expressions for searching and lexical analysis.
 
+## Other Fine Programs You Might Enjoy
+
+[Visidata](https://www.visidata.org/) (`vd`) provides a fantastic terminal UI
+that displays and helps you sort, slice, search in, and process a variety of
+data formats, including JSON, TSV, CSV, and more. For example, if you have a
+large amount of data you want to tootle around with, try this:
+
+```sh
+something that generates data... | records ... | fields ... | vd
+```
+
+And you can turn JSON into TSV by doing this:
+
+```sh
+something ... | vd -f json -b -o -
+```
+
+[Glow](https://github.com/charmbracelet/glow) (`glow`) displays Markdown in a
+terminal window in a beautiful way. It’s nice for viewing `futils`’ help, e.g.
+
+```sh
+files -h | glow
+```
+
 ## Development
 
 Every `pub` identifier has a Rustdoc comment. Rustdoc is always well-formed
