@@ -49,3 +49,14 @@ record in the input (and no `-v`). That is, `apply` is mostly about the
 side-effect; printing is a tangential option. By contrast, `map` is about
 transforming records. Additionally, `map` should pass each field of the record
 as a distinct argument to the `-x` command.
+
+Every program/most programs should take the following form:
+
+```
+parse options and arguments
+for each argument:
+  records = process the argument
+  for each record:
+    serialized = serialize as columns or as JSON
+    write serialized to stdout
+```
