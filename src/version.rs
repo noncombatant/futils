@@ -3,8 +3,6 @@ use crate::shell::ShellResult;
 /// Command line usage help.
 pub(crate) const VERSION_HELP_MESSAGE: &str = include_str!("version_help.md");
 
-// TODO: Add version to main_help.md
-
 // TODO: Do all the variables listed in https://doc.rust-lang.org/cargo/reference/environment-variables.html#environment-variables-cargo-sets-for-crates
 
 pub(crate) fn version_main(_: &[String]) -> ShellResult {

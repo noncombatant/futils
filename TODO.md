@@ -12,13 +12,7 @@ More programs: add `join` (like `join`(1)), `foldr`, `foldl`, `sum`, `zip`,
 > the sequence in the calculation, and serves as a default when the sequence is
 > empty.
 
-Add JSON output to all commands, either by default or with `-j`.
-
-Add a `json2fixed` command (or extend `fields`) that turns JSON into a table
-view, so that people don’t have to use `vd -f json -b -o -` all the time.
-
-Similarly, provide or find a good Markdown-to-terminal-escape program. Possibly
-https://github.com/charmbracelet/glow.
+Add JSON input and output to all commands, either by default or with `-j`.
 
 Tests for everything.
 

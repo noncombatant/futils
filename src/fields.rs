@@ -112,6 +112,8 @@ pub(crate) fn fields_main(arguments: &[String]) -> ShellResult {
         help(-1, FIELDS_HELP_MESSAGE);
     }
 
+    // TODO: To support named fields, use an `enum Field` here with `isize` and
+    // `String` variants.
     let fields = options
         .fields
         .iter()

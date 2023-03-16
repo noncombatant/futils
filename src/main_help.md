@@ -18,8 +18,10 @@ programming primitives and operate on streams.
 * `fields`
 * `files`
 * `filter`
+* `map`
 * `records`
 * `status`
+* `version`
 
 …and more to come.
 
