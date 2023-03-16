@@ -2,6 +2,7 @@ use atty::Stream;
 use nix::sys::stat::{stat, FileStat, Mode};
 use serde::Serialize;
 use std::fs::read_dir;
+use std::io::{stdout, Error, Write};
 use std::path::Path;
 use users::{get_group_by_gid, get_user_by_uid};
 
@@ -30,6 +31,7 @@ fn format_gid(gid: u32) -> String {
 struct Status<'a> {
     name: &'a str,
     device: i32,
+    // TODO: Use the non-permission bits into a `type: String` field.
     mode: u16,
     permissions: String,
     links: u16,
@@ -101,6 +103,41 @@ impl<'a> Status<'a> {
             block_size: status.st_blksize,
         }
     }
+
+    fn write_columns(&self, field_delimiter: &[u8], record_delimiter: &[u8]) -> Result<(), Error> {
+        let mut output = stdout();
+        output.write_all(self.name.as_bytes())?;
+        output.write_all(field_delimiter)?;
+        output.write_all(format!("{}", self.device).as_bytes())?;
+        output.write_all(field_delimiter)?;
+        output.write_all(format!("{}", self.mode).as_bytes())?;
+        output.write_all(field_delimiter)?;
+        output.write_all(self.permissions.as_bytes())?;
+        output.write_all(field_delimiter)?;
+        output.write_all(format!("{}", self.links).as_bytes())?;
+        output.write_all(field_delimiter)?;
+        output.write_all(format!("{}", self.inode).as_bytes())?;
+        output.write_all(field_delimiter)?;
+        output.write_all(self.user.as_bytes())?;
+        output.write_all(field_delimiter)?;
+        output.write_all(self.group.as_bytes())?;
+        output.write_all(field_delimiter)?;
+        output.write_all(self.accessed_time.as_bytes())?;
+        output.write_all(field_delimiter)?;
+        output.write_all(self.changed_time.as_bytes())?;
+        output.write_all(field_delimiter)?;
+        output.write_all(self.modified_time.as_bytes())?;
+        output.write_all(field_delimiter)?;
+        output.write_all(self.birth_time.as_bytes())?;
+        output.write_all(field_delimiter)?;
+        output.write_all(format!("{}", self.size).as_bytes())?;
+        output.write_all(field_delimiter)?;
+        output.write_all(format!("{}", self.blocks).as_bytes())?;
+        output.write_all(field_delimiter)?;
+        output.write_all(format!("{}", self.block_size).as_bytes())?;
+        output.write_all(record_delimiter)?;
+        Ok(())
+    }
 }
 
 /// Runs the `status` command on `arguments`.
@@ -128,17 +165,57 @@ pub(crate) fn status_main(arguments: &[String]) -> ShellResult {
         serde_json::to_string
     };
 
+    let mut stdout = stdout();
+
     let mut status = 0;
     let count = arguments.len();
-    if count != 1 {
+    if options.json && count != 1 {
         println!("[");
+    } else if !options.json {
+        // TODO: Document -O and -j
+        let headers = vec![
+            b"Name".as_slice(),
+            b"Device".as_slice(),
+            b"Mode".as_slice(),
+            b"Permissions".as_slice(),
+            b"Links".as_slice(),
+            b"Inode".as_slice(),
+            b"User".as_slice(),
+            b"Group".as_slice(),
+            b"Accessed".as_slice(),
+            b"Changed".as_slice(),
+            b"Modified".as_slice(),
+            b"Birth".as_slice(),
+            b"Size".as_slice(),
+            b"Blocks".as_slice(),
+            b"Block Size".as_slice(),
+        ];
+        stdout.write_all(&headers.join(options.output_field_delimiter.as_slice()))?;
+        stdout.write_all(&options.output_record_delimiter)?;
     }
     for (i, pathname) in arguments.iter().enumerate() {
         match stat(pathname.as_str()) {
             Ok(s) => {
                 let s = Status::new(&s, pathname);
-                let s = to_json(&s).unwrap();
-                println!("{}{}", s, if i < count - 1 { "," } else { "" });
+                if options.json {
+                    // TODO: Don't `unwrap` here; handle the error.
+                    let json = to_json(&s).unwrap();
+                    stdout.write_all(json.as_bytes())?;
+                } else {
+                    s.write_columns(
+                        &options.output_field_delimiter,
+                        &options.output_record_delimiter,
+                    )?;
+                }
+                stdout.write_all(if options.json {
+                    if i < count - 1 {
+                        b","
+                    } else {
+                        b""
+                    }
+                } else {
+                    &options.output_record_delimiter
+                })?;
             }
             Err(e) => {
                 eprintln!("{}: {}", pathname, e);
@@ -146,7 +223,7 @@ pub(crate) fn status_main(arguments: &[String]) -> ShellResult {
             }
         }
     }
-    if count != 1 {
+    if options.json && count != 1 {
         println!("]");
     }
     Ok(status)
