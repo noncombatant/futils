@@ -119,7 +119,7 @@ impl From<str::Utf8Error> for ShellError {
 pub(crate) type ShellResult = Result<i32, ShellError>;
 
 /// The default list of command line flags. See `Options`, below.
-pub(crate) const DEFAULT_OPTION_SPEC: &str = "D:d:Ff:hl:m:nO:o:p:st:vx:";
+pub(crate) const DEFAULT_OPTION_SPEC: &str = "D:d:Ff:hl:M:m:nO:o:p:st:vx:";
 
 /// These are the standard command line options for `futils` programs. Their
 /// meanings are:
@@ -130,6 +130,7 @@ pub(crate) const DEFAULT_OPTION_SPEC: &str = "D:d:Ff:hl:m:nO:o:p:st:vx:";
 ///   -f  `String`  field
 ///   -h  `bool`    help
 ///   -l  `isize`   limit
+///   -M  `String`  datetime expression
 ///   -m  `Regex`   match
 ///   -n  `bool`    enumerate
 ///   -O  `String`  output field delimiter
