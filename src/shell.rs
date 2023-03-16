@@ -120,7 +120,7 @@ impl From<str::Utf8Error> for ShellError {
 pub(crate) type ShellResult = Result<i32, ShellError>;
 
 /// The default list of command line flags. See `Options`, below.
-pub(crate) const DEFAULT_OPTION_SPEC: &str = "D:d:Ff:hl:M:m:nO:o:p:st:vx:";
+pub(crate) const DEFAULT_OPTION_SPEC: &str = "D:d:Ff:hjl:M:m:nO:o:p:st:vx:";
 
 /// These are the standard command line options for `futils` programs. Their
 /// meanings are:
@@ -130,6 +130,7 @@ pub(crate) const DEFAULT_OPTION_SPEC: &str = "D:d:Ff:hl:M:m:nO:o:p:st:vx:";
 ///   -F  `bool`    invert field selection
 ///   -f  `String`  field
 ///   -h  `bool`    help
+///   -j  `bool`    JSON output
 ///   -l  `isize`   limit
 ///   -M  `String`  datetime expression
 ///   -m  `Regex`   match
@@ -165,6 +166,7 @@ pub(crate) struct Options {
     // TODO: Consider making this `-I`, and being a generic “invert something”
     // flag.
     pub(crate) invert_fields: bool,
+    pub(crate) json: bool,
     pub(crate) show_all: bool,
     pub(crate) skip: bool,
     pub(crate) verbose: bool,
@@ -208,6 +210,7 @@ impl Options {
             enumerate: false,
             help: false,
             invert_fields: false,
+            json: false,
             show_all: false,
             skip: false,
             verbose: false,
@@ -233,6 +236,7 @@ pub(crate) fn parse_options(arguments: &[String]) -> Result<(Options, &[String])
                 Opt('F', None) => options.invert_fields = true,
                 Opt('f', Some(s)) => options.fields.push(s.clone()),
                 Opt('h', None) => options.help = true,
+                Opt('j', None) => options.json = true,
                 Opt('l', Some(s)) => options.limit = Some(str::parse::<isize>(&s)?),
                 Opt('M', Some(s)) => options.mtime_expressions.push(Time::new(&s)?),
                 Opt('m', Some(s)) => options.match_expressions.push(Regex::new(&s)?),
