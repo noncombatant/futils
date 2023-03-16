@@ -57,8 +57,5 @@ parse options and arguments
 for each argument:
   records = process the argument
   for each record:
-    serialized = serialize as columns or as JSON
-    write serialized to stdout
+    write_columns or write_json
 ```
-
-Add `version` command.

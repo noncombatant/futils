@@ -104,6 +104,7 @@ impl<'a> Status<'a> {
         }
     }
 
+    // TODO: This should take `output` as a `dyn io::Write`.
     fn write_columns(&self, field_delimiter: &[u8], record_delimiter: &[u8]) -> Result<(), Error> {
         let mut output = stdout();
         output.write_all(self.name.as_bytes())?;

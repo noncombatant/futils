@@ -13,6 +13,7 @@ mod stream_splitter;
 mod test;
 mod time;
 mod util;
+mod version;
 
 use apply::{apply_main, APPLY_HELP_MESSAGE};
 use fields::{fields_main, FIELDS_HELP_MESSAGE};
@@ -22,6 +23,7 @@ use map::{map_main, MAP_HELP_MESSAGE};
 use records::{records_main, RECORDS_HELP_MESSAGE};
 use status::{status_main, STATUS_HELP_MESSAGE};
 use util::{file_name, help};
+use version::{version_main, VERSION_HELP_MESSAGE};
 
 /// Command line usage help.
 const HELP_MESSAGE: &str = include_str!("main_help.md");
@@ -77,6 +79,7 @@ fn main() {
                 "map" => help(0, MAP_HELP_MESSAGE),
                 "records" => help(0, RECORDS_HELP_MESSAGE),
                 "status" => help(0, STATUS_HELP_MESSAGE),
+                "version" => help(0, VERSION_HELP_MESSAGE),
                 &_ => help(-1, HELP_MESSAGE),
             };
         }
@@ -90,6 +93,7 @@ fn main() {
         "map" => map_main(&arguments),
         "records" => records_main(&arguments),
         "status" => status_main(&arguments),
+        "version" => version_main(&arguments),
         _ => {
             help(-1, HELP_MESSAGE);
             unreachable!()
