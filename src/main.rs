@@ -5,6 +5,7 @@ mod apply;
 mod fields;
 mod files;
 mod filter;
+mod map;
 mod records;
 mod shell;
 mod status;
@@ -17,6 +18,7 @@ use apply::{apply_main, APPLY_HELP_MESSAGE};
 use fields::{fields_main, FIELDS_HELP_MESSAGE};
 use files::{files_main, FILES_HELP_MESSAGE};
 use filter::{filter_main, FILTER_HELP_MESSAGE};
+use map::{map_main, MAP_HELP_MESSAGE};
 use records::{records_main, RECORDS_HELP_MESSAGE};
 use status::{status_main, STATUS_HELP_MESSAGE};
 use util::{file_name, help};
@@ -72,6 +74,7 @@ fn main() {
                 "fields" => help(0, FIELDS_HELP_MESSAGE),
                 "files" => help(0, FILES_HELP_MESSAGE),
                 "filter" => help(0, FILTER_HELP_MESSAGE),
+                "map" => help(0, MAP_HELP_MESSAGE),
                 "records" => help(0, RECORDS_HELP_MESSAGE),
                 "status" => help(0, STATUS_HELP_MESSAGE),
                 &_ => help(-1, HELP_MESSAGE),
@@ -84,6 +87,7 @@ fn main() {
         "fields" => fields_main(&arguments),
         "files" => files_main(&arguments),
         "filter" => filter_main(&arguments),
+        "map" => map_main(&arguments),
         "records" => records_main(&arguments),
         "status" => status_main(&arguments),
         _ => {

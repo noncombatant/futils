@@ -1,21 +1,24 @@
-# `apply` - apply commands to records of input
+# `map` - transform records of input
 
 ## Usage
 
 ```
-apply -h
-apply [-v] [-d delimiter] [-o string] -x command [pathname [...]]
+map -h
+map [-D delimiter] [-d delimiter] [-o string] -x command [pathname [...]]
 ```
 
 ## Description
 
 For each record in each of the given `pathname`(s), runs the shell command
-`command`. If no pathnames are given, reads `stdin`. You can give more than 1
-instance of `-x command`, to run multiple commands on each input record.
+`command` with each field of the record as a distinct argument. If no pathnames
+are given, reads `stdin`. You can give more than 1 instance of `-x command`, to
+run multiple commands on each input record.
 
 ## Additional Options
 
 * `-h`: Print this help message.
+* `-D`: Use the given input field `delimiter`, a regular expression. The
+  default delimiter is `r"\s+"`.
 * `-d`: Use the given input record delimiter. The default delimiter is
   `r"(\r|\n)+"`.
 * `-o`: Use the given output record delimiter. The default delimiter is `\n`.
