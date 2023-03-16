@@ -7,7 +7,7 @@ use std::path::Path;
 use users::{get_group_by_gid, get_user_by_uid};
 
 use crate::shell::{parse_options, ShellResult};
-use crate::time::utc_timestamp_to_string;
+use crate::time::format_utc_timestamp;
 use crate::util::help;
 
 /// Command line usage help.
@@ -27,27 +27,7 @@ fn format_gid(gid: u32) -> String {
     }
 }
 
-#[derive(Serialize, Debug)]
-struct Status<'a> {
-    name: &'a str,
-    size: i64,
-    modified_time: String,
-    user: String,
-    group: String,
-    permissions: String,
-    links: u16,
-    device: i32,
-    inode: u64,
-    accessed_time: String,
-    changed_time: String,
-    birth_time: String,
-    // TODO: Use the non-permission bits into a `type: String` field.
-    mode: u16,
-    blocks: i64,
-    block_size: i32,
-}
-
-fn permissions_string(mode: u16) -> String {
+fn format_permissions(mode: u16) -> String {
     let mode = Mode::from_bits(
         mode & (Mode::S_IRWXU.bits() | Mode::S_IRWXG.bits() | Mode::S_IRWXO.bits()),
     )
@@ -83,21 +63,41 @@ fn permissions_string(mode: u16) -> String {
     String::from_utf8(bytes).unwrap()
 }
 
+#[derive(Serialize, Debug)]
+struct Status<'a> {
+    name: &'a str,
+    size: i64,
+    modified_time: String,
+    user: String,
+    group: String,
+    permissions: String,
+    links: u16,
+    device: i32,
+    inode: u64,
+    accessed_time: String,
+    changed_time: String,
+    birth_time: String,
+    // TODO: Use the non-permission bits into a `type: String` field.
+    mode: u16,
+    blocks: i64,
+    block_size: i32,
+}
+
 impl<'a> Status<'a> {
     fn new(status: &FileStat, name: &'a str) -> Status<'a> {
         Status {
             name,
             size: status.st_size,
-            modified_time: utc_timestamp_to_string(status.st_mtime),
+            modified_time: format_utc_timestamp(status.st_mtime),
             user: format_uid(status.st_uid),
             group: format_gid(status.st_gid),
-            permissions: permissions_string(status.st_mode),
+            permissions: format_permissions(status.st_mode),
             links: status.st_nlink,
             device: status.st_dev,
             inode: status.st_ino,
-            accessed_time: utc_timestamp_to_string(status.st_atime),
-            changed_time: utc_timestamp_to_string(status.st_ctime),
-            birth_time: utc_timestamp_to_string(status.st_birthtime),
+            accessed_time: format_utc_timestamp(status.st_atime),
+            changed_time: format_utc_timestamp(status.st_ctime),
+            birth_time: format_utc_timestamp(status.st_birthtime),
             mode: status.st_mode,
             blocks: status.st_blocks,
             block_size: status.st_blksize,

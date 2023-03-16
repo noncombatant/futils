@@ -8,7 +8,7 @@ use crate::shell::{ShellError, UsageError};
 /// Given the number of seconds from the Unix epoch in UTC, returns a sortable
 /// string representation in the format `%Y-%m-%d %H:%M:%S`. If `utc` cannot be
 /// interpreted for some raisin, returns `utc` `format!`ed as a `String`.
-pub(crate) fn utc_timestamp_to_string(utc: i64) -> String {
+pub(crate) fn format_utc_timestamp(utc: i64) -> String {
     match NaiveDateTime::from_timestamp_opt(utc, 0) {
         Some(naive) => {
             let datetime: DateTime<Utc> = DateTime::from_utc(naive, Utc);
