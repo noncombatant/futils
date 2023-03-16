@@ -52,7 +52,8 @@ pub(crate) struct UsageError {
 }
 
 impl UsageError {
-    fn new(details: &str) -> UsageError {
+    /// Return a new `UsageError` from `details`.
+    pub(crate) fn new(details: &str) -> UsageError {
         UsageError {
             details: details.to_string(),
         }
