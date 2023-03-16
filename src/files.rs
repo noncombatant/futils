@@ -1,10 +1,11 @@
 use chrono::NaiveDateTime;
+use std::cmp::Ordering;
 use std::io::{stdout, Write};
 use std::time::SystemTime;
 use walkdir::{DirEntry, WalkDir};
 
 use crate::shell::{parse_options, Options, ShellResult};
-use crate::time::{Comparison, Time};
+use crate::time::Time;
 use crate::util::{help, run_command};
 
 // TODO: Add a depth option, and parallelize -x.
@@ -28,10 +29,10 @@ fn compare_times(e: &DirEntry, t: &Time) -> Result<bool, std::io::Error> {
         .as_secs();
     let modified = NaiveDateTime::from_timestamp_opt(modified.try_into().unwrap(), 0).unwrap();
     let given = t.date_time;
-    Ok(match t.comparison {
-        Comparison::After => given <= modified,
-        Comparison::Before => given >= modified,
-        Comparison::Exactly => given == modified,
+    Ok(match t.ordering {
+        Ordering::Greater => given <= modified,
+        Ordering::Less => given >= modified,
+        Ordering::Equal => given == modified,
     })
 }
 

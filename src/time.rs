@@ -1,6 +1,9 @@
 use chrono::format::ParseError;
 use chrono::{DateTime, NaiveDate, NaiveDateTime, NaiveTime, Utc};
 use chrono::{Datelike, Local, Timelike};
+use std::cmp::Ordering;
+
+use crate::shell::{ShellError, UsageError};
 
 /// Given the number of seconds from the Unix epoch in UTC, returns a sortable
 /// string representation in the format `%Y-%m-%d %H:%M:%S`. If `utc` cannot be
@@ -15,23 +18,14 @@ pub(crate) fn utc_timestamp_to_string(utc: i64) -> String {
     }
 }
 
-/// Indicates which comparison operation to perform on 2 `NaiveDateTime`s. See
-/// `Time`.
-#[derive(Clone, Copy, Debug, PartialEq)]
-pub(crate) enum Comparison {
-    Before,
-    After,
-    Exactly,
-}
-
 /// A comparison operation on a `NaiveDateTime`. This is essentially a curried
 /// function (or, rather, 1 of 3 curried functions) on `date_time`.
 pub(crate) struct Time {
     /// A date-time that another date-time will be compared to.
     pub(crate) date_time: NaiveDateTime,
 
-    /// What kind of comparison to perform. See `Comparison`.
-    pub(crate) comparison: Comparison,
+    /// What kind of comparison to perform.
+    pub(crate) ordering: Ordering,
 }
 
 impl Time {
@@ -50,49 +44,46 @@ impl Time {
     ///
     /// This function also accepts the empty string as a special case, in which
     /// case it returns a `Time` indicating 0 in the Unix epoch.
-    pub(crate) fn new(string: &str) -> Result<Time, ParseError> {
+    pub(crate) fn new(string: &str) -> Result<Time, ShellError> {
         let string = string.trim();
         if string.is_empty() {
             return Ok(Time {
                 date_time: NaiveDateTime::from_timestamp_opt(0, 0).unwrap(),
-                comparison: Comparison::After,
+                ordering: Ordering::Greater,
             });
         }
 
-        let mut operator = Comparison::Exactly;
-        let mut string = string;
-        let (o, s) = string.split_at(1);
-        if ["<", ">", "="].contains(&o) {
-            operator = match o {
-                "<" => Comparison::Before,
-                ">" => Comparison::After,
-                _ => Comparison::Exactly,
-            };
-            string = s.trim();
-        }
+        let (operator, string) = string.split_at(1);
+        let operator = match operator {
+            "<" => Ok(Ordering::Less),
+            "=" => Ok(Ordering::Equal),
+            ">" => Ok(Ordering::Greater),
+            _ => Err(UsageError::new("Invalid datetime expression")),
+        }?;
+        let string = string.trim();
 
         let time = Self::from_date_time_string(string, operator);
         match time {
             Ok(time) => Ok(time),
             Err(_) => match Self::from_time_string(string, operator) {
                 Ok(time) => Ok(time),
-                Err(_) => Self::from_date_string(string, operator),
+                Err(_) => Ok(Self::from_date_string(string, operator)?),
             },
         }
     }
 
-    fn from_date_time_string(string: &str, operator: Comparison) -> Result<Time, ParseError> {
+    fn from_date_time_string(string: &str, operator: Ordering) -> Result<Time, ParseError> {
         let date_time = NaiveDateTime::parse_from_str(string, "%Y-%m-%d %H:%M:%S");
         match date_time {
             Ok(dt) => Ok(Time {
                 date_time: dt,
-                comparison: operator,
+                ordering: operator,
             }),
             Err(e) => Err(e),
         }
     }
 
-    fn from_time_string(string: &str, operator: Comparison) -> Result<Time, ParseError> {
+    fn from_time_string(string: &str, operator: Ordering) -> Result<Time, ParseError> {
         let now = Local::now();
         let time = NaiveTime::parse_from_str(string, "%H:%M:%S");
         match time {
@@ -103,14 +94,14 @@ impl Time {
                     .unwrap();
                 Ok(Time {
                     date_time,
-                    comparison: operator,
+                    ordering: operator,
                 })
             }
             Err(e) => Err(e),
         }
     }
 
-    fn from_date_string(string: &str, operator: Comparison) -> Result<Time, ParseError> {
+    fn from_date_string(string: &str, operator: Ordering) -> Result<Time, ParseError> {
         let date = NaiveDate::parse_from_str(string, "%Y-%m-%d");
         match date {
             Ok(date) => {
@@ -120,7 +111,7 @@ impl Time {
                     .unwrap();
                 Ok(Time {
                     date_time,
-                    comparison: operator,
+                    ordering: operator,
                 })
             }
             Err(e) => Err(e),
@@ -131,7 +122,7 @@ impl Time {
 #[test]
 fn parse_time() {
     let t = Time::new(">2023-01-27 12:34:56").unwrap();
-    assert_eq!(Comparison::After, t.comparison);
+    assert_eq!(Ordering::Greater, t.ordering);
     assert_eq!(2023, t.date_time.year());
     assert_eq!(1, t.date_time.month());
     assert_eq!(27, t.date_time.day());
@@ -140,7 +131,7 @@ fn parse_time() {
     assert_eq!(56, t.date_time.second());
 
     let t = Time::new("<2023-01-27").unwrap();
-    assert_eq!(Comparison::Before, t.comparison);
+    assert_eq!(Ordering::Less, t.ordering);
     assert_eq!(2023, t.date_time.year());
     assert_eq!(1, t.date_time.month());
     assert_eq!(27, t.date_time.day());
@@ -150,7 +141,7 @@ fn parse_time() {
 
     let t = Time::new("=12:34:56").unwrap();
     let now = Local::now();
-    assert_eq!(Comparison::Exactly, t.comparison);
+    assert_eq!(Ordering::Equal, t.ordering);
     assert_eq!(now.year(), t.date_time.year());
     assert_eq!(now.month(), t.date_time.month());
     assert_eq!(now.day(), t.date_time.day());
@@ -160,7 +151,7 @@ fn parse_time() {
 
     let t = Time::new(" =\n\n12:34:56 ").unwrap();
     let now = Local::now();
-    assert_eq!(Comparison::Exactly, t.comparison);
+    assert_eq!(Ordering::Equal, t.ordering);
     assert_eq!(now.year(), t.date_time.year());
     assert_eq!(now.month(), t.date_time.month());
     assert_eq!(now.day(), t.date_time.day());
