@@ -63,7 +63,7 @@ fn format_permissions(mode: u16) -> String {
     String::from_utf8(bytes).unwrap()
 }
 
-#[derive(Serialize, Debug)]
+#[derive(Serialize)]
 struct Status<'a> {
     name: &'a str,
     size: i64,
@@ -210,9 +210,9 @@ pub(crate) fn status_main(arguments: &[String]) -> ShellResult {
                 }
                 stdout.write_all(if options.json {
                     if i < count - 1 {
-                        b","
+                        b",\n"
                     } else {
-                        b""
+                        b"\n"
                     }
                 } else {
                     &options.output_record_delimiter
