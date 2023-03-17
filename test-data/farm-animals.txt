@@ -1,0 +1,4 @@
+1	mountain goat
+4	billy goats
+12	sheep
+1,749	llamas

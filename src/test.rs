@@ -75,12 +75,15 @@ test-data/goat
 
     #[test]
     fn test_files_prune_basic() {
+        // TODO BUG: These tests assume the OS orders the files the same way,
+        // which of course is not guaranteed.
         run_tests(&[
             new(
                 "files",
                 &["-p", "(?i)goat", "test-data"],
                 "test-data
 test-data/columns.txt
+test-data/farm-animals.txt
 test-data/lurp
 test-data/lurp/norp
 test-data/lurp/norp/yibb
@@ -91,6 +94,7 @@ test-data/lurp/norp/yibb
                 &["-p", "(?i)(goat|yibb)", "test-data"],
                 "test-data
 test-data/columns.txt
+test-data/farm-animals.txt
 test-data/lurp
 test-data/lurp/norp
 ",
