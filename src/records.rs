@@ -12,7 +12,8 @@ fn print_record(n: usize, record: &[u8], options: &Options) -> ShellResult {
     let mut stdout = stdout();
     if !record.is_empty() {
         if options.enumerate {
-            write!(stdout, "{:05}: ", n)?;
+            write!(stdout, "{}", n)?;
+            stdout.write_all(&options.output_field_delimiter)?;
         }
         stdout.write_all(record)?;
         stdout.write_all(&options.output_record_delimiter)?;
