@@ -33,8 +33,8 @@ syntax](https://docs.rs/regex/latest/regex/).
 records some-file.txt
 ```
 
-This is similar to POSIX `cat`, except that it will convert any new line
-sequences into your platform’s native sequence.
+This is similar to POSIX `cat`, except that it will convert any line break
+sequences into `\n`.
 
 ```
 records -d '\r\n' -o '\n' some-file.txt
@@ -55,4 +55,4 @@ existing delimiters as as syntactic metacharacters of some kind). For example,
 records -o '\0' list-of-files.txt | xargs -0 foo...
 ```
 
-(See for example `filter -h`, and the `xargs`(1) and `find`(1) manual pages.)
+See also `filter -h`, and the `xargs`(1) and `find`(1) manual pages.
