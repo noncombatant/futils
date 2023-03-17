@@ -3,31 +3,29 @@
 ## Usage
 
 ```
-records -h
-records [-n] [-l limit] [-d delimiter] [-o delimiter] [pathname [...]]
+records [-n] [-l limit] [pathname [...]]
 ```
 
 ## Description
 
 Reads the given `pathname`s (or `stdin` if none are given), splits them into
-records using the input delimiter, and prints them, delimiting them with the
-output delimiter.
+records, and prints them.
 
 ## Options
 
-* `-d`: Use the given input record `delimiter`, a regular expression. The
-  default delimiter is `r"(\r|\n)+"`.
 * `-l`: Limit the number of records printed. If `limit` is < 0, the limit is
   counted back from the last record in the input.
 * `-n`: Prefix each record with a record number.
-* `-o`: Use the given output record `delimiter`. The default delimiter is `\n`.
-
-Regular expressions use [the Rust regex library
-syntax](https://docs.rs/regex/latest/regex/).
 
 ## Additional Options
 
-    -h  Prints this help message.
+* `-d`: Set the input record delimiter, a regular expression. The default
+  delimiter is `r"(\r|\n)+"`.
+* `-h`: Prints this help message.
+* `-o`: Set the output record delimiter. The default delimiter is `\n`.
+
+Regular expressions use [the Rust regex library
+syntax](https://docs.rs/regex/latest/regex/).
 
 ## Examples
 

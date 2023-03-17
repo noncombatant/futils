@@ -3,8 +3,7 @@
 ## Usage
 
 ```
-status -h
-status [pathname [...]]
+status [-j] [pathname [...]]
 ```
 
 ## Description
@@ -29,6 +28,16 @@ The metadata elements are:
 * `blocks`: number of storage blocks used
 * `block_size`: size of storage blocks
 
+## Options
+
+* `-j`: Output JSON format.
+
 ## Additional Options
 
 * `-h`: Print this help message.
+* `-O`: Set the output field delimiter. The default delimiter is `\t`.
+* `-o`: Set the output record delimiter. The default delimiter is `\n`.
+
+## Examples
+
+TODO

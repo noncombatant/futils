@@ -11,12 +11,15 @@ futils [-j] version
 Prints the version of `futils`, metadata, and build-time configuration
 information.
 
+## Options
+
+* `-j`: Output JSON format.
+
 ## Additional Options
 
 * `-h`: Print this help message.
-* `-D`: Use the given input field `delimiter`, a regular expression. The
-  default delimiter is `r"\s+"`.
-* `-d`: Use the given input record delimiter. The default delimiter is
-  `r"(\r|\n)+"`.
-* `-O`: Use the given output field `delimiter`. The default delimiter is `\t`.
-* `-o`: Use the given output record delimiter. The default delimiter is `\n`.
+* `-D`: Set the input field delimiter, a regular expression. The default
+  delimiter is `r"\s+"`.
+* `-d`: Set the input record delimiter. The default delimiter is `r"(\r|\n)+"`.
+* `-O`: Set the output field delimiter. The default delimiter is `\t`.
+* `-o`: Set the output record delimiter. The default delimiter is `\n`.
