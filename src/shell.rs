@@ -120,7 +120,7 @@ impl From<str::Utf8Error> for ShellError {
 pub(crate) type ShellResult = Result<i32, ShellError>;
 
 /// The default list of command line flags. See `Options`, below.
-pub(crate) const DEFAULT_OPTION_SPEC: &str = "D:d:Ff:hjl:M:m:nO:o:p:st:vx:";
+pub(crate) const DEFAULT_OPTION_SPEC: &str = "aD:d:Ff:hjl:M:m:nO:o:p:st:vx:";
 
 /// These are the standard command line options for `futils` programs. Their
 /// meanings are:
