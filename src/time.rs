@@ -55,11 +55,15 @@ impl Time {
 
         let (operator, string) = string.split_at(1);
         let operator = match operator {
-            "<" => Ok(Ordering::Less),
-            "=" => Ok(Ordering::Equal),
-            ">" => Ok(Ordering::Greater),
-            _ => Err(UsageError::new("Invalid datetime expression")),
-        }?;
+            "<" => Ordering::Less,
+            "=" => Ordering::Equal,
+            ">" => Ordering::Greater,
+            _ => {
+                return Err(ShellError::Usage(UsageError::new(
+                    "Invalid datetime expression",
+                )))
+            }
+        };
         let string = string.trim();
 
         let time = Self::from_date_time_string(string, operator);
