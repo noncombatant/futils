@@ -53,3 +53,19 @@ for each argument:
   for each record:
     write_columns or write_json
 ```
+
+Here's a quirk: '\0' is not a valid regex:
+
+```
+$ files -o '\0' | records -d '\0' -n
+regex parse error:
+    \0
+    ^^
+error: backreferences are not supported
+```
+
+So you have to do `-d '\x00`, which is kind of annoying. Document this in
+examples. And is there any way around it?
+
+Move all universal options to the bottom of help messages, and don’t mention
+them in the synopsis (to keep it short). Mention this in the main help page.
