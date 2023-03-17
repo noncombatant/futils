@@ -1,4 +1,4 @@
-# `files` - print the pathnames of matching files
+# `files` — print the pathnames of matching files
 
 ## Usage
 

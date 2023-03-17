@@ -1,4 +1,4 @@
-# `map` - transform records of input
+# `map` — transform records of input
 
 ## Usage
 

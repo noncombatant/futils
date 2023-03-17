@@ -1,4 +1,4 @@
-# `filter` - filter records from files by patterns
+# `filter` — filter records from files by patterns
 
 ## Usage
 

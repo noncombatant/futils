@@ -1,4 +1,4 @@
-# `records` - splits a file into records
+# `records` — splits a file into records
 
 ## Usage
 

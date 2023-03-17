@@ -1,4 +1,4 @@
-# `status` - print the status of files
+# `status` — print the status of files
 
 ## Usage
 

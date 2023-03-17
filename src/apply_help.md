@@ -1,4 +1,4 @@
-# `apply` - apply commands to records of input
+# `apply` — apply commands to records of input
 
 ## Usage
 

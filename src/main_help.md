@@ -1,4 +1,4 @@
-# `futils` - functional shell utilities
+# `futils` — functional shell utilities
 
 ## Usage
 
