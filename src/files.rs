@@ -11,7 +11,7 @@ use crate::util::{help, run_command};
 // TODO: Add a depth option, and parallelize -x.
 
 /// Command line usage help.
-pub(crate) const FILES_HELP_MESSAGE: &str = include_str!("files_help.md");
+pub(crate) const FILES_HELP_PAGE: &str = include_str!("files_help.md");
 
 fn is_hidden(e: &DirEntry) -> bool {
     match e.path().to_str() {
@@ -134,7 +134,7 @@ fn print_matches(pathname: &str, options: &Options) -> ShellResult {
 pub(crate) fn files_main(arguments: &[String]) -> ShellResult {
     let (options, arguments) = parse_options(arguments)?;
     if options.help {
-        help(0, FILES_HELP_MESSAGE);
+        help(0, FILES_HELP_PAGE);
     }
 
     let mut pathnames = vec![".".to_string()];

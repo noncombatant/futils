@@ -42,7 +42,7 @@ parse the string as “YYYY-MM-DD HH:MM:SS”, then as “HH:MM:SS”, then as
 
 ## Additional Options
 
-* `-h`: Print this help message.
+* `-h`: Print this help page.
 * `-o`: Set the output record delimiter. The default delimiter is `\n`.
 * `-v`: Print the standard output of commands given with the `-x` option. (By
   default, `files` only prints their standard error.

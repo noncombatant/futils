@@ -7,7 +7,7 @@ use crate::stream_splitter::{is_not_delimiter, StreamSplitter};
 use crate::util::{help, run_command};
 
 /// Command line usage help.
-pub(crate) const MAP_HELP_MESSAGE: &str = include_str!("map_help.md");
+pub(crate) const MAP_HELP_PAGE: &str = include_str!("map_help.md");
 
 /// Iterates over `StreamSplitter` and runs each of the `commands` on each
 /// record, with each field of the record as a distinct argument to the command.
@@ -40,7 +40,7 @@ fn map(splitter: StreamSplitter, options: &Options) -> ShellResult {
 pub(crate) fn map_main(arguments: &[String]) -> ShellResult {
     let (options, arguments) = parse_options(arguments)?;
     if options.help {
-        help(0, MAP_HELP_MESSAGE);
+        help(0, MAP_HELP_PAGE);
     }
 
     let mut status = 0;

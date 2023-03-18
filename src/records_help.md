@@ -1,4 +1,4 @@
-# `records` — splits a file into records
+# `records` — splits a stream into records
 
 ## Usage
 
@@ -21,7 +21,7 @@ records, and prints them.
 
 * `-d`: Set the input record delimiter, a regular expression. The default
   delimiter is `r"(\r|\n)+"`.
-* `-h`: Prints this help message.
+* `-h`: Print this help page.
 * `-o`: Set the output record delimiter. The default delimiter is `\n`.
 
 Regular expressions use [the Rust regex library

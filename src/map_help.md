@@ -21,7 +21,7 @@ each input record.
 
 ## Additional Options
 
-* `-h`: Print this help message.
+* `-h`: Print this help page.
 * `-D`: Set the input field delimiter, a regular expression. The default
   delimiter is `r"\s+"`.
 * `-d`: Set the input record delimiter. The default delimiter is `r"(\r|\n)+"`.

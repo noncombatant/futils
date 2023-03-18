@@ -34,7 +34,7 @@ The metadata elements are:
 
 ## Additional Options
 
-* `-h`: Print this help message.
+* `-h`: Print this help page.
 * `-O`: Set the output field delimiter. The default delimiter is `\t`.
 * `-o`: Set the output record delimiter. The default delimiter is `\n`.
 

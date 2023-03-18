@@ -69,3 +69,5 @@ examples. And is there any way around it?
 
 Move all universal options to the bottom of help messages, and don’t mention
 them in the synopsis (to keep it short). Mention this in the main help page.
+
+Add a See Also section to every help page.

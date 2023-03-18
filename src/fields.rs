@@ -8,7 +8,7 @@ use crate::stream_splitter::{is_not_delimiter, Record, StreamSplitter};
 use crate::util::help;
 
 /// Command line usage help.
-pub(crate) const FIELDS_HELP_MESSAGE: &str = include_str!("fields_help.md");
+pub(crate) const FIELDS_HELP_PAGE: &str = include_str!("fields_help.md");
 
 // TODO: Implement support for named fields.
 
@@ -105,11 +105,11 @@ fn print_record(
 pub(crate) fn fields_main(arguments: &[String]) -> ShellResult {
     let (options, arguments) = parse_options(arguments)?;
     if options.help {
-        help(0, FIELDS_HELP_MESSAGE);
+        help(0, FIELDS_HELP_PAGE);
     }
 
     if options.invert_fields && options.fields.is_empty() {
-        help(-1, FIELDS_HELP_MESSAGE);
+        help(-1, FIELDS_HELP_PAGE);
     }
 
     // TODO: To support named fields, use an `enum Field` here with `isize` and

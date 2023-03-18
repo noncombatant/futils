@@ -23,7 +23,7 @@ each input record.
 ## Additional Options
 
 * `-d`: Set the input record delimiter. The default delimiter is `r"(\r|\n)+"`.
-* `-h`: Print this help message.
+* `-h`: Print this help page.
 * `-o`: Set the output record delimiter. The default delimiter is `\n`.
 
 ## Examples

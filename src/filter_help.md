@@ -27,7 +27,7 @@ syntax](https://docs.rs/regex/latest/regex/).
 
 ## Additional Options
 
-* `-h`: Print this help message.
+* `-h`: Print this help page.
 * `-d`: Set the input record delimiter. The default delimiter is `r"(\r|\n)+"`.
 * `-O`: Set the output field delimiter. The default delimiter is `\t`.
 * `-o`: Set the output record delimiter. The default delimiter is `\n`.
