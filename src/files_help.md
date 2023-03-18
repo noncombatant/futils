@@ -83,4 +83,5 @@ TODO: Update those with the quick-exit feature once it’s specified.
 ## See Also
 
 * `futils help`
-* TODO
+* `find`(1)
+* `ls`(1)
