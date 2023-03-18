@@ -32,6 +32,14 @@ each input record.
 Regular expressions use [the Rust regex library
 syntax](https://docs.rs/regex/latest/regex/).
 
+## Exit Status
+
+| Exit Status    | Meaning            |
+|----------------|--------------------|
+|              0 | Success            |
+|             -1 | Generic failure    |
+| greater than 1 | Number of errors   |
+
 ## Examples
 
 TODO

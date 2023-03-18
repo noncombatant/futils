@@ -38,6 +38,14 @@ The metadata elements are:
 * `-O`: Set the output field delimiter. The default delimiter is `\t`.
 * `-o`: Set the output record delimiter. The default delimiter is `\n`.
 
+## Exit Status
+
+| Exit Status    | Meaning            |
+|----------------|--------------------|
+|              0 | Success            |
+|             -1 | Generic failure    |
+| greater than 1 | Number of errors   |
+
 ## Examples
 
 TODO

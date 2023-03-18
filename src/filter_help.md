@@ -34,6 +34,14 @@ syntax](https://docs.rs/regex/latest/regex/).
 * `-v`: Print the standard output of commands given with the `-x` option. (By
   default, `filter` only prints their standard error.
 
+## Exit Status
+
+| Exit Status    | Meaning            |
+|----------------|--------------------|
+|              0 | Success            |
+|             -1 | Generic failure    |
+| greater than 1 | Number of errors   |
+
 ## Examples
 
 Consider a file called farm-animals.txt containing the following records:

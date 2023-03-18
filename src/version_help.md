@@ -21,6 +21,10 @@ information.
 * `-O`: Set the output field delimiter. The default delimiter is `\t`.
 * `-o`: Set the output record delimiter. The default delimiter is `\n`.
 
+## Exit Status
+
+0 on success, or -1 if there was an error.
+
 ## Examples
 
 ```

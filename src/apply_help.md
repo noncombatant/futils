@@ -26,6 +26,14 @@ each input record.
 * `-h`: Print this help page.
 * `-o`: Set the output record delimiter. The default delimiter is `\n`.
 
+## Exit Status
+
+| Exit Status    | Meaning            |
+|----------------|--------------------|
+|              0 | Success            |
+|             -1 | Generic failure    |
+| greater than 1 | Number of errors   |
+
 ## Examples
 
 TODO
