@@ -50,5 +50,4 @@ for each argument:
 
 A quick-exit option for `filter`, like `grep -l`.
 
-`files -x 'filter -p json' src/*.rs` doesn’t currently work because `filter`
-doesn’t fail if it didn’t find any matches. Fix that.
+Add an Exit Status section to all help pages.

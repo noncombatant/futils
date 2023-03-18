@@ -9,16 +9,19 @@ pub(crate) const FILTER_HELP: &str = include_str!("filter_help.md");
 
 fn print_matches(pathname: &str, splitter: StreamSplitter, options: &Options) -> ShellResult {
     let mut stdout = stdout();
+    let mut matched = false;
     'outer: for r in splitter.filter(is_not_delimiter) {
         for re in &options.prune_expressions {
             if re.is_match(&r.bytes) {
                 continue 'outer;
             }
+            matched = true;
         }
         for re in &options.match_expressions {
             if !re.is_match(&r.bytes) {
                 continue 'outer;
             }
+            matched = true;
         }
         for command in &options.match_commands {
             match run_command(command, &r.bytes, options.verbose) {
@@ -26,6 +29,7 @@ fn print_matches(pathname: &str, splitter: StreamSplitter, options: &Options) ->
                     if status != 0 {
                         continue 'outer;
                     }
+                    matched = true;
                 }
                 Err(e) => {
                     eprintln!(
@@ -43,7 +47,7 @@ fn print_matches(pathname: &str, splitter: StreamSplitter, options: &Options) ->
         stdout.write_all(&r.bytes)?;
         stdout.write_all(&options.output_record_delimiter)?;
     }
-    Ok(0)
+    Ok(if matched { 0 } else { 1 })
 }
 
 /// Runs the `filter` command on `arguments`.
@@ -61,11 +65,14 @@ pub(crate) fn filter_main(arguments: &[String]) -> ShellResult {
         let pathname = file.pathname.unwrap_or(&STDIN_PATHNAME);
         match file.read {
             Ok(mut read) => {
-                print_matches(
+                let s = print_matches(
                     pathname,
                     StreamSplitter::new(&mut read, &options.input_record_delimiter),
                     &options,
                 )?;
+                if s != 0 {
+                    status += 1;
+                }
             }
             Err(e) => {
                 eprintln!("{}: {}", pathname, e);

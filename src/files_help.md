@@ -55,10 +55,19 @@ To show all files that contain a record matching “foo”:
 files -x 'filter -m foo' ...
 ```
 
-To show all files that do not contain a record matching “foo”:
+To show all files that contain a record not matching “foo”:
 
 ```
 files -x 'filter -p foo' ...
+```
+
+To show all files that do not contain a record matching “foo”, we need to treat
+the whole file as a single record, and then try to prune (`-p`) that record. So
+we need to come up with an input record delimiter that never appears in the
+file; `\x00` often works for this purpose, for text files at least. For example:
+
+```
+files -x 'filter -d '\x00' -p foo' ...
 ```
 
 TODO: Update those with the quick-exit feature once it’s specified.
