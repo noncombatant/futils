@@ -50,6 +50,14 @@ apply -h
 files -h
 ```
 
+The help pages are always marked up in Markdown format. You can pipe them to a
+Markdown translator or display program:
+
+```
+records -h | glow -p
+fields -h | md-to-html > fields-help.html
+```
+
 ## Concepts
 
 Most `futils` programs operate on **streams** of bytes, usually either from
@@ -91,3 +99,8 @@ Some command line flags are common to most `futils` programs. For example:
 * `-j`: Output JSON format.
 * `-O`: Set the output field delimiter. The default delimiter is `\t`.
 * `-o`: Set the output record delimiter. The default delimiter is `\n`.
+
+## See Also
+
+* `futils help`
+* TODO

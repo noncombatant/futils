@@ -85,7 +85,7 @@ something ... | vd -f json -b -o -
 terminal window in a beautiful way. It’s nice for viewing `futils`’ help, e.g.
 
 ```sh
-files -h | glow
+files -h | glow -p
 ```
 
 ## Development
