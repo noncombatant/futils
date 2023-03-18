@@ -128,6 +128,7 @@ pub(crate) fn fields_main(arguments: &[String]) -> ShellResult {
         match file.read {
             Ok(mut read) => {
                 for (n, r) in StreamSplitter::new(&mut read, &options.input_record_delimiter)
+                    .map_while(|r| r.ok())
                     .filter(is_not_delimiter)
                     .enumerate()
                 {

@@ -15,7 +15,7 @@ pub(crate) const APPLY_HELP: &str = include_str!("apply_help.md");
 fn apply(splitter: StreamSplitter, options: &Options) -> ShellResult {
     let mut stdout = stdout();
     let mut status = 0;
-    for r in splitter.filter(is_not_delimiter) {
+    for r in splitter.map_while(|r| r.ok()).filter(is_not_delimiter) {
         for command in &options.match_commands {
             match run_command(command, &r.bytes, options.verbose) {
                 Ok(s) => {

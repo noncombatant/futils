@@ -10,7 +10,7 @@ pub(crate) const FILTER_HELP: &str = include_str!("filter_help.md");
 fn print_matches(pathname: &str, splitter: StreamSplitter, options: &Options) -> ShellResult {
     let mut stdout = stdout();
     let mut matched = false;
-    'outer: for r in splitter.filter(is_not_delimiter) {
+    'outer: for r in splitter.map_while(|r| r.ok()).filter(is_not_delimiter) {
         for re in &options.prune_expressions {
             if re.is_match(&r.bytes) {
                 continue 'outer;

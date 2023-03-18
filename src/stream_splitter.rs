@@ -96,13 +96,12 @@ impl<'a> StreamSplitter<'a> {
 }
 
 impl<'a> Iterator for StreamSplitter<'a> {
-    type Item = Record;
+    type Item = Result<Record>;
 
     fn next(&mut self) -> Option<Self::Item> {
         if let Err(e) = self.fill() {
-            // TODO: `Self::Item` should be `Result<Record, E>`.
             eprintln!("{}", e);
-            return None;
+            return Some(Err(e));
         }
 
         if self.start == self.end && self.eof {
@@ -125,30 +124,30 @@ impl<'a> Iterator for StreamSplitter<'a> {
                         // delimiter end next time.
                         let start = self.start;
                         self.start += m.end();
-                        Record {
+                        Ok(Record {
                             is_delimiter: true,
                             bytes: self.buffer[start..self.start].to_vec(),
-                        }
+                        })
                     }
                 } else {
                     // We matched a record. Set us up to start at the delimiter
                     // start next time.
                     let start = self.start;
                     self.start += m.start();
-                    Record {
+                    Ok(Record {
                         is_delimiter: false,
                         bytes: self.buffer[start..self.start].to_vec(),
-                    }
+                    })
                 };
                 Some(r)
             }
             None => {
                 let start = self.start;
                 self.start = self.end;
-                Some(Record {
+                Some(Ok(Record {
                     is_delimiter: false,
                     bytes: self.buffer[start..self.end].to_vec(),
-                })
+                }))
             }
         }
     }
@@ -171,19 +170,19 @@ mod tests {
         let delimiter = Regex::new(r"\s+").unwrap();
         let mut splitter = StreamSplitter::new(&mut file, &delimiter);
 
-        let r = splitter.next().unwrap();
+        let r = splitter.next().unwrap().unwrap();
         assert_eq!(false, r.is_delimiter);
         assert_eq!(b"hello", r.bytes.as_slice());
 
-        let r = splitter.next().unwrap();
+        let r = splitter.next().unwrap().unwrap();
         assert_eq!(true, r.is_delimiter);
         assert_eq!(b"\n\n", r.bytes.as_slice());
 
-        let r = splitter.next().unwrap();
+        let r = splitter.next().unwrap().unwrap();
         assert_eq!(false, r.is_delimiter);
         assert_eq!(b"world", r.bytes.as_slice());
 
-        let r = splitter.next().unwrap();
+        let r = splitter.next().unwrap().unwrap();
         assert_eq!(true, r.is_delimiter);
         assert_eq!(b"\n", r.bytes.as_slice());
 
@@ -203,15 +202,15 @@ mod tests {
         let delimiter = Regex::new(r"\s+").unwrap();
         let mut splitter = StreamSplitter::new(&mut file, &delimiter);
 
-        let r = splitter.next().unwrap();
+        let r = splitter.next().unwrap().unwrap();
         assert_eq!(false, r.is_delimiter);
         assert_eq!(b"hello", r.bytes.as_slice());
 
-        let r = splitter.next().unwrap();
+        let r = splitter.next().unwrap().unwrap();
         assert_eq!(true, r.is_delimiter);
         assert_eq!(spaces, r.bytes);
 
-        let r = splitter.next().unwrap();
+        let r = splitter.next().unwrap().unwrap();
         assert_eq!(false, r.is_delimiter);
         assert_eq!(b"world", r.bytes.as_slice());
 

@@ -36,6 +36,7 @@ pub(crate) fn records_main(arguments: &[String]) -> ShellResult {
         match file.read {
             Ok(mut read) => {
                 let records = StreamSplitter::new(&mut read, &options.input_record_delimiter)
+                    .map_while(|r| r.ok())
                     .filter(is_not_delimiter);
                 let records = match options.limit {
                     Some(limit) => {
