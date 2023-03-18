@@ -64,15 +64,8 @@ regex parse error:
 error: backreferences are not supported
 ```
 
-So you have to do `-d '\x00`, which is kind of annoying. Document this in
+So you have to do `-d '\x00'`, which is kind of annoying. Document this in
 examples. And is there any way around it?
 
 Move all universal options to the bottom of help messages, and don’t mention
 them in the synopsis (to keep it short). Mention this in the main help page.
-
-```
-futils version | filter -m major
-<stdin>	Version (major)	0
-```
-
-I don't love the `<stdin>`.
