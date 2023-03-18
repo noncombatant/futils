@@ -40,13 +40,11 @@ All help messages give examples.
 Programs that succeed exit with status 0. Non-zero statuses indicate program
 failure.
 
-+-------------+--------------------+
-| Exit Status | Meaning            |
-+-------------+--------------------+
-|           0 | Success            |
-|          -1 | Generic failure    |
-|         > 1 | Number of errors   |
-+-------------+--------------------+
+| Exit Status    | Meaning            |
+|----------------|--------------------|
+|              0 | Success            |
+|             -1 | Generic failure    |
+| greater than 1 | Number of errors   |
 
 When a program fails, it always prints a meaningful error message to `stderr`.
 If a program prints its help message as a result of failure, it prints to

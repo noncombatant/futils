@@ -34,7 +34,7 @@ records some-file.txt
 ```
 
 This is similar to POSIX `cat`, except that it will convert any line break
-sequences into `\n`.
+sequences into `\n`. This is due to the default values of `-d` and `-o`.
 
 ```
 records -d '\r\n' -o '\n' some-file.txt
