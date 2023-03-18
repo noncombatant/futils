@@ -91,4 +91,5 @@ filter -x 'check-if-hungry --dinner' farm-animals.txt
 ## See Also
 
 * `futils help`
-* TODO
+* `grep`(1)
+* `find`(1)
