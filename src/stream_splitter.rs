@@ -1,7 +1,7 @@
 use regex::bytes::Regex;
 use std::io::{Read, Result};
 
-/// A *record* lexed from the input that `StreamSplitter` is splitting.
+/// A record lexed from the input that `StreamSplitter` is splitting.
 #[derive(Debug)]
 pub(crate) struct Record {
     /// `StreamSplitter` yields both data records and the bytes of the delimiter
@@ -22,9 +22,8 @@ pub(crate) fn is_not_delimiter(r: &Record) -> bool {
     !r.is_delimiter
 }
 
-/// An `Iterator` that lexes a `Read`, searching for the arbitrary `delimiter`,
-/// and yields `Record`s containing (alternately) data bytes and delimiter
-/// bytes.
+/// An `Iterator` that lexes a `Read`, searching for the `delimiter`, and yields
+/// `Record`s containing (alternately) data bytes and delimiter bytes.
 ///
 /// This implementation incurs a new allocation when yielding a `Record`, and
 /// the caller owns it. An alternate implementation using generic associated
@@ -32,9 +31,7 @@ pub(crate) fn is_not_delimiter(r: &Record) -> bool {
 /// implement `Iterator`.
 ///
 /// This implementation uses a private buffer that may, in pathological cases,
-/// grow large (depending on how long it takes to match `delimiter`). The
-/// starting size of the buffer is an implementation detail that could be
-/// exposed if callers end up needing it.
+/// grow large (depending on how long it takes to match `delimiter`).
 pub(crate) struct StreamSplitter<'a> {
     reader: &'a mut dyn Read,
     delimiter: &'a Regex,
@@ -55,10 +52,21 @@ impl<'a> StreamSplitter<'a> {
     /// Creates a new `StreamSplitter` that will split the bytes of `reader`
     /// into `Record`s.
     pub(crate) fn new(reader: &'a mut dyn Read, delimiter: &'a Regex) -> Self {
+        Self::with_capacity(reader, delimiter, DEFAULT_CAPACITY)
+    }
+
+    /// Creates a new `StreamSplitter` that will split the bytes of `reader`
+    /// into `Record`s. The internal buffer will be pre-allocated with
+    /// at least `capacity` `u8`s of storage.
+    pub(crate) fn with_capacity(
+        reader: &'a mut dyn Read,
+        delimiter: &'a Regex,
+        capacity: usize,
+    ) -> Self {
         StreamSplitter {
             reader,
             delimiter,
-            buffer: vec![0; DEFAULT_CAPACITY],
+            buffer: vec![0; capacity],
             start: 0,
             end: 0,
             eof: false,
