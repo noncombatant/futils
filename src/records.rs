@@ -2,7 +2,7 @@ use itertools::Either;
 use std::io::{stdout, Write};
 
 use crate::shell::{parse_options, FileOpener, Options, ShellResult, STDIN_PATHNAME};
-use crate::stream_splitter::{is_not_delimiter, StreamSplitter};
+use crate::stream_splitter::{is_not_delimiter, Record, StreamSplitter};
 use crate::util::help;
 
 /// Command line usage help.
@@ -40,14 +40,22 @@ pub(crate) fn records_main(arguments: &[String]) -> ShellResult {
                     .filter(is_not_delimiter);
                 let records = match options.limit {
                     Some(limit) => {
-                        if limit >= 0 {
+                        Either::Right(if limit >= 0 {
                             Either::Right(records.take(limit as usize))
                         } else {
-                            // Need to `impl DoubleEndedIterator for StreamSplitter`
-                            // for this to work:
-                            //Either::Right(records.rev().take(limit.abs() as usize))
-                            unimplemented!()
-                        }
+                            // TODO: For best efficiency — not reading the
+                            // entire stream first when not necessary — we will
+                            // probably want to implement `DoubleEndedIterator`
+                            // for `StreamSplitter`.
+                            Either::Left(
+                                records
+                                    .collect::<Vec<Record>>()
+                                    .into_iter()
+                                    .rev()
+                                    .take(limit.unsigned_abs())
+                                    .rev(),
+                            )
+                        })
                     }
                     None => Either::Left(records),
                 };

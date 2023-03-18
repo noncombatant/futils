@@ -63,9 +63,26 @@ existing delimiters as as syntactic metacharacters of some kind). For example,
 records -o '\0' list-of-files.txt | xargs -0 foo...
 ```
 
-See also `filter -h`, and the `xargs`(1) and `find`(1) manual pages.
+With its `-l` option, `records` can work somewhat like `head` and `tail`.
+Positive limits work like `head`, while negative limits work like `tail`. Try
+these examples:
+
+```
+head -n5 your-file.txt
+records -l5 your-file.txt
+tail -n5 your-file.txt
+records -l-5 your-file.txt
+```
+
+Note that `head` and `tail` yield *lines*, including empty ones, while `records`
+yields only *non-empty* records. TODO: `records` and `fields` should maybe have
+an option to print input record delimiters, too, for full feature parity.
 
 ## See Also
 
 * `futils help`
-* TODO
+* `filter -h`
+* `xargs`(1)
+* `find`(1)
+* `head`(1)
+* `tail`(1)
