@@ -55,6 +55,7 @@ Markdown translator or display program:
 
 ```
 records -h | glow -p
+map -h | bat -l md
 fields -h | md-to-html > fields-help.html
 ```
 

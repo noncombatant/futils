@@ -88,6 +88,13 @@ terminal window in a beautiful way. It’s nice for viewing `futils`’ help, e.
 files -h | glow -p
 ```
 
+[`bat`](https://github.com/sharkdp/bat) works like a version of `cat` or `less`
+that does syntax highlighting. It’s also good for viewing help pages:
+
+```
+filter -h | bat -l md
+```
+
 ## Development
 
 Every `pub` identifier has a Rustdoc comment. Rustdoc is always well-formed
