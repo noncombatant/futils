@@ -7,6 +7,7 @@ mod files;
 mod filter;
 mod map;
 mod records;
+mod reduce;
 mod shell;
 mod status;
 mod stream_splitter;
@@ -21,6 +22,7 @@ use files::{files_main, FILES_HELP};
 use filter::{filter_main, FILTER_HELP};
 use map::{map_main, MAP_HELP};
 use records::{records_main, RECORDS_HELP};
+use reduce::{reduce_main, REDUCE_HELP};
 use status::{status_main, STATUS_HELP};
 use util::{file_name, help};
 use version::{version_main, VERSION_HELP};
@@ -78,6 +80,7 @@ fn main() {
                 "filter" => help(0, FILTER_HELP),
                 "map" => help(0, MAP_HELP),
                 "records" => help(0, RECORDS_HELP),
+                "reduce" => help(0, REDUCE_HELP),
                 "status" => help(0, STATUS_HELP),
                 "version" => help(0, VERSION_HELP),
                 &_ => help(-1, MAIN_HELP),
@@ -92,6 +95,7 @@ fn main() {
         "filter" => filter_main(&arguments),
         "map" => map_main(&arguments),
         "records" => records_main(&arguments),
+        "reduce" => reduce_main(&arguments),
         "status" => status_main(&arguments),
         "version" => version_main(&arguments),
         _ => {

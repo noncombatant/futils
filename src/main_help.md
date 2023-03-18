@@ -21,6 +21,7 @@ the following programs:
 * `help`
 * `map`
 * `records`
+* `reduce`
 * `status`
 * `version`
 
