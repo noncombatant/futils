@@ -72,35 +72,35 @@ impl<'a> StreamSplitter<'a> {
             eof: false,
         }
     }
-}
 
-/// Fills the `StreamSplitter`’s buffer, growing it if it is already full.
-fn fill(s: &mut StreamSplitter) -> Result<()> {
-    if s.end == s.buffer.capacity() {
-        if s.start == s.end {
-            // We have consumed the buffer. Reset it:
-            s.start = 0;
-            s.end = 0;
-        } else {
-            // The buffer is full. To read more, we must grow it:
-            s.buffer.resize(2 * s.buffer.capacity(), 0);
+    /// Fills the `StreamSplitter`’s buffer, growing it if it is already full.
+    fn fill(&mut self) -> Result<()> {
+        if self.end == self.buffer.capacity() {
+            if self.start == self.end {
+                // We have consumed the buffer. Reset it:
+                self.start = 0;
+                self.end = 0;
+            } else {
+                // The buffer is full. To read more, we must grow it:
+                self.buffer.resize(2 * self.buffer.capacity(), 0);
+            }
         }
+        let cap = self.buffer.capacity();
+        let n = self.reader.read(&mut self.buffer[self.end..cap])?;
+        self.end += n;
+        if n == 0 {
+            self.eof = true;
+        }
+        Ok(())
     }
-    let cap = s.buffer.capacity();
-    let n = s.reader.read(&mut s.buffer[s.end..cap])?;
-    s.end += n;
-    if n == 0 {
-        s.eof = true;
-    }
-    Ok(())
 }
 
 impl<'a> Iterator for StreamSplitter<'a> {
     type Item = Record;
 
     fn next(&mut self) -> Option<Self::Item> {
-        if let Err(e) = fill(self) {
-            // TODO: This is not great.
+        if let Err(e) = self.fill() {
+            // TODO: `Self::Item` should be `Result<Record, E>`.
             eprintln!("{}", e);
             return None;
         }
