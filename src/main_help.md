@@ -100,7 +100,44 @@ Some command line flags are common to most `futils` programs. For example:
 * `-O`: Set the output field delimiter. The default delimiter is `\t`.
 * `-o`: Set the output record delimiter. The default delimiter is `\n`.
 
+### Matching Input And Output Delimiters
+
+Say you wanted to use `futils` to do the equivalent of the classic pipeline
+
+```
+find ... -print0 | xargs -0 ...
+```
+
+In this example, `find` uses `NUL` (`\0`) as an output record delimiter, and
+`xargs` uses it as an input record delimiter. You might think the equivalent
+with `futils` would be:
+
+```
+files -o '\0' ... | apply -d '\0' ...
+```
+
+However, `\0` is not a valid regular expression. You’ll get an error message
+like this:
+
+```
+regex parse error:
+    \0
+    ^^
+error: backreferences are not supported
+```
+
+Instead, express the input delimiter as a valid Rust regular expression; in the
+case of `NUL`, the hexadecimal byte literal `\x00` works:
+
+```
+files -o '\0' ... | apply -d '\x00' ...
+```
+
+This is a bit annoying. TODO: Consider whether to treat strings that don’t parse
+as regexes as string literals instead. That could lead to problems; could: print
+the error and continue anyway; print the error and ask the person if they want
+to continue anyway.
+
 ## See Also
 
-* `futils help`
 * TODO

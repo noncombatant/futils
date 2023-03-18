@@ -49,7 +49,19 @@ parse the string as “YYYY-MM-DD HH:MM:SS”, then as “HH:MM:SS”, then as
 
 ## Examples
 
-TODO
+To show all files that contain a record matching “foo”:
+
+```
+files -x 'filter -m foo' ...
+```
+
+To show all files that do not contain a record matching “foo”:
+
+```
+files -x 'filter -p foo' ...
+```
+
+TODO: Update those with the quick-exit feature once it’s specified.
 
 ## See Also
 

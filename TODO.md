@@ -1,7 +1,7 @@
 # TODO
 
 More programs: add `join` (like `join`(1)), `foldr`, `foldl`, `sum`, `zip`,
-`reduce`, if reasonable. E.g.:
+`reduce`, `reverse`, if reasonable. E.g.:
 
 > reduce(function, sequence[, initial]) -> value
 >
@@ -12,11 +12,13 @@ More programs: add `join` (like `join`(1)), `foldr`, `foldl`, `sum`, `zip`,
 > the sequence in the calculation, and serves as a default when the sequence is
 > empty.
 
-Add JSON input and output to all commands, either by default or with `-j`.
+Enable JSON output for all commands with `-j`.
 
-Tests for everything.
+Enable JSON input for all commands with `-J`.
 
-Rustdoc for all `pub` identifiers.
+Unit and integration tests for everything.
+
+Rustdoc for all top-level and `pub` identifiers.
 
 Make sure that when options can be given more than once, the help strings for
 every program note this.
@@ -26,7 +28,7 @@ Hard to do safely and correctly, and therefore fun?
 
 Rayon for e.g. `files`, et c.?
 
-Parallelize `-x`, for sure.
+Parallelize `-x` when appropriate.
 
 Consider switching to using `clap` for parsing options, et c. This is related to
 the overall problem of `OsString` vs. `String` for arguments, options,
@@ -34,15 +36,7 @@ pathnames, et c.
 
 Use David Cook’s non-copying `StreamSplitter`.
 
-Provide an option for `records` to print delimiters, too.
-
-Implement `map`. Consider e.g. `ls | apply -x status -v`: it creates a new array
-(of size 1) of records from the output of `status` for each record in the input.
-By contrast, `ls | map -x status` would produce an array of _N_ records for each
-record in the input (and no `-v`). That is, `apply` is mostly about the
-side-effect; printing is a tangential option. By contrast, `map` is about
-transforming records. Additionally, `map` should pass each field of the record
-as a distinct argument to the `-x` command.
+Provide an option for `records` (and `fields`?) to print delimiters, too.
 
 Every program/most programs should take the following form:
 
@@ -54,15 +48,7 @@ for each argument:
     write_columns or write_json
 ```
 
-Here's a quirk: '\0' is not a valid regex:
+A quick-exit option for `filter`, like `grep -l`.
 
-```
-$ files -o '\0' | records -d '\0' -n
-regex parse error:
-    \0
-    ^^
-error: backreferences are not supported
-```
-
-So you have to do `-d '\x00'`, which is kind of annoying. Document this in
-examples. And is there any way around it?
+`files -x 'filter -p json' src/*.rs` doesn’t currently work because `filter`
+doesn’t fail if it didn’t find any matches. Fix that.
