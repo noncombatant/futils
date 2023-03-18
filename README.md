@@ -107,6 +107,6 @@ Never `panic!`.
 ### TODO
 
 There are TODOs in 3 places: in comments in the source code, in [the TODO
-document](TODO.md), and stated as assertions in this document. Whenever behavior
+document](TODO.md), and stated as assertions in documentation. Whenever behavior
 or functionality as documented differs from the implementation, the
 documentation is probably right.
