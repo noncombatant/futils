@@ -107,6 +107,9 @@ pub(crate) fn fields_main(arguments: &[String]) -> ShellResult {
     if options.help {
         help(0, FIELDS_HELP_PAGE);
     }
+    if options.json {
+        unimplemented!()
+    }
 
     if options.invert_fields && options.fields.is_empty() {
         help(-1, FIELDS_HELP_PAGE);

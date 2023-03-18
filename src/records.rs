@@ -27,6 +27,9 @@ pub(crate) fn records_main(arguments: &[String]) -> ShellResult {
     if options.help {
         help(0, RECORDS_HELP_PAGE);
     }
+    if options.json {
+        unimplemented!()
+    }
 
     let mut status = 0;
     for file in FileOpener::new(arguments) {

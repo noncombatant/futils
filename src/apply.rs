@@ -42,6 +42,9 @@ pub(crate) fn apply_main(arguments: &[String]) -> ShellResult {
     if options.help {
         help(0, APPLY_HELP_PAGE);
     }
+    if options.json {
+        unimplemented!()
+    }
 
     let mut status = 0;
     for file in FileOpener::new(arguments) {

@@ -136,6 +136,9 @@ pub(crate) fn files_main(arguments: &[String]) -> ShellResult {
     if options.help {
         help(0, FILES_HELP_PAGE);
     }
+    if options.json {
+        unimplemented!()
+    }
 
     let mut pathnames = vec![".".to_string()];
     if !arguments.is_empty() {
