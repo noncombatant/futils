@@ -49,5 +49,3 @@ for each argument:
 ```
 
 A quick-exit option for `filter`, like `grep -l`.
-
-Add an Exit Status section to all help pages.
