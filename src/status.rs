@@ -11,7 +11,7 @@ use crate::time::format_utc_timestamp;
 use crate::util::help;
 
 /// Command line usage help.
-pub(crate) const STATUS_HELP_PAGE: &str = include_str!("status_help.md");
+pub(crate) const STATUS_HELP: &str = include_str!("status_help.md");
 
 fn format_uid(uid: u32) -> String {
     match get_user_by_uid(uid) {
@@ -145,7 +145,7 @@ impl<'a> Status<'a> {
 pub(crate) fn status_main(arguments: &[String]) -> ShellResult {
     let (options, arguments) = parse_options(arguments)?;
     if options.help {
-        help(0, STATUS_HELP_PAGE);
+        help(0, STATUS_HELP);
     }
 
     let arguments = if arguments.is_empty() {

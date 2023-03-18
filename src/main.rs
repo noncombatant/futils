@@ -15,18 +15,18 @@ mod time;
 mod util;
 mod version;
 
-use apply::{apply_main, APPLY_HELP_PAGE};
-use fields::{fields_main, FIELDS_HELP_PAGE};
-use files::{files_main, FILES_HELP_PAGE};
-use filter::{filter_main, FILTER_HELP_PAGE};
-use map::{map_main, MAP_HELP_PAGE};
-use records::{records_main, RECORDS_HELP_PAGE};
-use status::{status_main, STATUS_HELP_PAGE};
+use apply::{apply_main, APPLY_HELP};
+use fields::{fields_main, FIELDS_HELP};
+use files::{files_main, FILES_HELP};
+use filter::{filter_main, FILTER_HELP};
+use map::{map_main, MAP_HELP};
+use records::{records_main, RECORDS_HELP};
+use status::{status_main, STATUS_HELP};
 use util::{file_name, help};
-use version::{version_main, VERSION_HELP_PAGE};
+use version::{version_main, VERSION_HELP};
 
 /// Command line usage help.
-const HELP_PAGE: &str = include_str!("main_help.md");
+const MAIN_HELP: &str = include_str!("main_help.md");
 
 fn reset_sigpipe() {
     if cfg!(unix) {
@@ -62,25 +62,25 @@ fn main() {
         arguments.remove(0);
     }
     if arguments.is_empty() {
-        help(-1, HELP_PAGE);
+        help(-1, MAIN_HELP);
     } else {
         program_name = file_name(&arguments[0]).unwrap();
     }
 
     if program_name == "help" || program_name == "-h" || program_name == "--help" {
         if arguments.len() < 2 {
-            help(0, HELP_PAGE);
+            help(0, MAIN_HELP);
         } else {
             match arguments[1].as_str() {
-                "apply" => help(0, APPLY_HELP_PAGE),
-                "fields" => help(0, FIELDS_HELP_PAGE),
-                "files" => help(0, FILES_HELP_PAGE),
-                "filter" => help(0, FILTER_HELP_PAGE),
-                "map" => help(0, MAP_HELP_PAGE),
-                "records" => help(0, RECORDS_HELP_PAGE),
-                "status" => help(0, STATUS_HELP_PAGE),
-                "version" => help(0, VERSION_HELP_PAGE),
-                &_ => help(-1, HELP_PAGE),
+                "apply" => help(0, APPLY_HELP),
+                "fields" => help(0, FIELDS_HELP),
+                "files" => help(0, FILES_HELP),
+                "filter" => help(0, FILTER_HELP),
+                "map" => help(0, MAP_HELP),
+                "records" => help(0, RECORDS_HELP),
+                "status" => help(0, STATUS_HELP),
+                "version" => help(0, VERSION_HELP),
+                &_ => help(-1, MAIN_HELP),
             };
         }
     }
@@ -95,7 +95,7 @@ fn main() {
         "status" => status_main(&arguments),
         "version" => version_main(&arguments),
         _ => {
-            help(-1, HELP_PAGE);
+            help(-1, MAIN_HELP);
             unreachable!()
         }
     } {

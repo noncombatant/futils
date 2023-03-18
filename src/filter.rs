@@ -5,7 +5,7 @@ use crate::stream_splitter::{is_not_delimiter, StreamSplitter};
 use crate::util::{help, run_command};
 
 /// Command line usage help.
-pub(crate) const FILTER_HELP_PAGE: &str = include_str!("filter_help.md");
+pub(crate) const FILTER_HELP: &str = include_str!("filter_help.md");
 
 fn print_matches(pathname: &str, splitter: StreamSplitter, options: &Options) -> ShellResult {
     let mut stdout = stdout();
@@ -50,7 +50,7 @@ fn print_matches(pathname: &str, splitter: StreamSplitter, options: &Options) ->
 pub(crate) fn filter_main(arguments: &[String]) -> ShellResult {
     let (options, arguments) = parse_options(arguments)?;
     if options.help {
-        help(0, FILTER_HELP_PAGE);
+        help(0, FILTER_HELP);
     }
     if options.json {
         unimplemented!()

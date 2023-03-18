@@ -6,7 +6,7 @@ use crate::stream_splitter::{is_not_delimiter, StreamSplitter};
 use crate::util::help;
 
 /// Command line usage help.
-pub(crate) const RECORDS_HELP_PAGE: &str = include_str!("records_help.md");
+pub(crate) const RECORDS_HELP: &str = include_str!("records_help.md");
 
 fn print_record(n: usize, record: &[u8], options: &Options) -> ShellResult {
     let mut stdout = stdout();
@@ -25,7 +25,7 @@ fn print_record(n: usize, record: &[u8], options: &Options) -> ShellResult {
 pub(crate) fn records_main(arguments: &[String]) -> ShellResult {
     let (options, arguments) = parse_options(arguments)?;
     if options.help {
-        help(0, RECORDS_HELP_PAGE);
+        help(0, RECORDS_HELP);
     }
     if options.json {
         unimplemented!()

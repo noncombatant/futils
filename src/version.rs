@@ -6,7 +6,7 @@ use crate::shell::{parse_options, ShellResult};
 use crate::util::help;
 
 /// Command line usage help.
-pub(crate) const VERSION_HELP_PAGE: &str = include_str!("version_help.md");
+pub(crate) const VERSION_HELP: &str = include_str!("version_help.md");
 
 #[derive(Serialize)]
 struct VersionDatum<'a> {
@@ -107,7 +107,7 @@ const VERSION_DATA: [VersionDatum; 15] = [
 pub(crate) fn version_main(arguments: &[String]) -> ShellResult {
     let (options, arguments) = parse_options(arguments)?;
     if options.help || !arguments.is_empty() {
-        help(0, VERSION_HELP_PAGE);
+        help(0, VERSION_HELP);
     }
 
     if options.json {
