@@ -1,8 +1,8 @@
 use atty::Stream;
 use serde::Serialize;
-use std::io::{stdout, Error, Write};
+use std::io::{stdout, Write};
 
-use crate::shell::{parse_options, ShellResult};
+use crate::shell::{parse_options, ShellError, ShellResult};
 use crate::util::help;
 
 /// Command line usage help.
@@ -15,23 +15,23 @@ struct VersionDatum<'a> {
 }
 
 impl VersionDatum<'_> {
-    // TODO: This should take `output` as a `dyn io::Write`.
-    fn write_json(&self) -> Result<(), Error> {
-        let to_json = if atty::is(Stream::Stdout) {
+    fn write_json(&self, output: &mut dyn Write, pretty: bool) -> Result<(), ShellError> {
+        let to_json = if pretty {
             serde_json::to_string_pretty
         } else {
             serde_json::to_string
         };
-        // TODO: Don't `unwrap` here; handle the error.
-        let json = to_json(self).unwrap();
-        let mut output = stdout();
+        let json = to_json(self)?;
         output.write_all(json.as_bytes())?;
         Ok(())
     }
 
-    // TODO: This should take `output` as a `dyn io::Write`.
-    fn write_columns(&self, field_delimiter: &[u8], record_delimiter: &[u8]) -> Result<(), Error> {
-        let mut output = stdout();
+    fn write_columns(
+        &self,
+        output: &mut dyn Write,
+        field_delimiter: &[u8],
+        record_delimiter: &[u8],
+    ) -> Result<(), ShellError> {
         output.write_all(self.key.as_bytes())?;
         output.write_all(field_delimiter)?;
         output.write_all(self.value.as_bytes())?;
@@ -114,13 +114,14 @@ pub(crate) fn version_main(arguments: &[String]) -> ShellResult {
         let count = VERSION_DATA.len();
         println!("[");
         for (i, d) in VERSION_DATA.iter().enumerate() {
-            d.write_json()?;
+            d.write_json(&mut stdout(), atty::is(Stream::Stdout))?;
             stdout().write_all(if i < count - 1 { b",\n" } else { b"\n" })?;
         }
         println!("]");
     } else {
         for d in VERSION_DATA {
             d.write_columns(
+                &mut stdout(),
                 &options.output_field_delimiter,
                 &options.output_record_delimiter,
             )?;

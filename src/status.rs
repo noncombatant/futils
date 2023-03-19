@@ -2,11 +2,11 @@ use atty::Stream;
 use nix::sys::stat::{stat, FileStat, Mode};
 use serde::Serialize;
 use std::fs::read_dir;
-use std::io::{stdout, Error, Write};
+use std::io::{stdout, Write};
 use std::path::Path;
 use users::{get_group_by_gid, get_user_by_uid};
 
-use crate::shell::{parse_options, ShellResult};
+use crate::shell::{parse_options, ShellError, ShellResult};
 use crate::time::format_utc_timestamp;
 use crate::util::help;
 
@@ -104,9 +104,12 @@ impl<'a> Status<'a> {
         }
     }
 
-    // TODO: This should take `output` as a `dyn io::Write`.
-    fn write_columns(&self, field_delimiter: &[u8], record_delimiter: &[u8]) -> Result<(), Error> {
-        let mut output = stdout();
+    fn write_columns(
+        &self,
+        output: &mut dyn Write,
+        field_delimiter: &[u8],
+        record_delimiter: &[u8],
+    ) -> Result<(), ShellError> {
         output.write_all(self.name.as_bytes())?;
         output.write_all(field_delimiter)?;
         output.write_all(format!("{}", self.size).as_bytes())?;
@@ -139,6 +142,17 @@ impl<'a> Status<'a> {
         output.write_all(record_delimiter)?;
         Ok(())
     }
+
+    fn write_json(&self, output: &mut dyn Write, pretty: bool) -> Result<(), ShellError> {
+        let to_json = if pretty {
+            serde_json::to_string_pretty
+        } else {
+            serde_json::to_string
+        };
+        let json = to_json(self)?;
+        output.write_all(json.as_bytes())?;
+        Ok(())
+    }
 }
 
 /// Runs the `status` command on `arguments`.
@@ -160,14 +174,7 @@ pub(crate) fn status_main(arguments: &[String]) -> ShellResult {
         Vec::from(arguments)
     };
 
-    let to_json = if atty::is(Stream::Stdout) {
-        serde_json::to_string_pretty
-    } else {
-        serde_json::to_string
-    };
-
     let mut stdout = stdout();
-
     let mut status = 0;
     let count = arguments.len();
     if options.json && count != 1 {
@@ -198,11 +205,10 @@ pub(crate) fn status_main(arguments: &[String]) -> ShellResult {
             Ok(s) => {
                 let s = Status::new(&s, pathname);
                 if options.json {
-                    // TODO: Don't `unwrap` here; handle the error.
-                    let json = to_json(&s).unwrap();
-                    stdout.write_all(json.as_bytes())?;
+                    s.write_json(&mut stdout, atty::is(Stream::Stdout))?;
                 } else {
                     s.write_columns(
+                        &mut stdout,
                         &options.output_field_delimiter,
                         &options.output_record_delimiter,
                     )?;
