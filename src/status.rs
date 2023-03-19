@@ -173,7 +173,6 @@ pub(crate) fn status_main(arguments: &[String]) -> ShellResult {
     if options.json && count != 1 {
         println!("[");
     } else if !options.json {
-        // TODO: Document -O and -j
         let headers = vec![
             b"Name".as_slice(),
             b"Size".as_slice(),
