@@ -20,4 +20,5 @@ install:
 	ln -f $(INSTALL_ROOT)/bin/futils $(INSTALL_ROOT)/bin/filter
 	ln -f $(INSTALL_ROOT)/bin/futils $(INSTALL_ROOT)/bin/map
 	ln -f $(INSTALL_ROOT)/bin/futils $(INSTALL_ROOT)/bin/records
+	ln -f $(INSTALL_ROOT)/bin/futils $(INSTALL_ROOT)/bin/reduce
 	ln -f $(INSTALL_ROOT)/bin/futils $(INSTALL_ROOT)/bin/status
