@@ -22,6 +22,8 @@ produces the numeric sum of all input records.
   default, `reduce` only prints their standard error.)
 * `-x`: Run `command` on each record of input.
 
+TODO: Describe what happens if multiple `-x`s are given.
+
 ## Additional Options
 
 * `-d`: Set the input record delimiter, a regular expression. The default

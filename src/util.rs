@@ -1,8 +1,10 @@
-use rustc_lexer::unescape::unescape_str;
 use std::io::{stderr, stdout, Write};
 use std::path::Path;
 use std::process::{exit, Command};
-use std::str;
+use std::str::{self, from_utf8, FromStr};
+
+use bigdecimal::BigDecimal;
+use rustc_lexer::unescape::unescape_str;
 
 use crate::shell::{ShellError, ShellResult};
 
@@ -66,6 +68,11 @@ pub(crate) fn unescape_backslashes(input: &str) -> Result<String, ShellError> {
 /// `basename`, so we do, too.)
 pub(crate) fn file_name(pathname: &str) -> Option<&str> {
     Path::new(pathname).file_name()?.to_str()
+}
+
+/// Parses `value` and returns a `BigDecimal`.
+pub(crate) fn parse_number(value: &[u8]) -> Result<BigDecimal, ShellError> {
+    Ok(BigDecimal::from_str(from_utf8(value)?)?)
 }
 
 #[cfg(test)]
