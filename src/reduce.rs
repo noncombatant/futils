@@ -13,11 +13,7 @@ use crate::util::{help, parse_number};
 pub(crate) const REDUCE_HELP: &str = include_str!("reduce_help.md");
 
 /// Returns the result of applying `command` to `accumulator` and `record`.
-fn apply_command(
-    accumulator: &[u8],
-    command: &str,
-    record: &[u8],
-) -> Result<Vec<u8>, ShellError> {
+fn apply_command(accumulator: &[u8], command: &str, record: &[u8]) -> Result<Vec<u8>, ShellError> {
     match command {
         "+" | "-" | "*" | "/" => {
             let a = parse_number(accumulator)?;
