@@ -14,7 +14,9 @@ categories = ["command-line-utilities"]
 [dependencies]
 
 atty = "*"
+bigdecimal = "*"
 chrono = "*"
+derive_more = "*"
 getopt = "*"
 itertools ="*"
 lazy_static = "*"

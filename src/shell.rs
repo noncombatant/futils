@@ -1,13 +1,19 @@
-use chrono::format;
-use getopt::Opt;
-use lazy_static::lazy_static;
-use regex::bytes::Regex;
-use rustc_lexer::unescape::EscapeError;
+//! A simple framework for command line programs: error types, option parsing,
+//! and assorted gadgets.
+
 use std::fmt::{Debug, Display};
 use std::fs::File;
 use std::io::{self, stdin, Read};
 use std::num::ParseIntError;
 use std::str;
+
+use bigdecimal::ParseBigDecimalError;
+use chrono::format;
+use derive_more::{Display, From};
+use getopt::Opt;
+use lazy_static::lazy_static;
+use regex::bytes::Regex;
+use rustc_lexer::unescape::EscapeError;
 
 use crate::time::Time;
 use crate::util::unescape_backslashes;
@@ -16,8 +22,9 @@ use crate::util::unescape_backslashes;
 /// shell commands, enabling many `main` `fn`s for shell programs to declare
 /// they return it and easily use the `?` operator. We can extend this `enum`
 /// arbitrarily, as needed.
-#[derive(Debug)]
+#[derive(Debug, From)]
 pub(crate) enum ShellError {
+    BigDecimal(ParseBigDecimalError),
     Escape(EscapeError),
     Getopt(getopt::Error),
     IntParse(ParseIntError),
@@ -28,9 +35,12 @@ pub(crate) enum ShellError {
     Utf8(str::Utf8Error),
 }
 
+// TODO: Could we #[derive(derive_more::Display)] for EscapeError? If so, we
+// could remove this.
 impl Display for ShellError {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> Result<(), std::fmt::Error> {
         match self {
+            ShellError::BigDecimal(e) => Display::fmt(e, f),
             ShellError::Escape(e) => write!(f, "{:?}", e),
             ShellError::Getopt(e) => Display::fmt(e, f),
             ShellError::IntParse(e) => Display::fmt(e, f),
@@ -46,7 +56,7 @@ impl Display for ShellError {
 impl std::error::Error for ShellError {}
 
 /// Return this error for invalid invocations of shell commands.
-#[derive(Debug)]
+#[derive(Display, Debug)]
 pub(crate) struct UsageError {
     details: String,
 }
@@ -57,60 +67,6 @@ impl UsageError {
         UsageError {
             details: details.to_string(),
         }
-    }
-}
-
-impl Display for UsageError {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> Result<(), std::fmt::Error> {
-        write!(f, "{}", self.details)
-    }
-}
-
-impl From<ParseIntError> for ShellError {
-    fn from(e: ParseIntError) -> ShellError {
-        ShellError::IntParse(e)
-    }
-}
-
-impl From<io::Error> for ShellError {
-    fn from(e: io::Error) -> ShellError {
-        ShellError::Io(e)
-    }
-}
-
-impl From<EscapeError> for ShellError {
-    fn from(e: EscapeError) -> ShellError {
-        ShellError::Escape(e)
-    }
-}
-
-impl From<getopt::Error> for ShellError {
-    fn from(e: getopt::Error) -> ShellError {
-        ShellError::Getopt(e)
-    }
-}
-
-impl From<regex::Error> for ShellError {
-    fn from(e: regex::Error) -> ShellError {
-        ShellError::Regex(e)
-    }
-}
-
-impl From<format::ParseError> for ShellError {
-    fn from(e: format::ParseError) -> ShellError {
-        ShellError::TimeParse(e)
-    }
-}
-
-impl From<UsageError> for ShellError {
-    fn from(e: UsageError) -> ShellError {
-        ShellError::Usage(e)
-    }
-}
-
-impl From<str::Utf8Error> for ShellError {
-    fn from(e: str::Utf8Error) -> ShellError {
-        ShellError::Utf8(e)
     }
 }
 
