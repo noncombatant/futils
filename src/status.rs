@@ -1,9 +1,12 @@
-use atty::Stream;
-use nix::sys::stat::{stat, FileStat, Mode};
-use serde::Serialize;
+//! The `futils status` command.
+
 use std::fs::read_dir;
 use std::io::{stdout, Write};
 use std::path::Path;
+
+use atty::Stream;
+use nix::sys::stat::{stat, FileStat, Mode};
+use serde::Serialize;
 use users::{get_group_by_gid, get_user_by_uid};
 
 use crate::shell::{parse_options, ShellError, ShellResult};

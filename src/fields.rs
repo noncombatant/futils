@@ -1,3 +1,5 @@
+//! The `futils fields` command.
+
 use std::io::{stdout, Write};
 use std::num::ParseIntError;
 

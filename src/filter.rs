@@ -1,3 +1,5 @@
+//! The `futils filter` command.
+
 use std::io::{stdout, Write};
 
 use crate::shell::{parse_options, FileOpener, Options, ShellResult, STDIN_PATHNAME};

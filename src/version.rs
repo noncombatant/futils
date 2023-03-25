@@ -1,6 +1,9 @@
+//! The `futils version` command.
+
+use std::io::{stdout, Write};
+
 use atty::Stream;
 use serde::Serialize;
-use std::io::{stdout, Write};
 
 use crate::shell::{parse_options, ShellError, ShellResult};
 use crate::util::help;

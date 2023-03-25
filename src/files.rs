@@ -1,7 +1,10 @@
-use chrono::NaiveDateTime;
+//! The `futils files` command.
+
 use std::cmp::Ordering;
 use std::io::{stdout, Write};
 use std::time::SystemTime;
+
+use chrono::NaiveDateTime;
 use walkdir::{DirEntry, WalkDir};
 
 use crate::shell::{parse_options, Options, ShellResult};

@@ -1,3 +1,5 @@
+//! The `futils` command.
+
 use std::env;
 use std::process::exit;
 

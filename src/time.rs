@@ -1,7 +1,11 @@
+//! A not-very-good way to represent and compare times provided as text strings
+//! on the command line.
+
+use std::cmp::Ordering;
+
 use chrono::format::ParseError;
 use chrono::{DateTime, NaiveDate, NaiveDateTime, NaiveTime, Utc};
 use chrono::{Datelike, Local, Timelike};
-use std::cmp::Ordering;
 
 use crate::shell::{ShellError, UsageError};
 

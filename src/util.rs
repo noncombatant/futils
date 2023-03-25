@@ -1,3 +1,5 @@
+//! Utilities (of dubious utility).
+
 use std::io::{stderr, stdout, Write};
 use std::path::Path;
 use std::process::{exit, Command};
@@ -81,13 +83,13 @@ mod tests {
 
     #[test]
     fn test_unescape_backslashes() {
-        let r = unescape_backslashes("\\0").expect("Should parse");
+        let r = unescape_backslashes("\\0").unwrap();
         assert_eq!("\0", r);
-        let r = unescape_backslashes("\\ngoat\\t").expect("Should parse");
+        let r = unescape_backslashes("\\ngoat\\t").unwrap();
         assert_eq!("\ngoat\t", r);
-        let r = unescape_backslashes("\\ngoat\t").expect("Should parse");
+        let r = unescape_backslashes("\\ngoat\t").unwrap();
         assert_eq!("\ngoat	", r);
-        let r = unescape_backslashes("\ngoat\t").expect("Should parse");
+        let r = unescape_backslashes("\ngoat\t").unwrap();
         assert_eq!(
             "
 goat	",

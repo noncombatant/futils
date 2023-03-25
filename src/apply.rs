@@ -1,4 +1,4 @@
-//! The `apply` command.
+//! The `futils apply` command.
 
 use std::io::{stdout, Write};
 

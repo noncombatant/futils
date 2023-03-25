@@ -1,4 +1,5 @@
-//! TODO
+//! An `Iterator` that yields `Records` from streams, delimited by regular
+//! expressions.
 
 use std::io::{Read, Result, Write};
 //use std::str::from_utf8;

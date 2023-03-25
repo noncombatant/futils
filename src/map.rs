@@ -1,4 +1,4 @@
-//! The `map` command.
+//! The `futils map` command.
 
 use std::io::{stdout, Write};
 

@@ -1,4 +1,4 @@
-//! The `reduce` command.
+//! The `futils reduce` command.
 
 use std::io::{stdout, Write};
 use std::str::from_utf8;

@@ -1,4 +1,4 @@
-//! TODO
+//! The `futils records` command.
 
 use std::io::{stdout, Error, Write};
 
