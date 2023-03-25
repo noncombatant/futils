@@ -11,7 +11,7 @@ use bigdecimal::ParseBigDecimalError;
 use chrono::format;
 use derive_more::{Display, From};
 use getopt::Opt;
-use lazy_static::lazy_static;
+use once_cell::sync::Lazy;
 use regex::bytes::Regex;
 use rustc_lexer::unescape::EscapeError;
 
@@ -219,10 +219,7 @@ pub(crate) fn parse_options(arguments: &[String]) -> Result<(Options, &[String])
     Ok((options, arguments))
 }
 
-lazy_static! {
-    /// A placeholder pathname for the standard input.
-    pub(crate) static ref STDIN_PATHNAME: String = "<stdin>".to_string();
-}
+pub(crate) static STDIN_PATHNAME: Lazy<String> = Lazy::new(|| "<stdin>".to_string());
 
 /// An open `Read`.
 pub(crate) struct OpenFile<'a> {

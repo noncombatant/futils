@@ -1,7 +1,8 @@
-use lazy_static::lazy_static;
-use regex::bytes::Regex;
 use std::io::{stdout, Write};
 use std::num::ParseIntError;
+
+use once_cell::sync::Lazy;
+use regex::bytes::Regex;
 
 use crate::shell::{parse_options, FileOpener, Options, ShellResult, STDIN_PATHNAME};
 use crate::stream_splitter::{is_not_delimiter, Record, StreamSplitter};
@@ -12,12 +13,9 @@ pub(crate) const FIELDS_HELP: &str = include_str!("fields_help.md");
 
 // TODO: Implement support for named fields.
 
-lazy_static! {
-    static ref SPACE_CADET: Regex = Regex::new(r"\S").unwrap();
-}
-
 /// Returns the index of the first byte that is not a space character.
 fn skip_leading_spaces(record: &[u8]) -> Option<usize> {
+    static SPACE_CADET: Lazy<Regex> = Lazy::new(|| Regex::new(r"\S").unwrap());
     SPACE_CADET.find(record).map(|m| m.start())
 }
 
