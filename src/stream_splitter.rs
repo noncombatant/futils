@@ -1,8 +1,14 @@
+//! TODO
+
+use std::io::{Read, Result, Write};
+
 use regex::bytes::Regex;
-use std::io::{Read, Result};
+use serde::Serialize;
 
 /// A record lexed from the input that `StreamSplitter` is splitting.
-#[derive(Debug)]
+// TODO: We need to `impl Serialize` ourselves, to get strings when `bytes` is
+// valid UTF-8.
+#[derive(Debug, Serialize)]
 pub(crate) struct Record {
     /// `StreamSplitter` yields both data records and the bytes of the delimiter
     /// that was matched when splitting. Use this field to see which you got.
@@ -10,6 +16,31 @@ pub(crate) struct Record {
 
     /// The bytes lexed from the input.
     pub(crate) bytes: Vec<u8>,
+}
+
+// TODO: Remove this allow as soon as it's not dead code.
+#[allow(dead_code)]
+impl Record {
+    /// TODO: Document
+    pub(crate) fn write_columns(&self, output: &mut dyn Write, delimiter: &[u8]) -> Result<()> {
+        if !self.bytes.is_empty() {
+            output.write_all(&self.bytes)?;
+            output.write_all(delimiter)?;
+        }
+        Ok(())
+    }
+
+    /// TODO: Document
+    pub(crate) fn write_json(&self, output: &mut dyn Write, pretty: bool) -> Result<()> {
+        let to_json = if pretty {
+            serde_json::to_string_pretty
+        } else {
+            serde_json::to_string
+        };
+        let json = to_json(self)?;
+        output.write_all(json.as_bytes())?;
+        Ok(())
+    }
 }
 
 /// A convenience for callers who want to filter out delimiters when iterating
