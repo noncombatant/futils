@@ -6,7 +6,7 @@ use std::str::from_utf8;
 use crate::shell::{
     parse_options, FileOpener, Options, ShellError, ShellResult, UsageError, STDIN_PATHNAME,
 };
-use crate::stream_splitter::{is_not_delimiter, StreamSplitter};
+use crate::stream_splitter::StreamSplitter;
 use crate::util::{help, parse_number};
 
 /// Command line usage help.
@@ -40,7 +40,7 @@ fn apply_command(accumulator: &[u8], command: &str, record: &[u8]) -> Result<Vec
 fn reduce(splitter: StreamSplitter, options: &Options) -> ShellResult {
     let mut stdout = stdout();
     let mut status = 0;
-    let mut splitter = splitter.map_while(|r| r.ok()).filter(is_not_delimiter);
+    let mut splitter = splitter.map_while(|r| r.ok());
     let mut result = match splitter.next() {
         Some(r) => r.bytes,
         None => return Err(ShellError::Usage(UsageError::new("No input"))),

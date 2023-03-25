@@ -7,7 +7,7 @@ use once_cell::sync::Lazy;
 use regex::bytes::Regex;
 
 use crate::shell::{parse_options, FileOpener, Options, ShellResult, STDIN_PATHNAME};
-use crate::stream_splitter::{is_not_delimiter, Record, StreamSplitter};
+use crate::stream_splitter::{Record, StreamSplitter};
 use crate::util::help;
 
 /// Command line usage help.
@@ -129,7 +129,6 @@ pub(crate) fn fields_main(arguments: &[String]) -> ShellResult {
             Ok(mut read) => {
                 for (n, r) in StreamSplitter::new(&mut read, &options.input_record_delimiter)
                     .map_while(|r| r.ok())
-                    .filter(is_not_delimiter)
                     .enumerate()
                 {
                     print_record(

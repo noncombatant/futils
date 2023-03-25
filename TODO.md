@@ -41,4 +41,6 @@ for each argument:
 
 A quick-exit option for `filter`, like `grep -l`.
 
-Add `-n` to filter to print record numbers.
+Add `-n` to `filter` to print record numbers. This requires returning the
+matched delimiter as a field of the `Record`, and allowing for empty
+`Record.bytes`.

@@ -3,7 +3,7 @@
 use std::io::{stdout, Write};
 
 use crate::shell::{parse_options, FileOpener, Options, ShellResult, STDIN_PATHNAME};
-use crate::stream_splitter::{is_not_delimiter, StreamSplitter};
+use crate::stream_splitter::StreamSplitter;
 use crate::util::{help, run_command};
 
 /// Command line usage help.
@@ -12,7 +12,11 @@ pub(crate) const FILTER_HELP: &str = include_str!("filter_help.md");
 fn print_matches(pathname: &str, splitter: StreamSplitter, options: &Options) -> ShellResult {
     let mut stdout = stdout();
     let mut matched = false;
-    'outer: for r in splitter.map_while(|r| r.ok()).filter(is_not_delimiter) {
+    'outer: for (n, r) in splitter
+        .map_while(|r| r.ok())
+        .filter(|r| !r.bytes.is_empty())
+        .enumerate()
+    {
         for re in &options.prune_expressions {
             if re.is_match(&r.bytes) {
                 continue 'outer;
@@ -44,8 +48,13 @@ fn print_matches(pathname: &str, splitter: StreamSplitter, options: &Options) ->
                 }
             }
         }
+
         stdout.write_all(pathname.as_bytes())?;
         stdout.write_all(&options.output_field_delimiter)?;
+        if options.enumerate {
+            write!(stdout, "{}", n + 1)?;
+            stdout.write_all(&options.output_field_delimiter)?;
+        }
         stdout.write_all(&r.bytes)?;
         stdout.write_all(&options.output_record_delimiter)?;
     }

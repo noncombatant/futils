@@ -7,7 +7,7 @@ use itertools::Either;
 use serde::Serialize;
 
 use crate::shell::{parse_options, FileOpener, Options, ShellResult, STDIN_PATHNAME};
-use crate::stream_splitter::{is_not_delimiter, Record, StreamSplitter};
+use crate::stream_splitter::{Record, StreamSplitter};
 use crate::util::help;
 
 /// Command line usage help.
@@ -23,7 +23,7 @@ impl EnumeratedRecord {
     fn write_columns(&self, output: &mut dyn Write, options: &Options) -> Result<(), Error> {
         if !self.r.bytes.is_empty() {
             if let Some(n) = self.n {
-                write!(output, "{}", n)?;
+                write!(output, "{}", n + 1)?;
                 output.write_all(&options.output_field_delimiter)?;
             }
             output.write_all(&self.r.bytes)?;
@@ -58,8 +58,7 @@ pub(crate) fn records_main(arguments: &[String]) -> ShellResult {
         match file.read {
             Ok(mut read) => {
                 let records = StreamSplitter::new(&mut read, &options.input_record_delimiter)
-                    .map_while(|r| r.ok())
-                    .filter(is_not_delimiter);
+                    .map_while(|r| r.ok());
                 let records = match options.limit {
                     Some(limit) => {
                         Either::Right(if limit >= 0 {
