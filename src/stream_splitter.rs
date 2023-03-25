@@ -1,20 +1,25 @@
 //! TODO
 
 use std::io::{Read, Result, Write};
+//use std::str::from_utf8;
 
 use regex::bytes::Regex;
 use serde::Serialize;
+//use serde::ser::Serializer;
+//use serde_with::{BytesOrString, serde_as};
+
+//use serde::ser::{Serialize, Serializer, SerializeStruct};
 
 /// A record lexed from the input that `StreamSplitter` is splitting.
-// TODO: We need to `impl Serialize` ourselves, to get strings when `bytes` is
-// valid UTF-8.
-#[derive(Debug, Serialize)]
+//#[serde_as]
+#[derive(Serialize)]
 pub(crate) struct Record {
     /// `StreamSplitter` yields both data records and the bytes of the delimiter
     /// that was matched when splitting. Use this field to see which you got.
     pub(crate) is_delimiter: bool,
 
     /// The bytes lexed from the input.
+    //#[serde_as(as = "BytesOrString")]
     pub(crate) bytes: Vec<u8>,
 }
 
@@ -42,6 +47,25 @@ impl Record {
         Ok(())
     }
 }
+
+//impl Serialize for Record {
+//    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+//    where
+//        S: Serializer,
+//    {
+//        let mut state = serializer.serialize_struct("Record", 2)?;
+//        state.serialize_field("is_delimiter", &self.is_delimiter)?;
+//        match from_utf8(&self.bytes) {
+//            Ok(s) => {
+//                state.serialize_field("bytes", s)?;
+//            }
+//            Err(_) => {
+//                state.serialize_field("bytes", &self.bytes)?;
+//            }
+//        }
+//        state.end()
+//    }
+//}
 
 /// A convenience for callers who want to filter out delimiters when iterating
 /// over a `StreamSplitter`:

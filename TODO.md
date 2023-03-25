@@ -40,3 +40,5 @@ for each argument:
 ```
 
 A quick-exit option for `filter`, like `grep -l`.
+
+use serde_json::to_writer[_pretty]
