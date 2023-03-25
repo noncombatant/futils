@@ -13,6 +13,9 @@ every program note this.
 Create a `trash` program that puts things in a trashcan, for 2-phase delete?
 Hard to do safely and correctly, and therefore fun?
 
+Create a Markdown printing function and program, like `glow`, and use it when
+printing all help messages.
+
 Rayon for e.g. `files`, et c.?
 
 Parallelize `-x` when appropriate.
