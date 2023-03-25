@@ -41,6 +41,6 @@ for each argument:
 
 A quick-exit option for `filter`, like `grep -l`.
 
-Add `-n` to `filter` to print record numbers. This requires returning the
-matched delimiter as a field of the `Record`, and allowing for empty
-`Record.bytes`.
+Consider making the default input record separator be just 1 line break
+sequence. This more closely matches the traditional Unix line = record behavior,
+but people still have the flexibility of providing something else.

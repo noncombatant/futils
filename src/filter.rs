@@ -9,13 +9,16 @@ use crate::util::{help, run_command};
 /// Command line usage help.
 pub(crate) const FILTER_HELP: &str = include_str!("filter_help.md");
 
+/// TODO: Define an `EnumeratedMatch`, like `EnumeratedRecord`, and give it
+/// `write_{columns,json}`.
+
 fn print_matches(pathname: &str, splitter: StreamSplitter, options: &Options) -> ShellResult {
     let mut stdout = stdout();
     let mut matched = false;
     'outer: for (n, r) in splitter
         .map_while(|r| r.ok())
-        .filter(|r| !r.bytes.is_empty())
         .enumerate()
+        .filter(|pair| !pair.1.bytes.is_empty())
     {
         for re in &options.prune_expressions {
             if re.is_match(&r.bytes) {

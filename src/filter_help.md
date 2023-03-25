@@ -29,10 +29,13 @@ syntax](https://docs.rs/regex/latest/regex/).
 
 * `-h`: Print this help page.
 * `-d`: Set the input record delimiter. The default delimiter is `r"(\r|\n)+"`.
+* `-n`: Prefix each match with its record number.
 * `-O`: Set the output field delimiter. The default delimiter is `\t`.
 * `-o`: Set the output record delimiter. The default delimiter is `\n`.
 * `-v`: Print the standard output of commands given with the `-x` option. (By
   default, `filter` only prints their standard error.
+
+TODO: Support `-l` as in `records`.
 
 ## Exit Status
 
