@@ -145,13 +145,11 @@ impl<'a> Status<'a> {
 
     fn write_json(&self, output: &mut dyn Write, pretty: bool) -> Result<(), ShellError> {
         let to_json = if pretty {
-            serde_json::to_string_pretty
+            serde_json::to_writer_pretty
         } else {
-            serde_json::to_string
+            serde_json::to_writer
         };
-        let json = to_json(self)?;
-        output.write_all(json.as_bytes())?;
-        Ok(())
+        Ok(to_json(output, &self)?)
     }
 }
 

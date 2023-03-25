@@ -35,12 +35,11 @@ impl EnumeratedRecord {
     fn write_json(&self, output: &mut dyn Write, pretty: bool) -> Result<(), Error> {
         if !self.r.bytes.is_empty() {
             let to_json = if pretty {
-                serde_json::to_string_pretty
+                serde_json::to_writer_pretty
             } else {
-                serde_json::to_string
+                serde_json::to_writer
             };
-            let json = to_json(self)?;
-            output.write_all(json.as_bytes())?;
+            to_json(output, &self)?;
         }
         Ok(())
     }
@@ -82,6 +81,10 @@ pub(crate) fn records_main(arguments: &[String]) -> ShellResult {
                     }
                     None => Either::Left(records),
                 };
+
+                if options.json {
+                    println!("[");
+                }
                 for er in records.enumerate().map(|pair| EnumeratedRecord {
                     n: if options.enumerate {
                         Some(pair.0)
@@ -92,10 +95,13 @@ pub(crate) fn records_main(arguments: &[String]) -> ShellResult {
                 }) {
                     if options.json {
                         er.write_json(&mut stdout, atty::is(Stream::Stdout))?;
+                        stdout.write_all(b",\n")?;
                     } else {
                         er.write_columns(&mut stdout, &options)?;
                     }
-                    //print_record(&mut stdout(), n + 1, &r.bytes, &options)?;
+                }
+                if options.json {
+                    println!("{{}}]");
                 }
             }
             Err(e) => {

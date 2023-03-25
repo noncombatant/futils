@@ -41,4 +41,4 @@ for each argument:
 
 A quick-exit option for `filter`, like `grep -l`.
 
-use serde_json::to_writer[_pretty]
+Add `-n` to filter to print record numbers.

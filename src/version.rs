@@ -17,13 +17,11 @@ struct VersionDatum<'a> {
 impl VersionDatum<'_> {
     fn write_json(&self, output: &mut dyn Write, pretty: bool) -> Result<(), ShellError> {
         let to_json = if pretty {
-            serde_json::to_string_pretty
+            serde_json::to_writer_pretty
         } else {
-            serde_json::to_string
+            serde_json::to_writer
         };
-        let json = to_json(self)?;
-        output.write_all(json.as_bytes())?;
-        Ok(())
+        Ok(to_json(output, &self)?)
     }
 
     fn write_columns(
@@ -110,18 +108,19 @@ pub(crate) fn version_main(arguments: &[String]) -> ShellResult {
         help(0, VERSION_HELP);
     }
 
+    let mut stdout = stdout();
     if options.json {
         let count = VERSION_DATA.len();
         println!("[");
         for (i, d) in VERSION_DATA.iter().enumerate() {
-            d.write_json(&mut stdout(), atty::is(Stream::Stdout))?;
-            stdout().write_all(if i < count - 1 { b",\n" } else { b"\n" })?;
+            d.write_json(&mut stdout, atty::is(Stream::Stdout))?;
+            stdout.write_all(if i < count - 1 { b",\n" } else { b"\n" })?;
         }
         println!("]");
     } else {
         for d in VERSION_DATA {
             d.write_columns(
-                &mut stdout(),
+                &mut stdout,
                 &options.output_field_delimiter,
                 &options.output_record_delimiter,
             )?;
