@@ -143,11 +143,12 @@ pub(crate) struct Options {
     pub(crate) match_commands: Vec<String>,
 }
 
-/// The default input record delimiter.
-const DEFAULT_INPUT_RECORD_DELIMITER: &str = r"(\r|\n)+";
+/// The default input record delimiter. This pattern matches 1 DOS/Internet,
+/// POSIX, or Mac line break (in that order of preference).
+const DEFAULT_INPUT_RECORD_DELIMITER: &str = r"(\r\n|\n|\r)";
 
 /// The default input field delimiter.
-const DEFAULT_INPUT_FIELD_DELIMITER: &str = r"\s+";
+const DEFAULT_INPUT_FIELD_DELIMITER: &str = r"\t";
 
 /// The default output record delimiter.
 const DEFAULT_OUTPUT_RECORD_DELIMITER: &[u8] = b"\n";

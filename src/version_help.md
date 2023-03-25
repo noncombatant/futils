@@ -17,9 +17,9 @@ information.
 
 ## Additional Options
 
-* `-F`: Set the output field delimiter. The default delimiter is `\t`.
+* `-F`: Set the output field delimiter.
 * `-h`: Print this help page.
-* `-R`: Set the output record delimiter. The default delimiter is `\n`.
+* `-R`: Set the output record delimiter.
 
 ## Exit Status
 

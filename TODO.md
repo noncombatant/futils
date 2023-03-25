@@ -43,9 +43,3 @@ for each argument:
 
 A quick-exit option for `filter`, like `grep -l`. Maybe `-q` for quick or `-b`
 for Boolean.
-
-Consider making the default input record separator be just 1 line break
-sequence. This more closely matches the traditional Unix line = record behavior,
-but people still have the flexibility of providing something else. Similarly,
-maybe the default input field delimiter should be tab. That might obviate `-s`,
-or let us use it to mean “skip the first N records” or similar.

@@ -34,12 +34,10 @@ syntax](https://docs.rs/regex/latest/regex/).
 ## Additional Options
 
 * `-h`: Prints this help page.
-* `-F`: Set the output field delimiter. The default delimiter is `\t`.
-* `-f`: Set the input field delimiter, a regular expression. The default
-  delimiter is `r"\s+"`.
-* `-R`: Set the output record delimiter. The default delimiter is `\n`.
-* `-r`: Set the input record delimiter, a regular expression. The default
-  delimiter is `r"(\r|\n)+"`.
+* `-F`: Set the output field delimiter.
+* `-f`: Set the input field delimiter, a regular expression.
+* `-R`: Set the output record delimiter.
+* `-r`: Set the input record delimiter, a regular expression.
 
 ## Exit Status
 

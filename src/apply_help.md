@@ -23,8 +23,8 @@ each input record.
 ## Additional Options
 
 * `-h`: Print this help page.
-* `-R`: Set the output record delimiter. The default delimiter is `\n`.
-* `-r`: Set the input record delimiter. The default delimiter is `r"(\r|\n)+"`.
+* `-R`: Set the output record delimiter.
+* `-r`: Set the input record delimiter.
 
 ## Exit Status
 

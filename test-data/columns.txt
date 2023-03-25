@@ -1,2 +1,2 @@
-yeah   wow   hey   friends
-whee   bonk  ouch  boing
+yeah	wow	hey	friends
+whee	bonk	ouch	boing

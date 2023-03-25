@@ -95,13 +95,13 @@ Some command line flags are common to most `futils` programs. For example:
 
 * `-F`: Set the output field delimiter. The default delimiter is `\t`.
 * `-f`: Set the input field delimiter, a regular expression. The default
-  delimiter is `r"\s+"`.
+  delimiter is `r"\t"`.
 * `-h`: Prints the help page.
 * `-J`: Output JSON format.
 * `-j`: Input JSON format.
 * `-R`: Set the output record delimiter. The default delimiter is `\n`.
 * `-r`: Set the input record delimiter, a regular expression. The default
-  delimiter is `r"(\r|\n)+"`.
+  delimiter is `r"(\r\n|\n|\r)"`.
 
 ### Matching Input And Output Delimiters
 

@@ -22,10 +22,9 @@ each input record.
 ## Additional Options
 
 * `-h`: Print this help page.
-* `-f`: Set the input field delimiter, a regular expression. The default
-  delimiter is `r"\s+"`.
-* `-R`: Set the output record delimiter. The default delimiter is `\n`.
-* `-r`: Set the input record delimiter. The default delimiter is `r"(\r|\n)+"`.
+* `-f`: Set the input field delimiter, a regular expression.
+* `-R`: Set the output record delimiter.
+* `-r`: Set the input record delimiter.
 * `-v`: Print the standard output of commands given with the `-x` option. (By
   default, `apply` only prints their standard error.)
 
