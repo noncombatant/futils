@@ -30,13 +30,13 @@ The metadata elements are:
 
 ## Options
 
-* `-j`: Output JSON format.
+* `-J`: Output JSON format.
 
 ## Additional Options
 
+* `-F`: Set the output field delimiter. The default delimiter is `\t`.
 * `-h`: Print this help page.
-* `-O`: Set the output field delimiter. The default delimiter is `\t`.
-* `-o`: Set the output record delimiter. The default delimiter is `\n`.
+* `-R`: Set the output record delimiter. The default delimiter is `\n`.
 
 ## Exit Status
 
@@ -52,32 +52,32 @@ To get a nice spreadsheet-like view of a large directory:
 
 ```
 status | vd
-status -j | vd -f json
+status -J | vd -f json
 ```
 
 `status` prints the most-often-interesting fields first. To print only the first
 few fields, try this:
 
 ```
-status | fields -D '\t' -f 1 -f 2 -f 0
+status | fields -f '\t' -c 1 -c 2 -c 0
 ```
 
-To sort by size (`-f1` is the Size field):
+To sort by size (`-c1` is the Size field):
 
 ```
-status | fields -D'\t' -f1 -f2 -f0 | sort -n
+status | fields -f'\t' -c1 -c2 -c0 | sort -n
 ```
 
 You can also use JSON and `jq` to filter fields:
 
 ```
-status -j | jq '.[] | {name, size}'
+status -J | jq '.[] | {name, size}'
 ```
 
 Or even:
 
 ```
-status -j | jq '[.[] | {name, size, modified_time}]' | vd -f json
+status -J | jq '[.[] | {name, size, modified_time}]' | vd -f json
 ```
 
 ## See Also

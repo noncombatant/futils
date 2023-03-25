@@ -81,7 +81,7 @@ pub(crate) fn records_main(arguments: &[String]) -> ShellResult {
                     None => Either::Left(records),
                 };
 
-                if options.json {
+                if options.json_output {
                     println!("[");
                 }
                 for er in records.enumerate().map(|pair| EnumeratedRecord {
@@ -92,14 +92,14 @@ pub(crate) fn records_main(arguments: &[String]) -> ShellResult {
                     },
                     r: pair.1,
                 }) {
-                    if options.json {
+                    if options.json_output {
                         er.write_json(&mut stdout, atty::is(Stream::Stdout))?;
                         stdout.write_all(b",\n")?;
                     } else {
                         er.write_columns(&mut stdout, &options)?;
                     }
                 }
-                if options.json {
+                if options.json_output {
                     println!("{{}}]");
                 }
             }

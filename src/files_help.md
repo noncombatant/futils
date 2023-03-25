@@ -43,7 +43,7 @@ parse the string as “YYYY-MM-DD HH:MM:SS”, then as “HH:MM:SS”, then as
 ## Additional Options
 
 * `-h`: Print this help page.
-* `-o`: Set the output record delimiter. The default delimiter is `\n`.
+* `-R`: Set the output record delimiter. The default delimiter is `\n`.
 * `-v`: Print the standard output of commands given with the `-x` option. (By
   default, `files` only prints their standard error.
 
@@ -75,7 +75,7 @@ we need to come up with an input record delimiter that never appears in the
 file; `\x00` often works for this purpose, for text files at least. For example:
 
 ```
-files -x 'filter -d '\x00' -p foo' ...
+files -x 'filter -R '\x00' -p foo' ...
 ```
 
 TODO: Update those with the quick-exit feature once it’s specified.

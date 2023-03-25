@@ -93,14 +93,15 @@ the same thing in most programs.
 
 Some command line flags are common to most `futils` programs. For example:
 
-* `-D`: Set the input field delimiter, a regular expression. The default
+* `-F`: Set the output field delimiter. The default delimiter is `\t`.
+* `-f`: Set the input field delimiter, a regular expression. The default
   delimiter is `r"\s+"`.
-* `-d`: Set the input record delimiter, a regular expression. The default
-  delimiter is `r"(\r|\n)+"`.
 * `-h`: Prints the help page.
-* `-j`: Output JSON format.
-* `-O`: Set the output field delimiter. The default delimiter is `\t`.
-* `-o`: Set the output record delimiter. The default delimiter is `\n`.
+* `-J`: Output JSON format.
+* `-j`: Input JSON format.
+* `-R`: Set the output record delimiter. The default delimiter is `\n`.
+* `-r`: Set the input record delimiter, a regular expression. The default
+  delimiter is `r"(\r|\n)+"`.
 
 ### Matching Input And Output Delimiters
 
@@ -115,7 +116,7 @@ In this example, `find` uses `NUL` (`\0`) as an output record delimiter, and
 with `futils` would be:
 
 ```
-files -o '\0' ... | apply -d '\0' ...
+files -R '\0' ... | apply -r '\0' ...
 ```
 
 However, `\0` is not a valid regular expression. You’ll get an error message
@@ -132,7 +133,7 @@ Instead, express the input delimiter as a valid Rust regular expression; in the
 case of `NUL`, the hexadecimal byte literal `\x00` works:
 
 ```
-files -o '\0' ... | apply -d '\x00' ...
+files -R '\0' ... | apply -r '\x00' ...
 ```
 
 This is a bit annoying. TODO: Consider whether to treat strings that don’t parse

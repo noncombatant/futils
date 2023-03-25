@@ -78,56 +78,69 @@ impl UsageError {
 pub(crate) type ShellResult = Result<i32, ShellError>;
 
 /// The default list of command line flags. See `Options`, below.
-pub(crate) const DEFAULT_OPTION_SPEC: &str = "aD:d:Ff:hjl:M:m:nO:o:p:st:vx:";
+pub(crate) const DEFAULT_OPTION_SPEC: &str = "ac:F:f:hIJjl:M:m:np:R:r:st:vx:";
 
-/// These are the standard command line options for `futils` programs. Their
-/// meanings are:
-///
-///   -D  `Regex`   input field delimiter
-///   -d  `Regex`   input record delimiter
-///   -F  `bool`    invert field selection
-///   -f  `String`  field
-///   -h  `bool`    help
-///   -j  `bool`    JSON output
-///   -l  `isize`   limit
-///   -M  `String`  datetime expression
-///   -m  `Regex`   match
-///   -n  `bool`    enumerate
-///   -O  `String`  output field delimiter
-///   -o  `String`  output record delimiter
-///   -p  `Regex`   prune
-///   -s  `bool`    skip
-///   -t  `String`  file or object types
-///   -v  `bool`    verbose
-///   -x  `String`  command
+/// These are the standard command line options for `futils` programs.
 ///
 /// Not all programs use all options. Some programs may not use this option
 /// spec, depending on their needs.
 pub(crate) struct Options {
-    pub(crate) input_record_delimiter: Regex,
-    pub(crate) input_field_delimiter: Regex,
-    pub(crate) output_record_delimiter: Vec<u8>,
+    /// `-a`
+    pub(crate) show_all: bool,
+
+    /// `-c` (“column”, “cut”)
+    pub(crate) fields: Vec<String>,
+
+    /// `-F`
     pub(crate) output_field_delimiter: Vec<u8>,
 
-    pub(crate) match_expressions: Vec<Regex>,
-    pub(crate) prune_expressions: Vec<Regex>,
-    pub(crate) match_commands: Vec<String>,
-    pub(crate) mtime_expressions: Vec<Time>,
+    /// `-f`
+    pub(crate) input_field_delimiter: Regex,
 
+    /// `-h`
+    pub(crate) help: bool,
+
+    /// `-I`
+    pub(crate) invert_fields: bool,
+
+    /// `-J`
+    pub(crate) json_output: bool,
+
+    /// `-j`
+    pub(crate) json_input: bool,
+
+    /// `-l`
     pub(crate) limit: Option<isize>,
 
-    pub(crate) fields: Vec<String>,
+    /// `-M`
+    pub(crate) mtime_expressions: Vec<Time>,
+
+    /// `-m`
+    pub(crate) match_expressions: Vec<Regex>,
+
+    /// `-n`
+    pub(crate) enumerate: bool,
+
+    /// `-p`
+    pub(crate) prune_expressions: Vec<Regex>,
+
+    /// `-R`
+    pub(crate) output_record_delimiter: Vec<u8>,
+
+    /// `-r`
+    pub(crate) input_record_delimiter: Regex,
+
+    /// `-s`
+    pub(crate) skip: bool,
+
+    /// `-t`
     pub(crate) file_types: String,
 
-    pub(crate) enumerate: bool,
-    pub(crate) help: bool,
-    // TODO: Consider making this `-I`, and being a generic “invert something”
-    // flag.
-    pub(crate) invert_fields: bool,
-    pub(crate) json: bool,
-    pub(crate) show_all: bool,
-    pub(crate) skip: bool,
+    /// `-v`
     pub(crate) verbose: bool,
+
+    /// `-x`
+    pub(crate) match_commands: Vec<String>,
 }
 
 /// The default input record delimiter.
@@ -150,28 +163,25 @@ impl Options {
     /// values.
     pub(crate) fn with_defaults() -> Result<Options, ShellError> {
         Ok(Options {
-            input_record_delimiter: Regex::new(DEFAULT_INPUT_RECORD_DELIMITER)?,
-            input_field_delimiter: Regex::new(DEFAULT_INPUT_FIELD_DELIMITER)?,
-            output_record_delimiter: Vec::from(DEFAULT_OUTPUT_RECORD_DELIMITER),
-            output_field_delimiter: Vec::from(DEFAULT_OUTPUT_FIELD_DELIMITER),
-
-            match_expressions: Vec::new(),
-            prune_expressions: Vec::new(),
-            match_commands: Vec::new(),
-            mtime_expressions: Vec::new(),
-
-            limit: None,
-
+            show_all: false,
             fields: Vec::new(),
-            file_types: String::from(DEFAULT_FILE_TYPES),
-
-            enumerate: false,
+            output_field_delimiter: Vec::from(DEFAULT_OUTPUT_FIELD_DELIMITER),
+            input_field_delimiter: Regex::new(DEFAULT_INPUT_FIELD_DELIMITER)?,
             help: false,
             invert_fields: false,
-            json: false,
-            show_all: false,
+            json_output: false,
+            json_input: false,
+            limit: None,
+            mtime_expressions: Vec::new(),
+            match_expressions: Vec::new(),
+            enumerate: false,
+            prune_expressions: Vec::new(),
+            output_record_delimiter: Vec::from(DEFAULT_OUTPUT_RECORD_DELIMITER),
+            input_record_delimiter: Regex::new(DEFAULT_INPUT_RECORD_DELIMITER)?,
             skip: false,
+            file_types: String::from(DEFAULT_FILE_TYPES),
             verbose: false,
+            match_commands: Vec::new(),
         })
     }
 }
@@ -189,24 +199,25 @@ pub(crate) fn parse_options(arguments: &[String]) -> Result<(Options, &[String])
             None => break,
             Some(opt) => match opt {
                 Opt('a', None) => options.show_all = true,
-                Opt('D', Some(s)) => options.input_field_delimiter = Regex::new(&s)?,
-                Opt('d', Some(s)) => options.input_record_delimiter = Regex::new(&s)?,
-                Opt('F', None) => options.invert_fields = true,
-                Opt('f', Some(s)) => options.fields.push(s.clone()),
+                Opt('c', Some(s)) => options.fields.push(s.clone()),
+                Opt('F', Some(s)) => {
+                    options.output_field_delimiter = Vec::from(unescape_backslashes(&s)?.as_bytes())
+                }
+                Opt('f', Some(s)) => options.input_field_delimiter = Regex::new(&s)?,
+                Opt('I', None) => options.invert_fields = true,
                 Opt('h', None) => options.help = true,
-                Opt('j', None) => options.json = true,
+                Opt('J', None) => options.json_output = true,
+                Opt('j', None) => options.json_input = true,
                 Opt('l', Some(s)) => options.limit = Some(str::parse::<isize>(&s)?),
                 Opt('M', Some(s)) => options.mtime_expressions.push(Time::new(&s)?),
                 Opt('m', Some(s)) => options.match_expressions.push(Regex::new(&s)?),
                 Opt('n', None) => options.enumerate = true,
-                Opt('O', Some(s)) => {
-                    options.output_field_delimiter = Vec::from(unescape_backslashes(&s)?.as_bytes())
-                }
-                Opt('o', Some(s)) => {
+                Opt('p', Some(s)) => options.prune_expressions.push(Regex::new(&s)?),
+                Opt('R', Some(s)) => {
                     options.output_record_delimiter =
                         Vec::from(unescape_backslashes(&s)?.as_bytes())
                 }
-                Opt('p', Some(s)) => options.prune_expressions.push(Regex::new(&s)?),
+                Opt('r', Some(s)) => options.input_record_delimiter = Regex::new(&s)?,
                 Opt('s', None) => options.skip = true,
                 Opt('t', Some(s)) => options.file_types = s.clone(),
                 Opt('v', None) => options.verbose = true,

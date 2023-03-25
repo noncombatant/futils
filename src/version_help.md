@@ -3,7 +3,7 @@
 ## Usage
 
 ```
-futils [-j] version
+futils [-J] version
 ```
 
 ## Description
@@ -13,13 +13,13 @@ information.
 
 ## Options
 
-* `-j`: Output JSON format.
+* `-J`: Output JSON format.
 
 ## Additional Options
 
+* `-F`: Set the output field delimiter. The default delimiter is `\t`.
 * `-h`: Print this help page.
-* `-O`: Set the output field delimiter. The default delimiter is `\t`.
-* `-o`: Set the output record delimiter. The default delimiter is `\n`.
+* `-R`: Set the output record delimiter. The default delimiter is `\n`.
 
 ## Exit Status
 
@@ -28,7 +28,7 @@ information.
 ## Examples
 
 ```
-futils version -O': '
+futils version -F': '
 ```
 
 Prints the version metadata keys and values separated by a colon and a space,

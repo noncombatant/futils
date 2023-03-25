@@ -178,9 +178,9 @@ pub(crate) fn status_main(arguments: &[String]) -> ShellResult {
     let mut stdout = stdout();
     let mut status = 0;
     let count = arguments.len();
-    if options.json && count != 1 {
+    if options.json_output && count != 1 {
         println!("[");
-    } else if !options.json {
+    } else if !options.json_output {
         let headers = vec![
             b"Name".as_slice(),
             b"Size".as_slice(),
@@ -205,7 +205,7 @@ pub(crate) fn status_main(arguments: &[String]) -> ShellResult {
         match stat(pathname.as_str()) {
             Ok(s) => {
                 let s = Status::new(&s, pathname);
-                if options.json {
+                if options.json_output {
                     s.write_json(&mut stdout, atty::is(Stream::Stdout))?;
                 } else {
                     s.write_columns(
@@ -214,7 +214,7 @@ pub(crate) fn status_main(arguments: &[String]) -> ShellResult {
                         &options.output_record_delimiter,
                     )?;
                 }
-                stdout.write_all(if options.json {
+                stdout.write_all(if options.json_output {
                     if i < count - 1 {
                         b",\n"
                     } else {
@@ -230,7 +230,7 @@ pub(crate) fn status_main(arguments: &[String]) -> ShellResult {
             }
         }
     }
-    if options.json && count != 1 {
+    if options.json_output && count != 1 {
         println!("]");
     }
     Ok(status)

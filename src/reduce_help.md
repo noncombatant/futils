@@ -26,10 +26,10 @@ TODO: Describe what happens if multiple `-x`s are given.
 
 ## Additional Options
 
-* `-d`: Set the input record delimiter, a regular expression. The default
-  delimiter is `r"(\r|\n)+"`.
 * `-h`: Prints this help page.
-* `-o`: Set the output record delimiter. The default delimiter is `\n`.
+* `-R`: Set the output record delimiter. The default delimiter is `\n`.
+* `-r`: Set the input record delimiter, a regular expression. The default
+  delimiter is `r"(\r|\n)+"`.
 
 ## Exit Status
 

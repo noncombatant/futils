@@ -19,10 +19,10 @@ records, and prints them.
 
 ## Additional Options
 
-* `-d`: Set the input record delimiter, a regular expression. The default
-  delimiter is `r"(\r|\n)+"`.
 * `-h`: Print this help page.
-* `-o`: Set the output record delimiter. The default delimiter is `\n`.
+* `-R`: Set the output record delimiter. The default delimiter is `\n`.
+* `-r`: Set the input record delimiter, a regular expression. The default
+  delimiter is `r"(\r|\n)+"`.
 
 Regular expressions use [the Rust regex library
 syntax](https://docs.rs/regex/latest/regex/).
@@ -45,13 +45,13 @@ This is similar to POSIX `cat`, except that it will convert any line break
 sequences into `\n`. This is due to the default values of `-d` and `-o`.
 
 ```
-records -d '\r\n' -o '\n' some-file.txt
+records -r '\r\n' -R '\n' some-file.txt
 ```
 
 As above, but explicitly convert Windows new line sequences (only) into POSIX.
 
 ```
-records -o '\0' some-file.txt
+records -R '\0' some-file.txt
 ```
 
 Delimit records in some-file.txt with the `NUL` character (`\0`). This is
@@ -60,7 +60,7 @@ in a more robust way (such as when the other utilities may treat the file’s
 existing delimiters as as syntactic metacharacters of some kind). For example,
 
 ```
-records -o '\0' list-of-files.txt | xargs -0 foo...
+records -r '\0' list-of-files.txt | xargs -0 foo...
 ```
 
 With its `-l` option, `records` can work somewhat like `head` and `tail`.

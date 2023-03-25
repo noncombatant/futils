@@ -42,7 +42,7 @@ pub(crate) fn map_main(arguments: &[String]) -> ShellResult {
     if options.help {
         help(0, MAP_HELP);
     }
-    if options.json {
+    if options.json_input || options.json_output {
         unimplemented!()
     }
 

@@ -112,7 +112,7 @@ pub(crate) fn version_main(arguments: &[String]) -> ShellResult {
     }
 
     let mut stdout = stdout();
-    if options.json {
+    if options.json_output {
         let count = VERSION_DATA.len();
         println!("[");
         for (i, d) in VERSION_DATA.iter().enumerate() {

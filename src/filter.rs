@@ -70,7 +70,7 @@ pub(crate) fn filter_main(arguments: &[String]) -> ShellResult {
     if options.help {
         help(0, FILTER_HELP);
     }
-    if options.json {
+    if options.json_input || options.json_output {
         unimplemented!()
     }
 
