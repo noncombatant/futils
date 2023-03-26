@@ -1,7 +1,7 @@
 //! An `Iterator` that yields `Records` from streams, delimited by regular
 //! expressions.
 
-use std::io::{Read, Result, Write};
+use std::io::{Read, Result};
 //use std::str::from_utf8;
 
 use regex::bytes::Regex;
@@ -22,31 +22,6 @@ pub(crate) struct Record {
     /// The delimiter lexed from the input.
     //#[serde_as(as = "BytesOrString")]
     pub(crate) delimiter: Vec<u8>,
-}
-
-// TODO: Remove this allow as soon as it's not dead code.
-#[allow(dead_code)]
-impl Record {
-    /// TODO: Document
-    pub(crate) fn write_columns(&self, output: &mut dyn Write, delimiter: &[u8]) -> Result<()> {
-        if !self.data.is_empty() {
-            output.write_all(&self.data)?;
-            output.write_all(delimiter)?;
-        }
-        Ok(())
-    }
-
-    /// TODO: Document
-    pub(crate) fn write_json(&self, output: &mut dyn Write, pretty: bool) -> Result<()> {
-        let to_json = if pretty {
-            serde_json::to_string_pretty
-        } else {
-            serde_json::to_string
-        };
-        let json = to_json(self)?;
-        output.write_all(json.as_bytes())?;
-        Ok(())
-    }
 }
 
 //impl Serialize for Record {
@@ -154,10 +129,8 @@ impl<'a> Iterator for StreamSplitter<'a> {
             return None;
         }
 
-        // TODO: Clarify this whole blob by doing:
-        //let section = &self.buffer[self.start..self.end];
-
-        match self.delimiter.find(&self.buffer[self.start..self.end]) {
+        let section = &self.buffer[self.start..self.end];
+        match self.delimiter.find(section) {
             Some(m) => {
                 if self.start + m.end() == self.end && !self.eof {
                     // `self.buffer` ends in delimiter-matching bytes, yet we
@@ -170,28 +143,26 @@ impl<'a> Iterator for StreamSplitter<'a> {
                 }
                 let r = if m.start() == 0 {
                     // We matched the delimiter at the beginning of the section.
-                    let start = self.start;
                     self.start += m.end();
                     Ok(Record {
                         data: Vec::new(),
-                        delimiter: self.buffer[start + m.start()..start + m.end()].to_vec(),
+                        delimiter: section[m.start()..m.end()].to_vec(),
                     })
                 } else {
                     // We matched a record.
-                    let start = self.start;
                     self.start += m.end();
                     Ok(Record {
-                        data: self.buffer[start..start + m.start()].to_vec(),
-                        delimiter: self.buffer[start + m.start()..start + m.end()].to_vec(),
+                        data: section[0..m.start()].to_vec(),
+                        delimiter: section[m.start()..m.end()].to_vec(),
                     })
                 };
                 Some(r)
             }
             None => {
-                let start = self.start;
+                // Last record, with no trailing delimiter.
                 self.start = self.end;
                 Some(Ok(Record {
-                    data: self.buffer[start..self.end].to_vec(),
+                    data: section.to_vec(),
                     delimiter: Vec::new(),
                 }))
             }
