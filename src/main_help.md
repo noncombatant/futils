@@ -111,9 +111,9 @@ Say you wanted to use `futils` to do the equivalent of the classic pipeline
 find ... -print0 | xargs -0 ...
 ```
 
-In this example, `find` uses `NUL` (`\0`) as an output record delimiter, and
-`xargs` uses it as an input record delimiter. You might think the equivalent
-with `futils` would be:
+In this example, `find` uses `NUL` (`\0` or `\x00`) as an output record
+delimiter, and `xargs` uses it as an input record delimiter. You might think the
+equivalent with `futils` would be:
 
 ```
 files -R '\0' ... | apply -r '\0' ...
@@ -129,18 +129,29 @@ regex parse error:
 error: backreferences are not supported
 ```
 
-Instead, express the input delimiter as a valid Rust regular expression; in the
-case of `NUL`, the hexadecimal byte literal `\x00` works:
+Rust’s regular expression library (`regex`) doesn’t follow the same rules as its
+string lexer (specifically `rustc_lexer::unescape`).
+
+The way to avoid this problem, express the input delimiter as a valid Rust
+regular expression; in the case of `NUL`, the hexadecimal byte literal `\x00`
+works:
 
 ```
 files -R '\0' ... | apply -r '\x00' ...
 ```
 
-This is a bit annoying. TODO: Consider whether to treat strings that don’t parse
-as regexes as string literals instead. That could lead to problems; could: print
-the error and continue anyway; print the error and ask the person if they want
-to continue anyway.
+That also works for lexing strings, thankfully, so you can be consistent and use
+it everywhere:
+
+```
+files -R '\x00' ... | apply -r '\x00' ...
+```
 
 ## See Also
 
-* TODO
+* Classic Unix text processing tools, such as
+  * `awk`(1)
+  * `cut`(1)
+  * `paste`(1)
+  * `colrm`(1)
+* `find`(1), `xargs`(1)
