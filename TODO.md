@@ -46,3 +46,16 @@ A quick-exit option for `filter`, like `grep -l`. Maybe `-q` for quick or `-b`
 for Boolean.
 
 Consider distinguishing short help (`-h`) from verbose help (`-h -v`).
+
+Run all documented examples as actual tests with this form:
+
+```
+some command ...
+output 1
+output 2
+output 3
+```
+
+Assert that running the command produces the output.
+
+Write a `futils tutorial` that has a more discursive tone and lots of examples.
