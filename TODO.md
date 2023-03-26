@@ -44,3 +44,5 @@ for each argument:
 
 A quick-exit option for `filter`, like `grep -l`. Maybe `-q` for quick or `-b`
 for Boolean.
+
+Consider distinguishing short help (`-h`) from verbose help (`-h -v`).
