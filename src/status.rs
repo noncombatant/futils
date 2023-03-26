@@ -9,7 +9,7 @@ use nix::sys::stat::{stat, FileStat, Mode};
 use serde::Serialize;
 use users::{get_group_by_gid, get_user_by_uid};
 
-use crate::shell::{parse_options, ShellError, ShellResult};
+use crate::shell::{parse_options, Options, ShellError, ShellResult};
 use crate::time::format_utc_timestamp;
 use crate::util::help;
 
@@ -107,11 +107,40 @@ impl<'a> Status<'a> {
         }
     }
 
-    fn write_columns(
+    fn write_columns(&self, output: &mut dyn Write, options: &Options) -> Result<(), ShellError> {
+        if options.verbose {
+            self.write_columns_verbose(output, &options.output_field_delimiter)
+        } else {
+            self.write_columns_concise(output, &options.output_field_delimiter)
+        }
+    }
+
+    fn write_columns_concise(
         &self,
         output: &mut dyn Write,
         field_delimiter: &[u8],
-        record_delimiter: &[u8],
+    ) -> Result<(), ShellError> {
+        output.write_all(self.permissions.as_bytes())?;
+        output.write_all(field_delimiter)?;
+        output.write_all(format!("{}", self.links).as_bytes())?;
+        output.write_all(field_delimiter)?;
+        output.write_all(self.user.as_bytes())?;
+        output.write_all(field_delimiter)?;
+        output.write_all(self.group.as_bytes())?;
+        output.write_all(field_delimiter)?;
+        output.write_all(format!("{}", self.size).as_bytes())?;
+        output.write_all(field_delimiter)?;
+        output.write_all(self.modified_time.as_bytes())?;
+        output.write_all(field_delimiter)?;
+        output.write_all(self.name.as_bytes())?;
+        output.write_all(field_delimiter)?;
+        Ok(())
+    }
+
+    fn write_columns_verbose(
+        &self,
+        output: &mut dyn Write,
+        field_delimiter: &[u8],
     ) -> Result<(), ShellError> {
         output.write_all(self.name.as_bytes())?;
         output.write_all(field_delimiter)?;
@@ -142,7 +171,6 @@ impl<'a> Status<'a> {
         output.write_all(format!("{}", self.blocks).as_bytes())?;
         output.write_all(field_delimiter)?;
         output.write_all(format!("{}", self.block_size).as_bytes())?;
-        output.write_all(record_delimiter)?;
         Ok(())
     }
 
@@ -181,23 +209,37 @@ pub(crate) fn status_main(arguments: &[String]) -> ShellResult {
     if options.json_output && count != 1 {
         println!("[");
     } else if !options.json_output {
-        let headers = vec![
-            b"Name".as_slice(),
-            b"Size".as_slice(),
-            b"Modified".as_slice(),
-            b"User".as_slice(),
-            b"Group".as_slice(),
-            b"Permissions".as_slice(),
-            b"Links".as_slice(),
-            b"Device".as_slice(),
-            b"Inode".as_slice(),
-            b"Accessed".as_slice(),
-            b"Changed".as_slice(),
-            b"Birth".as_slice(),
-            b"Mode".as_slice(),
-            b"Blocks".as_slice(),
-            b"Block Size".as_slice(),
-        ];
+        let headers = if options.verbose {
+            vec![
+                b"Name".as_slice(),
+                b"Size".as_slice(),
+                b"Modified".as_slice(),
+                b"User".as_slice(),
+                b"Group".as_slice(),
+                b"Permissions".as_slice(),
+                b"Links".as_slice(),
+                b"Device".as_slice(),
+                b"Inode".as_slice(),
+                b"Accessed".as_slice(),
+                b"Changed".as_slice(),
+                b"Birth".as_slice(),
+                b"Mode".as_slice(),
+                b"Blocks".as_slice(),
+                b"Block Size".as_slice(),
+            ]
+        } else {
+            vec![
+                b"Permissions".as_slice(),
+                b"Links".as_slice(),
+                b"User".as_slice(),
+                b"Group".as_slice(),
+                b"Size".as_slice(),
+                b"Modified".as_slice(),
+                // TODO: The Modified column's data is too wide, so the Name
+                // header is misaligned.
+                b"Name".as_slice(),
+            ]
+        };
         stdout.write_all(&headers.join(options.output_field_delimiter.as_slice()))?;
         stdout.write_all(&options.output_record_delimiter)?;
     }
@@ -208,11 +250,7 @@ pub(crate) fn status_main(arguments: &[String]) -> ShellResult {
                 if options.json_output {
                     s.write_json(&mut stdout, atty::is(Stream::Stdout))?;
                 } else {
-                    s.write_columns(
-                        &mut stdout,
-                        &options.output_field_delimiter,
-                        &options.output_record_delimiter,
-                    )?;
+                    s.write_columns(&mut stdout, &options)?;
                 }
                 stdout.write_all(if options.json_output {
                     if i < count - 1 {

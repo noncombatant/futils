@@ -3,7 +3,8 @@
 ## Usage
 
 ```
-status [-j] [pathname [...]]
+status [-v] [pathname [...]]
+status [-J] [pathname [...]]
 ```
 
 ## Description
@@ -14,23 +15,32 @@ If no pathnames are given, prints the status for each file in `.`.
 The metadata elements are:
 
 * `name`: name
-* `device`: device number
-* `mode`: type and permissions
-* `links`: number of hard links
-* `inode`: inode number
+* `size`: size in bytes
+* `modified_time`: last modified time
 * `user`: user-owner
 * `group`: group-owner
+* `permissions`: type and permissions
+* `links`: number of hard links
+* `device`: device number
+* `inode`: inode number
 * `accessed_time`: last accessed time
-* `modified_time`: last modified time
 * `changed_time`: last changed time (metadata change)
 * `birth_time`: birth time
-* `size`: size in bytes
+* `mode`: underlying `mode` field
 * `blocks`: number of storage blocks used
 * `block_size`: size of storage blocks
+
+For columns output (no `-J`), by default, only the `permissions`, `links`,
+`user`, `group`, `size`, `modified_time`, and `name` fields are printed (in that
+order). To see all fields, pass the `-v` option. For JSON output (`-J`), all
+fields are printed.
+
+TODO: Add the `type` field.
 
 ## Options
 
 * `-J`: Output JSON format.
+* `-v`: Verbose output (all fields).
 
 ## Additional Options
 
