@@ -18,22 +18,22 @@ fn print_matches(pathname: &str, splitter: StreamSplitter, options: &Options) ->
     'outer: for (n, r) in splitter
         .map_while(|r| r.ok())
         .enumerate()
-        .filter(|pair| !pair.1.bytes.is_empty())
+        .filter(|pair| !pair.1.data.is_empty())
     {
         for re in &options.prune_expressions {
-            if re.is_match(&r.bytes) {
+            if re.is_match(&r.data) {
                 continue 'outer;
             }
             matched = true;
         }
         for re in &options.match_expressions {
-            if !re.is_match(&r.bytes) {
+            if !re.is_match(&r.data) {
                 continue 'outer;
             }
             matched = true;
         }
         for command in &options.match_commands {
-            match run_command(command, &r.bytes, options.verbose) {
+            match run_command(command, &r.data, options.verbose) {
                 Ok(status) => {
                     if status != 0 {
                         continue 'outer;
@@ -44,7 +44,7 @@ fn print_matches(pathname: &str, splitter: StreamSplitter, options: &Options) ->
                     eprintln!(
                         "{} \"{}\": {}",
                         command,
-                        String::from_utf8_lossy(&r.bytes),
+                        String::from_utf8_lossy(&r.data),
                         e
                     );
                     continue 'outer;
@@ -58,7 +58,7 @@ fn print_matches(pathname: &str, splitter: StreamSplitter, options: &Options) ->
             write!(stdout, "{}", n + 1)?;
             stdout.write_all(&options.output_field_delimiter)?;
         }
-        stdout.write_all(&r.bytes)?;
+        stdout.write_all(&r.data)?;
         stdout.write_all(&options.output_record_delimiter)?;
     }
     Ok(if matched { 0 } else { 1 })

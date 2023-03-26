@@ -21,19 +21,19 @@ struct EnumeratedRecord {
 
 impl EnumeratedRecord {
     fn write_columns(&self, output: &mut dyn Write, options: &Options) -> Result<(), Error> {
-        if !self.r.bytes.is_empty() {
+        if !self.r.data.is_empty() {
             if let Some(n) = self.n {
                 write!(output, "{}", n + 1)?;
                 output.write_all(&options.output_field_delimiter)?;
             }
-            output.write_all(&self.r.bytes)?;
+            output.write_all(&self.r.data)?;
             output.write_all(&options.output_record_delimiter)?;
         }
         Ok(())
     }
 
     fn write_json(&self, output: &mut dyn Write, pretty: bool) -> Result<(), Error> {
-        if !self.r.bytes.is_empty() {
+        if !self.r.data.is_empty() {
             let to_json = if pretty {
                 serde_json::to_writer_pretty
             } else {

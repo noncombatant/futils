@@ -17,14 +17,14 @@ fn apply(splitter: StreamSplitter, options: &Options) -> ShellResult {
     let mut status = 0;
     for r in splitter.map_while(|r| r.ok()) {
         for command in &options.match_commands {
-            match run_command(command, &r.bytes, options.verbose) {
+            match run_command(command, &r.data, options.verbose) {
                 Ok(s) => {
                     if s != 0 {
                         status += 1;
                     }
                 }
                 Err(e) => {
-                    eprintln!("{}: {}", std::str::from_utf8(&r.bytes).unwrap(), e);
+                    eprintln!("{}: {}", std::str::from_utf8(&r.data).unwrap(), e);
                     status += 1;
                 }
             }

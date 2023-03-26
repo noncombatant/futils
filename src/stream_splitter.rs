@@ -17,8 +17,7 @@ use serde::Serialize;
 pub(crate) struct Record {
     /// The bytes lexed from the input.
     //#[serde_as(as = "BytesOrString")]
-    // TODO: Rename this to `data`.
-    pub(crate) bytes: Vec<u8>,
+    pub(crate) data: Vec<u8>,
 
     /// The delimiter lexed from the input.
     //#[serde_as(as = "BytesOrString")]
@@ -30,8 +29,8 @@ pub(crate) struct Record {
 impl Record {
     /// TODO: Document
     pub(crate) fn write_columns(&self, output: &mut dyn Write, delimiter: &[u8]) -> Result<()> {
-        if !self.bytes.is_empty() {
-            output.write_all(&self.bytes)?;
+        if !self.data.is_empty() {
+            output.write_all(&self.data)?;
             output.write_all(delimiter)?;
         }
         Ok(())
@@ -57,12 +56,12 @@ impl Record {
 //    {
 //        let mut state = serializer.serialize_struct("Record", 2)?;
 //        state.serialize_field("is_delimiter", &self.is_delimiter)?;
-//        match from_utf8(&self.bytes) {
+//        match from_utf8(&self.data) {
 //            Ok(s) => {
-//                state.serialize_field("bytes", s)?;
+//                state.serialize_field("data", s)?;
 //            }
 //            Err(_) => {
-//                state.serialize_field("bytes", &self.bytes)?;
+//                state.serialize_field("data", &self.data)?;
 //            }
 //        }
 //        state.end()
@@ -70,7 +69,7 @@ impl Record {
 //}
 
 /// An `Iterator` that lexes a `Read`, searching for the `delimiter`, and yields
-/// `Record`s containing (alternately) data bytes and delimiter bytes.
+/// `Record`s containing data and delimiter bytes.
 ///
 /// This implementation incurs a new allocation when yielding a `Record`, and
 /// the caller owns it. An alternate implementation using generic associated
@@ -174,7 +173,7 @@ impl<'a> Iterator for StreamSplitter<'a> {
                     let start = self.start;
                     self.start += m.end();
                     Ok(Record {
-                        bytes: Vec::new(),
+                        data: Vec::new(),
                         delimiter: self.buffer[start + m.start()..start + m.end()].to_vec(),
                     })
                 } else {
@@ -182,7 +181,7 @@ impl<'a> Iterator for StreamSplitter<'a> {
                     let start = self.start;
                     self.start += m.end();
                     Ok(Record {
-                        bytes: self.buffer[start..start + m.start()].to_vec(),
+                        data: self.buffer[start..start + m.start()].to_vec(),
                         delimiter: self.buffer[start + m.start()..start + m.end()].to_vec(),
                     })
                 };
@@ -192,7 +191,7 @@ impl<'a> Iterator for StreamSplitter<'a> {
                 let start = self.start;
                 self.start = self.end;
                 Some(Ok(Record {
-                    bytes: self.buffer[start..self.end].to_vec(),
+                    data: self.buffer[start..self.end].to_vec(),
                     delimiter: Vec::new(),
                 }))
             }
@@ -222,11 +221,11 @@ mod tests {
         let mut splitter = StreamSplitter::with_capacity(&mut file, &delimiter, SMALL_CAPACITY);
 
         let r = splitter.next().unwrap().unwrap();
-        assert_eq!(b"hello", r.bytes.as_slice());
+        assert_eq!(b"hello", r.data.as_slice());
         assert_eq!(b"\n\n", r.delimiter.as_slice());
 
         let r = splitter.next().unwrap().unwrap();
-        assert_eq!(b"world", r.bytes.as_slice());
+        assert_eq!(b"world", r.data.as_slice());
         assert_eq!(b"\n", r.delimiter.as_slice());
 
         assert!(splitter.next().is_none());
@@ -246,11 +245,11 @@ mod tests {
         let mut splitter = StreamSplitter::with_capacity(&mut file, &delimiter, SMALL_CAPACITY);
 
         let r = splitter.next().unwrap().unwrap();
-        assert_eq!(b"greetings", r.bytes.as_slice());
+        assert_eq!(b"greetings", r.data.as_slice());
         assert_eq!(spaces, r.delimiter);
 
         let r = splitter.next().unwrap().unwrap();
-        assert_eq!(b"world", r.bytes.as_slice());
+        assert_eq!(b"world", r.data.as_slice());
 
         assert!(splitter.next().is_none());
     }

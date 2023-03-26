@@ -42,18 +42,18 @@ fn reduce(splitter: StreamSplitter, options: &Options) -> ShellResult {
     let mut status = 0;
     let mut splitter = splitter.map_while(|r| r.ok());
     let mut result = match splitter.next() {
-        Some(r) => r.bytes,
+        Some(r) => r.data,
         None => return Err(ShellError::Usage(UsageError::new("No input"))),
     };
 
     for r in splitter {
         for command in &options.match_commands {
-            match apply_command(&result, command, &r.bytes) {
+            match apply_command(&result, command, &r.data) {
                 Ok(r) => {
                     result = r;
                 }
                 Err(e) => {
-                    eprintln!("{}: {}", from_utf8(&r.bytes).unwrap(), e);
+                    eprintln!("{}: {}", from_utf8(&r.data).unwrap(), e);
                     status += 1;
                 }
             }

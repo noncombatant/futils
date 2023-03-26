@@ -17,16 +17,16 @@ fn map(splitter: StreamSplitter, options: &Options) -> ShellResult {
     let mut status = 0;
     for r in splitter.map_while(|r| r.ok()) {
         for command in &options.match_commands {
-            // TODO: split `&r.bytes` on input_field_separator, pass to
+            // TODO: split `&r.data` on input_field_separator, pass to
             // `run_command`. This requires updating `run_command`.
-            match run_command(command, &r.bytes, true) {
+            match run_command(command, &r.data, true) {
                 Ok(s) => {
                     if s != 0 {
                         status += 1;
                     }
                 }
                 Err(e) => {
-                    eprintln!("{}: {}", std::str::from_utf8(&r.bytes).unwrap(), e);
+                    eprintln!("{}: {}", std::str::from_utf8(&r.data).unwrap(), e);
                     status += 1;
                 }
             }

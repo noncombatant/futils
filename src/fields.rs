@@ -77,7 +77,7 @@ fn print_record(
 ) -> ShellResult {
     let mut stdout = stdout();
     let start = if options.skip {
-        match skip_leading_spaces(&r.bytes) {
+        match skip_leading_spaces(&r.data) {
             Some(start) => start,
             None => return Ok(0),
         }
@@ -86,7 +86,7 @@ fn print_record(
     };
     let mut fields = options
         .input_field_delimiter
-        .split(&r.bytes[start..])
+        .split(&r.data[start..])
         .collect::<Vec<&[u8]>>();
     if !requested_fields.is_empty() {
         fields = select_fields(&fields, requested_fields, options.invert_fields);
