@@ -66,9 +66,69 @@ fn format_permissions(mode: u16) -> String {
     String::from_utf8(bytes).unwrap()
 }
 
+fn format_type(mode: u16) -> String {
+    // Darwin's `stat`(2) says:
+    // #define S_IFMT 0170000           /* type of file */
+    // #define        S_IFIFO  0010000  /* named pipe (fifo) */
+    // #define        S_IFCHR  0020000  /* character special */
+    // #define        S_IFDIR  0040000  /* directory */
+    // #define        S_IFBLK  0060000  /* block special */
+    // #define        S_IFREG  0100000  /* regular */
+    // #define        S_IFLNK  0120000  /* symbolic link */
+    // #define        S_IFSOCK 0140000  /* socket */
+    // #define        S_IFWHT  0160000  /* whiteout */
+    //
+    // https://github.com/torvalds/linux/blob/master/include/uapi/linux/stat.h:
+    // #define S_IFMT    00170000
+    // #define S_IFSOCK   0140000
+    // #define S_IFLNK    0120000
+    // #define S_IFREG    0100000
+    // #define S_IFBLK    0060000
+    // #define S_IFDIR    0040000
+    // #define S_IFCHR    0020000
+    // #define S_IFIFO    0010000
+    // #define S_ISUID    0004000
+    // #define S_ISGID    0002000
+    // #define S_ISVTX    0001000
+    //
+    // So, close enough for horseshoes (and hand grenades).
+
+    static S_IFMT: u16 = 0o0170000;
+    static S_IFSOCK: u16 = 0o0140000;
+    static S_IFLNK: u16 = 0o0120000;
+    static S_IFREG: u16 = 0o0100000;
+    static S_IFBLK: u16 = 0o0060000;
+    static S_IFDIR: u16 = 0o0040000;
+    static S_IFCHR: u16 = 0o0020000;
+    static S_IFIFO: u16 = 0o0010000;
+    static S_ISUID: u16 = 0o0004000;
+    static S_ISGID: u16 = 0o0002000;
+
+    let mode = mode & S_IFMT;
+    let r = if S_ISUID == mode & S_ISUID || S_ISGID == mode & S_ISGID {
+        "💣"
+    } else if S_IFIFO == mode & S_IFIFO {
+        "🚰"
+    } else if S_IFBLK == mode & S_IFBLK || S_IFCHR == mode & S_IFCHR {
+        "🐧"
+    } else if S_IFDIR == mode & S_IFDIR {
+        "📁"
+    } else if S_IFREG == mode & S_IFREG {
+        " "
+    } else if S_IFLNK == mode & S_IFLNK {
+        "→"
+    } else if S_IFSOCK == mode & S_IFSOCK {
+        "🧦"
+    } else {
+        "⁉️"
+    };
+    r.to_string()
+}
+
 #[derive(Serialize)]
 struct Status<'a> {
     name: &'a str,
+    file_type: String,
     size: i64,
     modified_time: String,
     user: String,
@@ -80,7 +140,6 @@ struct Status<'a> {
     accessed_time: String,
     changed_time: String,
     birth_time: String,
-    // TODO: Use the non-permission bits into a `type: String` field.
     mode: u16,
     blocks: i64,
     block_size: i32,
@@ -90,6 +149,7 @@ impl<'a> Status<'a> {
     fn new(status: &FileStat, name: &'a str) -> Status<'a> {
         Status {
             name,
+            file_type: format_type(status.st_mode),
             size: status.st_size,
             modified_time: format_utc_timestamp(status.st_mtime),
             user: format_uid(status.st_uid),
@@ -120,6 +180,8 @@ impl<'a> Status<'a> {
         output: &mut dyn Write,
         field_delimiter: &[u8],
     ) -> Result<(), ShellError> {
+        output.write_all(self.file_type.as_bytes())?;
+        output.write_all(field_delimiter)?;
         output.write_all(self.permissions.as_bytes())?;
         output.write_all(field_delimiter)?;
         output.write_all(format!("{}", self.links).as_bytes())?;
@@ -151,6 +213,8 @@ impl<'a> Status<'a> {
         output.write_all(self.user.as_bytes())?;
         output.write_all(field_delimiter)?;
         output.write_all(self.group.as_bytes())?;
+        output.write_all(field_delimiter)?;
+        output.write_all(self.file_type.as_bytes())?;
         output.write_all(field_delimiter)?;
         output.write_all(self.permissions.as_bytes())?;
         output.write_all(field_delimiter)?;
@@ -216,6 +280,7 @@ pub(crate) fn status_main(arguments: &[String]) -> ShellResult {
                 b"Modified".as_slice(),
                 b"User".as_slice(),
                 b"Group".as_slice(),
+                b"Type".as_slice(),
                 b"Permissions".as_slice(),
                 b"Links".as_slice(),
                 b"Device".as_slice(),
@@ -229,6 +294,7 @@ pub(crate) fn status_main(arguments: &[String]) -> ShellResult {
             ]
         } else {
             vec![
+                b"Type".as_slice(),
                 b"Permissions".as_slice(),
                 b"Links".as_slice(),
                 b"User".as_slice(),
