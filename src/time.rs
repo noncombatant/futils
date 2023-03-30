@@ -48,7 +48,7 @@ impl Time {
     ///
     /// This function also accepts the empty string as a special case, in which
     /// case it returns a `Time` indicating 0 in the Unix epoch.
-    pub(crate) fn new(string: &str) -> Result<Time, ShellError> {
+    pub(crate) fn new(string: &str) -> Result<Self, ShellError> {
         let string = string.trim();
         if string.is_empty() {
             return Ok(Time {
