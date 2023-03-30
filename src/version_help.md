@@ -43,4 +43,4 @@ Show just the major version key and its value.
 ## See Also
 
 * `futils help`
-* TODO
+* [Semantic Versioning](https://semver.org/)

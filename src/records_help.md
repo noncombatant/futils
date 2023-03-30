@@ -75,7 +75,8 @@ records -l-5 your-file.txt
 
 Note that `head` and `tail` yield *lines*, including empty ones, while `records`
 yields only *non-empty* records. TODO: `records` and `fields` should maybe have
-an option to print input record delimiters, too, for full feature parity.
+an option to print empty records, and/or input record delimiters, for full
+feature parity.
 
 ## See Also
 

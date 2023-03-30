@@ -41,4 +41,5 @@ TODO
 ## See Also
 
 * `futils help`
-* TODO
+* `find`(1), in particular the `-exec` option
+* `xargs`(1)
