@@ -3,7 +3,7 @@
 ## Usage
 
 ```
-fields [-Ins] [-c field] [pathname [...]]
+fields [-IJns] [-c field] [pathname [...]]
 ```
 
 ## Description
@@ -25,6 +25,7 @@ alias for/simplified form of `fields`. That might be ok!
   `fields` will print all fields.
 * `-I`: Inverts the behavior of `-c`: selects the fields *not* listed. This
   option makes no sense without at least 1 `-f` option.
+* `-J`: Output JSON format.
 * `-n`: Prefix each record with a record number.
 * `-s`: Skip leading space characters in records.
 

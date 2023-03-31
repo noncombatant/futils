@@ -3,7 +3,7 @@
 ## Usage
 
 ```
-records [-n] [-l limit] [pathname [...]]
+records [-Jn] [-l limit] [pathname [...]]
 ```
 
 ## Description
@@ -15,6 +15,7 @@ records, and prints them.
 
 * `-l`: Limit the number of records printed. If `limit` is < 0, the limit is
   counted back from the last record in the input.
+* `-J`: Output JSON format.
 * `-n`: Prefix each record with a record number.
 
 ## Additional Options

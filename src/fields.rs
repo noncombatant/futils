@@ -1,10 +1,12 @@
 //! The `futils fields` command.
 
-use std::io::{stdout, Write};
+use std::io::{stdout, Error, Read, Write};
 use std::num::ParseIntError;
 
+use atty::Stream;
 use once_cell::sync::Lazy;
 use regex::bytes::Regex;
+use serde::Serialize;
 
 use crate::shell::{parse_options, FileOpener, Options, ShellResult, STDIN_PATHNAME};
 use crate::stream_splitter::{Record, StreamSplitter};
@@ -16,7 +18,7 @@ pub(crate) const FIELDS_HELP: &str = include_str!("fields_help.md");
 // TODO: Implement support for named fields.
 
 /// Returns the index of the first byte that is not a space character.
-fn skip_leading_spaces(record: &[u8]) -> Option<usize> {
+fn first_non_space(record: &[u8]) -> Option<usize> {
     static SPACE_CADET: Lazy<Regex> = Lazy::new(|| Regex::new(r"\S").unwrap());
     SPACE_CADET.find(record).map(|m| m.start())
 }
@@ -69,35 +71,86 @@ fn select_fields<'a>(fields: &[&'a [u8]], requested: &[isize], invert: bool) -> 
     }
 }
 
-fn print_record(
-    r: Record,
-    number: Option<usize>,
+#[derive(Serialize)]
+struct EnumeratedRecord<'a> {
+    n: Option<usize>,
+    fields: Vec<&'a [u8]>,
+}
+
+impl<'a> EnumeratedRecord<'a> {
+    fn new(
+        n: Option<usize>,
+        record: &'a Record,
+        requested_fields: &[isize],
+        options: &Options,
+    ) -> Self {
+        let mut start = 0;
+        if options.skip {
+            if let Some(s) = first_non_space(&record.data) {
+                start = s
+            }
+        };
+        let mut fields = options
+            .input_field_delimiter
+            .split(&record.data[start..])
+            .collect::<Vec<&[u8]>>();
+        if !requested_fields.is_empty() {
+            fields = select_fields(&fields, requested_fields, options.invert_fields);
+        }
+        EnumeratedRecord { n, fields }
+    }
+
+    fn write_columns(&self, output: &mut dyn Write, options: &Options) -> Result<(), Error> {
+        if !self.fields.is_empty() {
+            if let Some(n) = self.n {
+                write!(output, "{}", n + 1)?;
+                output.write_all(&options.output_field_delimiter)?;
+            }
+            for (n, f) in self.fields.iter().enumerate() {
+                output.write_all(f)?;
+                if n != self.fields.len() - 1 {
+                    output.write_all(&options.output_field_delimiter)?;
+                }
+            }
+            output.write_all(&options.output_record_delimiter)?;
+        }
+        Ok(())
+    }
+
+    fn write_json(&self, output: &mut dyn Write, pretty: bool) -> Result<(), Error> {
+        if !self.fields.is_empty() {
+            let to_json = if pretty {
+                serde_json::to_writer_pretty
+            } else {
+                serde_json::to_writer
+            };
+            to_json(output, &self)?;
+        }
+        Ok(())
+    }
+}
+
+fn print_fields(
+    reader: &mut dyn Read,
     options: &Options,
     requested_fields: &[isize],
 ) -> ShellResult {
-    let mut stdout = stdout();
-    let start = if options.skip {
-        match skip_leading_spaces(&r.data) {
-            Some(start) => start,
-            None => return Ok(0),
+    for (n, r) in StreamSplitter::new(reader, &options.input_record_delimiter)
+        .map_while(|r| r.ok())
+        .enumerate()
+    {
+        let fields = EnumeratedRecord::new(
+            if options.enumerate { Some(n) } else { None },
+            &r,
+            requested_fields,
+            options,
+        );
+        if options.json_output {
+            fields.write_json(&mut stdout(), atty::is(Stream::Stdout))?;
+        } else {
+            fields.write_columns(&mut stdout(), options)?;
         }
-    } else {
-        0
-    };
-    let mut fields = options
-        .input_field_delimiter
-        .split(&r.data[start..])
-        .collect::<Vec<&[u8]>>();
-    if !requested_fields.is_empty() {
-        fields = select_fields(&fields, requested_fields, options.invert_fields);
     }
-    let record = fields.join(options.output_field_delimiter.as_slice());
-    if let Some(n) = number {
-        write!(stdout, "{}", n + 1)?;
-        stdout.write_all(&options.output_field_delimiter)?;
-    }
-    stdout.write_all(&record)?;
-    stdout.write_all(&options.output_record_delimiter)?;
     Ok(0)
 }
 
@@ -107,9 +160,6 @@ pub(crate) fn fields_main(arguments: &[String]) -> ShellResult {
     if options.help {
         help(0, FIELDS_HELP);
     }
-    if options.json_input || options.json_output {
-        unimplemented!()
-    }
 
     if options.invert_fields && options.fields.is_empty() {
         help(-1, FIELDS_HELP);
@@ -117,7 +167,7 @@ pub(crate) fn fields_main(arguments: &[String]) -> ShellResult {
 
     // TODO: To support named fields, use an `enum Field` here with `isize` and
     // `String` variants.
-    let fields = options
+    let requested_fields = options
         .fields
         .iter()
         .map(|f| str::parse::<isize>(f))
@@ -126,19 +176,14 @@ pub(crate) fn fields_main(arguments: &[String]) -> ShellResult {
     let mut status = 0;
     for file in FileOpener::new(arguments) {
         match file.read {
-            Ok(mut read) => {
-                for (n, r) in StreamSplitter::new(&mut read, &options.input_record_delimiter)
-                    .map_while(|r| r.ok())
-                    .enumerate()
-                {
-                    print_record(
-                        r,
-                        if options.enumerate { Some(n) } else { None },
-                        &options,
-                        &fields,
-                    )?;
+            Ok(mut read) => match print_fields(&mut read, &options, &requested_fields) {
+                Ok(_) => {}
+                Err(e) => {
+                    let p = file.pathname.unwrap_or(&STDIN_PATHNAME);
+                    eprintln!("{}: {}", p, e);
+                    status += 1;
                 }
-            }
+            },
             Err(e) => {
                 let p = file.pathname.unwrap_or(&STDIN_PATHNAME);
                 eprintln!("{}: {}", p, e);
