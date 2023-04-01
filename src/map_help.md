@@ -56,5 +56,6 @@ files | map -x 'status -J'
 
 ## See Also
 
+* `futils apply`
 * `futils help`
 * `xargs`(1)

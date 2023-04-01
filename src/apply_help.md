@@ -3,22 +3,14 @@
 ## Usage
 
 ```
-apply [-v] -x command [pathname [...]]
+apply [pathname [...]]
 ```
 
 ## Description
 
-For each record in each of the given `pathname`(s), runs the shell command
-`command`. If no pathnames are given, reads `stdin`.
-
-## Options
-
-* `-v`: Print the standard output of commands given with the `-x` option. (By
-  default, `apply` only prints their standard error.)
-* `-x`: Run `command` on each record of input.
-
-You can give more than 1 instance of `-x command`, to run multiple commands on
-each input record.
+For each record in each of the given `pathname`(s), treats the first field of
+the record as a shell command, and runs it with the rest of the fields (if any)
+as its arguments. If no pathnames are given, reads `stdin`.
 
 ## Additional Options
 
@@ -41,5 +33,6 @@ TODO
 ## See Also
 
 * `futils help`
+* `futils map`
 * `find`(1), in particular the `-exec` option
 * `xargs`(1)
