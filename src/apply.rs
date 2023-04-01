@@ -16,7 +16,7 @@ fn apply(splitter: StreamSplitter, options: &Options) -> ShellResult {
     let mut stdout = stdout();
     let mut status = 0;
     for r in splitter.map_while(|r| r.ok()) {
-        let fields = options
+        let mut fields = options
             .input_field_delimiter
             .split(&r.data)
             .collect::<Vec<&[u8]>>();
