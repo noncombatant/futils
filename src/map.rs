@@ -17,16 +17,18 @@ fn map(splitter: StreamSplitter, options: &Options) -> ShellResult {
     let mut status = 0;
     for r in splitter.map_while(|r| r.ok()) {
         for command in &options.match_commands {
-            // TODO: split `&r.data` on input_field_separator, pass to
-            // `run_command`. This requires updating `run_command`.
-            match run_command(command, &r.data, true) {
+            let fields = options
+                .input_field_delimiter
+                .split(&r.data)
+                .collect::<Vec<&[u8]>>();
+            match run_command(command, &fields, true) {
                 Ok(s) => {
                     if s != 0 {
                         status += 1;
                     }
                 }
                 Err(e) => {
-                    eprintln!("{}: {}", std::str::from_utf8(&r.data).unwrap(), e);
+                    eprintln!("{}: {}", String::from_utf8_lossy(&r.data), e);
                     status += 1;
                 }
             }

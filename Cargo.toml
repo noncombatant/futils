@@ -28,6 +28,7 @@ rustc_lexer = "*"
 serde = { version = "*", features = ["derive"] }
 serde_json = "*"
 serde_with = "*"
+shell-words = "1.1.0"
 tempfile = "*"
 users = "*"
 walkdir = "*"

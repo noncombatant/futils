@@ -3,17 +3,20 @@
 ## Usage
 
 ```
-map -x command [pathname [...]]
+map [-P] -x command [pathname [...]]
 ```
 
 ## Description
 
-For each record in each of the given `pathname`(s), runs the shell command
-`command` with each field of the record as a distinct argument. If no pathnames
-are given, reads `stdin`.
+For each record in each of the given `pathname`(s) (or `stdin` if no pathnames
+are given), runs the shell command `command`. Each field of the record is given
+to `command` as a distinct argument. Prints the `stdout` and `stderr` of each
+command.
 
 ## Options
 
+* `-P`: Run `command`(s) in parallel. The order of output records will not be
+  deterministic when you use this option.
 * `-x`: Run `command` on each record of input.
 
 You can give more than 1 instance of `-x command`, to run multiple commands on
@@ -25,8 +28,6 @@ each input record.
 * `-f`: Set the input field delimiter, a regular expression.
 * `-R`: Set the output record delimiter.
 * `-r`: Set the input record delimiter.
-* `-v`: Print the standard output of commands given with the `-x` option. (By
-  default, `apply` only prints their standard error.)
 
 Regular expressions use [the Rust regex library
 syntax](https://docs.rs/regex/latest/regex/).
@@ -41,9 +42,19 @@ syntax](https://docs.rs/regex/latest/regex/).
 
 ## Examples
 
-TODO
+To get the status of each file in the current directory:
+
+```
+files | map -x status
+```
+
+To get the status of files in JSON format:
+
+```
+files | map -x 'status -J'
+```
 
 ## See Also
 
 * `futils help`
-* TODO
+* `xargs`(1)

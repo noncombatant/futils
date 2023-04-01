@@ -33,7 +33,7 @@ fn print_matches(pathname: &str, splitter: StreamSplitter, options: &Options) ->
             matched = true;
         }
         for command in &options.match_commands {
-            match run_command(command, &r.data, options.verbose) {
+            match run_command(command, &[&r.data], options.verbose) {
                 Ok(status) => {
                     if status != 0 {
                         continue 'outer;

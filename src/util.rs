@@ -25,20 +25,19 @@ pub(crate) fn help(status: i32, message: &str) {
 /// Runs the shell command `command`, passing it `argument`. If `verbose` is
 /// true, will print any resulting `stdout`. Prints `stderr` unconditionally.
 // TODO: `arguments` should be `&[OsString]`.
-pub(crate) fn run_command(command: &str, argument: &[u8], verbose: bool) -> ShellResult {
-    let argument = str::from_utf8(argument)?;
-    let output = if cfg!(windows) {
-        Command::new("cmd")
-            .arg("/C")
-            .arg(command)
-            .arg(argument)
-            .output()?
-    } else if cfg!(unix) {
-        let command = [command, argument].join(" ");
-        Command::new("sh").arg("-c").arg(command).output()?
-    } else {
-        unimplemented!()
-    };
+pub(crate) fn run_command(command: &str, arguments: &[&[u8]], verbose: bool) -> ShellResult {
+    let words = shell_words::split(command)?;
+    let arguments = arguments
+        .iter()
+        .map(|a| str::from_utf8(a))
+        .collect::<Result<Vec<&str>, str::Utf8Error>>()?;
+
+    let mut command = Command::new(&words[0]);
+    if words.len() > 1 {
+        command.args(&words[1..]);
+    }
+    command.args(arguments);
+    let output = command.output()?;
 
     if verbose && !output.stdout.is_empty() {
         stdout().write_all(&output.stdout)?;

@@ -114,7 +114,7 @@ fn print_matches(pathname: &str, options: &Options) -> ShellResult {
         }
 
         for command in &options.match_commands {
-            match run_command(command, pathname.as_bytes(), options.verbose) {
+            match run_command(command, &[pathname.as_bytes()], options.verbose) {
                 Ok(status) => {
                     if status != 0 {
                         continue 'outer;
