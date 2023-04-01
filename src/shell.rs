@@ -80,7 +80,7 @@ impl UsageError {
 pub(crate) type ShellResult = Result<i32, ShellError>;
 
 /// The default list of command line flags. See `Options`, below.
-pub(crate) const DEFAULT_OPTION_SPEC: &str = "ac:F:f:hIJjl:M:m:np:R:r:st:vx:";
+pub(crate) const DEFAULT_OPTION_SPEC: &str = "ac:F:f:hIJjl:M:m:nP:p:R:r:st:vx:";
 
 /// These are the standard command line options for `futils` programs.
 ///
@@ -122,6 +122,9 @@ pub(crate) struct Options {
 
     /// `-n`
     pub(crate) enumerate: bool,
+
+    /// `-P`
+    pub(crate) parallel: u16,
 
     /// `-p`
     pub(crate) prune_expressions: Vec<Regex>,
@@ -178,6 +181,7 @@ impl Options {
             mtime_expressions: Vec::new(),
             match_expressions: Vec::new(),
             enumerate: false,
+            parallel: 1,
             prune_expressions: Vec::new(),
             output_record_delimiter: Vec::from(DEFAULT_OUTPUT_RECORD_DELIMITER),
             input_record_delimiter: Regex::new(DEFAULT_INPUT_RECORD_DELIMITER)?,
@@ -215,6 +219,7 @@ pub(crate) fn parse_options(arguments: &[String]) -> Result<(Options, &[String])
                 Opt('M', Some(s)) => options.mtime_expressions.push(Time::new(&s)?),
                 Opt('m', Some(s)) => options.match_expressions.push(Regex::new(&s)?),
                 Opt('n', None) => options.enumerate = true,
+                Opt('P', Some(s)) => options.parallel = str::parse::<u16>(&s)?,
                 Opt('p', Some(s)) => options.prune_expressions.push(Regex::new(&s)?),
                 Opt('R', Some(s)) => {
                     options.output_record_delimiter =
