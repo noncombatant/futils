@@ -6,6 +6,7 @@ use std::process::{exit, Command};
 use std::str::{self, from_utf8, FromStr};
 
 use bigdecimal::BigDecimal;
+use locale::Numeric;
 use rustc_lexer::unescape::unescape_str;
 
 use crate::shell::{ShellError, ShellResult};
@@ -74,7 +75,13 @@ pub(crate) fn file_name(pathname: &str) -> Option<&str> {
 
 /// Parses `value` and returns a `BigDecimal`.
 pub(crate) fn parse_number(value: &[u8]) -> Result<BigDecimal, ShellError> {
-    Ok(BigDecimal::from_str(from_utf8(value)?)?)
+    let separator = match Numeric::load_user_locale() {
+        Ok(numeric) => numeric.thousands_sep,
+        Err(_) => "".to_string(),
+    };
+    let value = from_utf8(value)?;
+    let value = value.replace(&separator, "");
+    Ok(BigDecimal::from_str(&value)?)
 }
 
 #[cfg(test)]

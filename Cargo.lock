@@ -240,6 +240,7 @@ dependencies = [
  "getopt",
  "itertools",
  "libc",
+ "locale",
  "nix",
  "once_cell",
  "regex",
@@ -366,6 +367,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ecd207c9c713c34f95a097a5b029ac2ce6010530c7b49d7fea24d977dede04f5"
 dependencies = [
  "cc",
+]
+
+[[package]]
+name = "locale"
+version = "0.2.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5fdbe492a9c0238da900a1165c42fc5067161ce292678a6fe80921f30fe307fd"
+dependencies = [
+ "libc",
 ]
 
 [[package]]
