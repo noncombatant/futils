@@ -16,9 +16,7 @@ Hard to do safely and correctly, and therefore fun?
 Create a Markdown printing function and program, like `glow`, and use it when
 printing all help messages.
 
-Rayon for e.g. `files`, et c.?
-
-Parallelize `-x` when appropriate.
+Rayon for e.g. `files`, et c.? Parallelize `-x` when appropriate with `-P`.
 
 Consider switching to using `clap` for parsing options, et c. This is related to
 the overall problem of `OsString` vs. `String` for arguments, options,
@@ -37,8 +35,8 @@ Every program/most programs should take the following form:
 ```
 parse options and arguments
 for each argument:
-  records = process the argument
   for each record:
+    specific record type = process record
     write_columns or write_json
 ```
 

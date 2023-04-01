@@ -15,8 +15,6 @@ use crate::util::help;
 /// Command line usage help.
 pub(crate) const FIELDS_HELP: &str = include_str!("fields_help.md");
 
-// TODO: Implement support for named fields.
-
 /// Returns the index of the first byte that is not a space character.
 fn first_non_space(record: &[u8]) -> Option<usize> {
     static SPACE_CADET: Lazy<Regex> = Lazy::new(|| Regex::new(r"\S").unwrap());

@@ -58,4 +58,5 @@ files | map -x 'status -J'
 
 * `futils apply`
 * `futils help`
+* `find`(1), in particular the `-exec` option
 * `xargs`(1)
