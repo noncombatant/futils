@@ -12,6 +12,11 @@ use crate::util::{help, parse_number};
 /// Command line usage help.
 pub(crate) const REDUCE_HELP: &str = include_str!("reduce_help.md");
 
+// TODO: Change this program to work on each field in each record, instead of
+// each record. Or, make that an option. That way, you could sum each column in
+// a row, for example. That may mean ignoring number parse errors, or making
+// reporting them be optional.
+
 /// Returns the result of applying `command` to `accumulator` and `record`.
 fn apply_command(accumulator: &[u8], command: &str, record: &[u8]) -> Result<Vec<u8>, ShellError> {
     match command {
