@@ -97,6 +97,7 @@ fn test_files_prune_basic() {
             "files",
             &["-p", "(?i)goat", "test-data"],
             "test-data
+test-data/numbers.txt
 test-data/columns.txt
 test-data/farm-animals.txt
 test-data/lurp
@@ -109,6 +110,7 @@ test-data/lurp/norp/yibb
             "files",
             &["-p", "(?i)(goat|yibb)", "test-data"],
             "test-data
+test-data/numbers.txt
 test-data/columns.txt
 test-data/farm-animals.txt
 test-data/lurp
@@ -213,4 +215,72 @@ test-data/farm-animals.txt	4	1,749	llamas	exclusively human flesh (for some reas
             1,
         ),
     ]);
+}
+
+#[test]
+fn test_records_basic() {
+    run_tests(&[
+        TestCase::new(
+            "records",
+            &["test-data/farm-animals.txt"],
+            "1	mountain goat	grass, moss, vegetation
+4	billy goats	grass, moss, vegetation, tin cans
+12	sheep	grass, more grass
+1,749	llamas	exclusively human flesh (for some reason)
+",
+            0,
+        ),
+        TestCase::new(
+            "records",
+            &["-n", "test-data/farm-animals.txt"],
+            "1	1	mountain goat	grass, moss, vegetation
+2	4	billy goats	grass, moss, vegetation, tin cans
+3	12	sheep	grass, more grass
+4	1,749	llamas	exclusively human flesh (for some reason)
+",
+            0,
+        ),
+        TestCase::new(
+            "records",
+            &["-l", "2", "test-data/farm-animals.txt"],
+            "1	mountain goat	grass, moss, vegetation
+4	billy goats	grass, moss, vegetation, tin cans
+",
+            0,
+        ),
+    ]);
+}
+
+#[test]
+fn test_reduce_basic() {
+    run_tests(&[
+        TestCase::new(
+            "reduce",
+            &["-x", "+", "test-data/numbers.txt"],
+            "2102784
+",
+            0,
+        ),
+        TestCase::new(
+            "reduce",
+            &["-x", "-", "test-data/numbers.txt"],
+            "-2100736
+",
+            0,
+        ),
+        TestCase::new(
+            "reduce",
+            &["-x", "*", "test-data/numbers.txt"],
+            "2361183241434822606848
+",
+            0,
+        ),
+        TestCase::new(
+            "reduce",
+            &["-x", "/", "test-data/numbers.txt"],
+            "0.000000000000000444089209850062616169452667236328125
+",
+            0,
+        ),
+	]);
 }
