@@ -60,7 +60,7 @@ in a more robust way (such as when the other utilities may treat the file’s
 existing delimiters as as syntactic metacharacters of some kind). For example,
 
 ```
-records -r '\0' list-of-files.txt | xargs -0 foo...
+records -R '\0' list-of-files.txt | xargs -0 foo...
 ```
 
 With its `-l` option, `records` can work somewhat like `head` and `tail`.
@@ -76,8 +76,8 @@ records -l-5 your-file.txt
 
 Note that `head` and `tail` yield *lines*, including empty ones, while `records`
 yields only *non-empty* records. TODO: `records` and `fields` should maybe have
-an option to print empty records, and/or input record delimiters, for full
-feature parity.
+an option to print empty records, and/or input record delimiters, for feature
+parity.
 
 ## See Also
 
