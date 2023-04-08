@@ -1,7 +1,7 @@
 # TODO
 
-More programs: add `join` (like `join`(1)), `foldr`, `foldl`, `sum`, `zip`,
-`reverse`, if reasonable.
+More programs: add `common` (like `comm`(1)), `join` (like `join`(1)), `foldr`,
+`foldl`, `sum`, `zip`, `reverse`, if reasonable.
 
 Unit and integration tests for everything.
 
