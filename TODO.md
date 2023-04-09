@@ -26,10 +26,6 @@ Use David Cook’s non-copying `StreamSplitter`, in some magical future when it
 can be made to `impl Iterator`. Currently, we rely too much on the `Iterator`
 trait to do without it.
 
-Provide an option for `records`, `fields`, `filter`, et c. to print the matched
-input delimiters, too. Alternately: if we end up never wanting that, get rid of
-the `.delimiter` field. (Especially since it costs another allocation.)
-
 Every program/most programs should take the following form:
 
 ```

@@ -18,10 +18,6 @@ pub(crate) struct Record {
     /// The bytes lexed from the input.
     //#[serde_as(as = "BytesOrString")]
     pub(crate) data: Vec<u8>,
-
-    /// The delimiter lexed from the input.
-    //#[serde_as(as = "BytesOrString")]
-    pub(crate) delimiter: Vec<u8>,
 }
 
 //impl Serialize for Record {
@@ -146,14 +142,12 @@ impl<'a> Iterator for StreamSplitter<'a> {
                     self.start += m.end();
                     Ok(Record {
                         data: Vec::new(),
-                        delimiter: section[m.start()..m.end()].to_vec(),
                     })
                 } else {
                     // We matched a record.
                     self.start += m.end();
                     Ok(Record {
                         data: section[0..m.start()].to_vec(),
-                        delimiter: section[m.start()..m.end()].to_vec(),
                     })
                 };
                 Some(r)
@@ -163,7 +157,6 @@ impl<'a> Iterator for StreamSplitter<'a> {
                 self.start = self.end;
                 Some(Ok(Record {
                     data: section.to_vec(),
-                    delimiter: Vec::new(),
                 }))
             }
         }
@@ -193,11 +186,9 @@ mod tests {
 
         let r = splitter.next().unwrap().unwrap();
         assert_eq!(b"hello", r.data.as_slice());
-        assert_eq!(b"\n\n", r.delimiter.as_slice());
 
         let r = splitter.next().unwrap().unwrap();
         assert_eq!(b"world", r.data.as_slice());
-        assert_eq!(b"\n", r.delimiter.as_slice());
 
         assert!(splitter.next().is_none());
     }
@@ -217,7 +208,6 @@ mod tests {
 
         let r = splitter.next().unwrap().unwrap();
         assert_eq!(b"greetings", r.data.as_slice());
-        assert_eq!(spaces, r.delimiter);
 
         let r = splitter.next().unwrap().unwrap();
         assert_eq!(b"world", r.data.as_slice());
