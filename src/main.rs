@@ -3,7 +3,6 @@
 use std::env;
 use std::process::exit;
 
-mod apply;
 mod fields;
 mod files;
 mod filter;
@@ -17,7 +16,6 @@ mod time;
 mod util;
 mod version;
 
-use apply::{apply_main, APPLY_HELP};
 use fields::{fields_main, FIELDS_HELP};
 use files::{files_main, FILES_HELP};
 use filter::{filter_main, FILTER_HELP};
@@ -75,7 +73,6 @@ fn main() {
             help(0, MAIN_HELP);
         } else {
             match arguments[1].as_str() {
-                "apply" => help(0, APPLY_HELP),
                 "fields" => help(0, FIELDS_HELP),
                 "files" => help(0, FILES_HELP),
                 "filter" => help(0, FILTER_HELP),
@@ -90,7 +87,6 @@ fn main() {
     }
 
     match match program_name {
-        "apply" => apply_main(&arguments),
         "fields" => fields_main(&arguments),
         "files" => files_main(&arguments),
         "filter" => filter_main(&arguments),

@@ -54,14 +54,6 @@ fn run_tests(cases: &[TestCase]) {
 }
 
 #[test]
-fn test_apply_basic() {
-    run_tests(&[
-        TestCase::new("apply", &["-x", "ls", "test-data/goat"], "", 0),
-        TestCase::new("apply", &["-x", "cat -v", "test-data/Goats"], "", 0),
-    ]);
-}
-
-#[test]
 fn test_files_match_basic() {
     run_tests(&[
         TestCase::new("files", &["-m", "goat", "test-data"], "test-data/goat\n", 0),

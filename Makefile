@@ -14,7 +14,6 @@ install:
 	mkdir -p $(INSTALL_ROOT)/bin
 	cp target/release/futils $(INSTALL_ROOT)/bin
 	strip $(INSTALL_ROOT)/bin/futils
-	ln -f $(INSTALL_ROOT)/bin/futils $(INSTALL_ROOT)/bin/apply
 	ln -f $(INSTALL_ROOT)/bin/futils $(INSTALL_ROOT)/bin/fields
 	ln -f $(INSTALL_ROOT)/bin/futils $(INSTALL_ROOT)/bin/files
 	ln -f $(INSTALL_ROOT)/bin/futils $(INSTALL_ROOT)/bin/filter

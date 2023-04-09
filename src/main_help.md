@@ -14,7 +14,6 @@ futils version
 programming primitives and operate on streams. The suite currently consists of
 the following programs:
 
-* `apply`
 * `fields`
 * `files`
 * `filter`
@@ -37,17 +36,17 @@ or
 futils help sub-command
 ```
 
-For example, to get help for `apply`:
+For example, to get help for `map`:
 
 ```
-futils apply -h
-futils help apply
+futils map -h
+futils help map
 ```
 
 You can also invoke `futils` utilities directly, for example:
 
 ```
-apply -h
+map -h
 files -h
 ```
 
@@ -116,7 +115,7 @@ delimiter, and `xargs` uses it as an input record delimiter. You might think the
 equivalent with `futils` would be:
 
 ```
-files -R '\0' ... | apply -r '\0' ...
+files -R '\0' ... | map -r '\0' ...
 ```
 
 However, `\0` is not a valid regular expression. You’ll get an error message
@@ -137,14 +136,14 @@ regular expression; in the case of `NUL`, the hexadecimal byte literal `\x00`
 works:
 
 ```
-files -R '\0' ... | apply -r '\x00' ...
+files -R '\0' ... | map -r '\x00' ...
 ```
 
 That also works for lexing strings, thankfully, so you can be consistent and use
 it everywhere:
 
 ```
-files -R '\x00' ... | apply -r '\x00' ...
+files -R '\x00' ... | map -r '\x00' ...
 ```
 
 ## See Also
