@@ -18,6 +18,8 @@ produces the numeric sum of all input records.
 
 ## Options
 
+TODO: Maybe have some way to print the input records too.
+
 * `-v`: Print the standard output of commands given with the `-x` option. (By
   default, `reduce` only prints their standard error.)
 * `-x`: Run `command` on each record of input.
