@@ -218,6 +218,30 @@ test-data/farm-animals.txt	4	1,749	llamas	exclusively human flesh (for some reas
 }
 
 #[test]
+fn test_filter_limit0() {
+    run_tests(&[
+        TestCase::new(
+            "filter",
+            &["-l", "0", "-m", "chunk", "test-data/farm-animals.txt"],
+            "",
+            1,
+        ),
+        TestCase::new(
+            "filter",
+            &["-l", "0", "-p", "chunk", "test-data/farm-animals.txt"],
+            "",
+            0,
+        ),
+        TestCase::new(
+            "filter",
+            &["-l", "0", "-m", "(?i)goat", "test-data/farm-animals.txt"],
+            "",
+            0,
+        ),
+    ]);
+}
+
+#[test]
 fn test_records_basic() {
     run_tests(&[
         TestCase::new(
@@ -282,5 +306,5 @@ fn test_reduce_basic() {
 ",
             0,
         ),
-	]);
+    ]);
 }

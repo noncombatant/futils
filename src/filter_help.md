@@ -3,7 +3,7 @@
 ## Usage
 
 ```
-filter [-v] [-m regex] [-p regex] [-x command] [pathname [...]]
+filter [-v] [-l limit] [-m regex] [-p regex] [-x command] [pathname [...]]
 ```
 
 ## Description
@@ -15,6 +15,11 @@ If you give no specifications, `filter` prints all records.
 
 ## Options
 
+* `-l`: Limit the number of records printed.
+  * If `limit` is 0, `filter` prints nothing and exits with status 0 if the
+    input contained a matching record, and 1 otherwise.
+  * If `limit` is < 0, the limit is counted back from the last record in the
+    input.
 * `-m`: Print records that match the regular expression.
 * `-p`: Do not print (i.e. prune) records that match the regular expression.
 * `-x`: Print records for which `command` exited with status 0.
@@ -34,8 +39,6 @@ syntax](https://docs.rs/regex/latest/regex/).
 * `-r`: Set the input record delimiter.
 * `-v`: Print the standard output of commands given with the `-x` option. (By
   default, `filter` only prints their standard error.)
-
-TODO: Support `-l` as in `records`.
 
 ## Exit Status
 

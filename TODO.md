@@ -40,9 +40,6 @@ for each argument:
     write_columns or write_json
 ```
 
-A quick-exit option for `filter`, like `grep -l`. Maybe `-q` for quick or `-b`
-for Boolean.
-
 Consider distinguishing short help (`-h`) from verbose help (`-h -v`).
 
 Run all documented examples as actual tests with this form:

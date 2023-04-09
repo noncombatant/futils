@@ -25,12 +25,18 @@ fn print_matches(pathname: &str, splitter: StreamSplitter, options: &Options) ->
                 continue 'outer;
             }
             matched = true;
+            if options.limit == Some(0) {
+                break 'outer;
+            }
         }
         for re in &options.match_expressions {
             if !re.is_match(&r.data) {
                 continue 'outer;
             }
             matched = true;
+            if options.limit == Some(0) {
+                break 'outer;
+            }
         }
         for command in &options.match_commands {
             match run_command(command, &[&r.data], options.verbose) {
@@ -39,6 +45,9 @@ fn print_matches(pathname: &str, splitter: StreamSplitter, options: &Options) ->
                         continue 'outer;
                     }
                     matched = true;
+                    if options.limit == Some(0) {
+                        break 'outer;
+                    }
                 }
                 Err(e) => {
                     eprintln!(
