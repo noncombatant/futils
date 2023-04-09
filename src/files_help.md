@@ -60,13 +60,13 @@ parse the string as “YYYY-MM-DD HH:MM:SS”, then as “HH:MM:SS”, then as
 To show all files that contain a record matching “foo”:
 
 ```
-files -x 'filter -m foo' ...
+files -x 'filter -l0 -m foo' ...
 ```
 
 To show all files that contain a record not matching “foo”:
 
 ```
-files -x 'filter -p foo' ...
+files -x 'filter -l0 -p foo' ...
 ```
 
 To show all files that do not contain a record matching “foo”, we need to treat
@@ -75,10 +75,8 @@ we need to come up with an input record delimiter that never appears in the
 file; `\x00` often works for this purpose, for text files at least. For example:
 
 ```
-files -x 'filter -R '\x00' -p foo' ...
+files -x 'filter -l0 -R '\x00' -p foo' ...
 ```
-
-TODO: Update those with the quick-exit feature once it’s specified.
 
 ## See Also
 
