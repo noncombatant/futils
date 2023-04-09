@@ -14,6 +14,7 @@ as its arguments. If no pathnames are given, reads `stdin`.
 
 ## Additional Options
 
+* `-f`: Set the input field delimiter.
 * `-h`: Print this help page.
 * `-R`: Set the output record delimiter.
 * `-r`: Set the input record delimiter.
