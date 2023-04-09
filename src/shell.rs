@@ -19,9 +19,8 @@ use crate::time::Time;
 use crate::util::unescape_backslashes;
 
 /// `ShellError` accounts for a variety of errors that can happen when running
-/// shell commands, enabling many `main` `fn`s for shell programs to declare
-/// they return it and easily use the `?` operator. We can extend this `enum`
-/// arbitrarily, as needed.
+/// shell commands, enabling `*_main` to declare they return it and easily use
+/// the `?` operator. We can extend this `enum` arbitrarily, as needed.
 #[derive(Debug, From)]
 pub(crate) enum ShellError {
     BigDecimal(ParseBigDecimalError),
@@ -37,8 +36,6 @@ pub(crate) enum ShellError {
     Utf8(str::Utf8Error),
 }
 
-// TODO: Could we #[derive(derive_more::Display)] for EscapeError? If so, we
-// could remove this.
 impl Display for ShellError {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> Result<(), std::fmt::Error> {
         match self {
@@ -148,8 +145,9 @@ pub(crate) struct Options {
     pub(crate) match_commands: Vec<String>,
 }
 
-/// The default input record delimiter. This pattern matches 1 DOS/Internet,
-/// POSIX, or Mac line break (in that order of preference).
+/// The default input record delimiter. This pattern matches 1
+/// DOS/Windows/Internet, POSIX, or Mac line break (in that order of
+/// preference).
 const DEFAULT_INPUT_RECORD_DELIMITER: &str = r"(\r\n|\n|\r)";
 
 /// The default input field delimiter.

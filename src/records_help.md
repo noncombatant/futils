@@ -48,7 +48,8 @@ sequences into `\n`. This is due to the default values of `-d` and `-o`.
 records -r '\r\n' -R '\n' some-file.txt
 ```
 
-As above, but explicitly convert Windows new line sequences (only) into POSIX.
+As above, but explicitly convert DOS/Windows/Internet new line sequences (only)
+into POSIX.
 
 ```
 records -R '\0' some-file.txt

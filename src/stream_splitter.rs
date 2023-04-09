@@ -2,42 +2,16 @@
 //! expressions.
 
 use std::io::{Read, Result};
-//use std::str::from_utf8;
 
 use regex::bytes::Regex;
 use serde::Serialize;
-//use serde::ser::Serializer;
-//use serde_with::{BytesOrString, serde_as};
-
-//use serde::ser::{Serialize, Serializer, SerializeStruct};
 
 /// A record lexed from the input that `StreamSplitter` is splitting.
-//#[serde_as]
 #[derive(Serialize)]
 pub(crate) struct Record {
     /// The bytes lexed from the input.
-    //#[serde_as(as = "BytesOrString")]
     pub(crate) data: Vec<u8>,
 }
-
-//impl Serialize for Record {
-//    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-//    where
-//        S: Serializer,
-//    {
-//        let mut state = serializer.serialize_struct("Record", 2)?;
-//        state.serialize_field("is_delimiter", &self.is_delimiter)?;
-//        match from_utf8(&self.data) {
-//            Ok(s) => {
-//                state.serialize_field("data", s)?;
-//            }
-//            Err(_) => {
-//                state.serialize_field("data", &self.data)?;
-//            }
-//        }
-//        state.end()
-//    }
-//}
 
 /// An `Iterator` that lexes a `Read`, searching for the `delimiter`, and yields
 /// `Record`s containing data and delimiter bytes.
