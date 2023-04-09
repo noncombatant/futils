@@ -51,7 +51,7 @@ syntax](https://docs.rs/regex/latest/regex/).
 ## Examples
 
 Consider a file named farm-animals.txt with the following records of
-tab-separated fields showing how many of each animal we have, as well as their
+tab-delimited fields showing how many of each animal we have, as well as their
 diet:
 
 ```
@@ -61,8 +61,9 @@ diet:
 1,749	llamas	exclusively human flesh (for some reason)
 ```
 
-We’ll use `-f '\t'` to delimit the fields, and we can use `fields` to select
-some of the fields. For example, to print only the count of each animal:
+We can use `fields` to select some of the fields. (The default input field
+delimiter is the tab, but if we want to be explicit, we can use `-f '\t'`.) For
+example, to print only the count of each animal:
 
 ```
 fields -f '\t' -c 0 farm-animals.txt
@@ -73,13 +74,13 @@ Note that field counting begins at 0, so `-c 0` gives us the *first* field.
 To print every field *except* the count, we can invert the selection with `-I`:
 
 ```
-fields -f '\t' -I -c 0 farm-animals.txt
+fields -I -c 0 farm-animals.txt
 ```
 
 If we only want to see the animals’ diets:
 
 ```
-fields -f '\t' -c 2 farm-animals.txt
+fields -c 2 farm-animals.txt
 ```
 
 ## See Also

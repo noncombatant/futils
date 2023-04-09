@@ -15,6 +15,7 @@ If no pathnames are given, prints the status for each file in `.`.
 The metadata elements are:
 
 * `name`: name
+* `file_type`: type: regular file, directory, et c.
 * `size`: size in bytes
 * `modified_time`: last modified time
 * `user`: user-owner
@@ -30,12 +31,10 @@ The metadata elements are:
 * `blocks`: number of storage blocks used
 * `block_size`: size of storage blocks
 
-For columns output (no `-J`), by default, only the `permissions`, `links`,
-`user`, `group`, `size`, `modified_time`, and `name` fields are printed (in that
-order). To see all fields, pass the `-v` option. For JSON output (`-J`), all
-fields are printed.
-
-TODO: Add the `type` field.
+For columns output (no `-J`), by default, only the `file_type`, `permissions`,
+`links`, `user`, `group`, `size`, `modified_time`, and `name` fields are printed
+(in that order). To see all fields, pass the `-v` option. For JSON output
+(`-J`), all fields are printed.
 
 ## Options
 
@@ -69,13 +68,13 @@ status -J | vd -f json
 few fields, try this:
 
 ```
-status | fields -f '\t' -c 1 -c 2 -c 0
+status | fields -c 1 -c 2 -c 0
 ```
 
 To sort by size (`-c1` is the Size field):
 
 ```
-status | fields -f'\t' -c1 -c2 -c0 | sort -n
+status | fields -c1 -c2 -c0 | sort -n
 ```
 
 You can also use JSON and `jq` to filter fields:
