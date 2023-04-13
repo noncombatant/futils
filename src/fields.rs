@@ -134,7 +134,7 @@ fn print_fields(
     requested_fields: &[isize],
 ) -> ShellResult {
     for (n, r) in StreamSplitter::new(reader, &options.input_record_delimiter)
-        .map_while(|r| r.ok())
+        .map_while(Result::ok)
         .enumerate()
     {
         let fields = EnumeratedRecord::new(

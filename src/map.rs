@@ -15,7 +15,7 @@ pub(crate) const MAP_HELP: &str = include_str!("map_help.md");
 fn map(splitter: StreamSplitter, options: &Options) -> ShellResult {
     let mut stdout = stdout();
     let mut status = 0;
-    for r in splitter.map_while(|r| r.ok()) {
+    for r in splitter.map_while(Result::ok) {
         for command in &options.match_commands {
             let fields = options
                 .input_field_delimiter

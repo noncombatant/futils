@@ -45,7 +45,7 @@ fn apply_command(accumulator: &[u8], command: &str, record: &[u8]) -> Result<Vec
 fn reduce(splitter: StreamSplitter, options: &Options) -> ShellResult {
     let mut stdout = stdout();
     let mut status = 0;
-    let mut splitter = splitter.map_while(|r| r.ok());
+    let mut splitter = splitter.map_while(Result::ok);
     let mut result = match splitter.next() {
         Some(r) => r.data,
         None => return Err(ShellError::Usage(UsageError::new("No input"))),

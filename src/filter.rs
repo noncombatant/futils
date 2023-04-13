@@ -16,7 +16,7 @@ fn print_matches(pathname: &str, splitter: StreamSplitter, options: &Options) ->
     let mut stdout = stdout();
     let mut matched = false;
     'outer: for (n, r) in splitter
-        .map_while(|r| r.ok())
+        .map_while(Result::ok)
         .enumerate()
         .filter(|pair| !pair.1.data.is_empty())
     {
