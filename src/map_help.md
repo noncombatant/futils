@@ -26,7 +26,6 @@ each input record.
 
 * `-h`: Print this help page.
 * `-f`: Set the input field delimiter, a regular expression.
-* `-R`: Set the output record delimiter.
 * `-r`: Set the input record delimiter.
 
 Regular expressions use [the Rust regex library
