@@ -78,6 +78,19 @@ file; `\x00` often works for this purpose, for text files at least. For example:
 files -x 'filter -l0 -R '\x00' -p foo' ...
 ```
 
+To show (`-v`), for all Rust source code files (`.rs`), lines matching “goat”
+(`-m goat`) and the line numbers (`-n`):
+
+```
+files -m '\.rs$' -x 'filter -n -m goat' -v
+```
+
+Another way to do this is:
+
+```
+files -m '\.rs$' | map -x 'filter -n -m goat'
+```
+
 ## See Also
 
 * `futils help`
