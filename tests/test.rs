@@ -304,3 +304,19 @@ fn test_reduce_basic() {
         ),
     ]);
 }
+
+#[test]
+fn test_common_basic() {
+    run_tests(&[
+        TestCase::new(
+            "common",
+            &["-F", ",\\t", "test-data/common1.txt", "test-data/common2.txt"],
+            ",	,	Atlanta
+,	,	Boston
+Cincinnati
+,	Detroit
+",
+            0,
+        ),
+    ]);
+}
