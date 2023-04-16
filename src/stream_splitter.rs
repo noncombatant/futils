@@ -114,9 +114,7 @@ impl<'a> Iterator for StreamSplitter<'a> {
                 let r = if m.start() == 0 {
                     // We matched the delimiter at the beginning of the section.
                     self.start += m.end();
-                    Ok(Record {
-                        data: Vec::new(),
-                    })
+                    Ok(Record { data: Vec::new() })
                 } else {
                     // We matched a record.
                     self.start += m.end();
