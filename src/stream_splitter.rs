@@ -7,7 +7,7 @@ use regex::bytes::Regex;
 use serde::Serialize;
 
 /// A record lexed from the input that `StreamSplitter` is splitting.
-#[derive(Serialize)]
+#[derive(Eq, Ord, PartialEq, PartialOrd, Serialize)]
 pub(crate) struct Record {
     /// The bytes lexed from the input.
     pub(crate) data: Vec<u8>,

@@ -89,6 +89,8 @@ fn test_files_prune_basic() {
             "files",
             &["-p", "(?i)goat", "test-data"],
             "test-data
+test-data/common1.txt
+test-data/common2.txt
 test-data/numbers.txt
 test-data/columns.txt
 test-data/farm-animals.txt
@@ -102,6 +104,8 @@ test-data/lurp/norp/yibb
             "files",
             &["-p", "(?i)(goat|yibb)", "test-data"],
             "test-data
+test-data/common1.txt
+test-data/common2.txt
 test-data/numbers.txt
 test-data/columns.txt
 test-data/farm-animals.txt
