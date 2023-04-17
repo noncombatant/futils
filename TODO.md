@@ -50,3 +50,5 @@ output 3
 Assert that running the command produces the output.
 
 Write a `futils tutorial` that has a more discursive tone and lots of examples.
+
+Enable `-i` for `-m` and `-p` using `RegexBuilder::case_insensitive`.
