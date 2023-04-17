@@ -77,7 +77,7 @@ impl UsageError {
 pub(crate) type ShellResult = Result<i32, ShellError>;
 
 /// The default list of command line flags. See `Options`, below.
-pub(crate) const DEFAULT_OPTION_SPEC: &str = "ac:F:f:hIJjl:M:m:nP:p:R:r:st:vx:";
+pub(crate) const DEFAULT_OPTION_SPEC: &str = "ac:F:f:hIiJjl:M:m:nP:p:R:r:st:vx:";
 
 /// These are the standard command line options for `futils` programs.
 ///
@@ -101,6 +101,9 @@ pub(crate) struct Options {
 
     /// `-I`
     pub(crate) invert_fields: bool,
+
+    /// `-i`
+    pub(crate) insensitive: bool,
 
     /// `-J`
     pub(crate) json_output: bool,
@@ -173,6 +176,7 @@ impl Options {
             input_field_delimiter: Regex::new(DEFAULT_INPUT_FIELD_DELIMITER)?,
             help: false,
             invert_fields: false,
+            insensitive: false,
             json_output: false,
             json_input: false,
             limit: None,
@@ -210,6 +214,7 @@ pub(crate) fn parse_options(arguments: &[String]) -> Result<(Options, &[String])
                 }
                 Opt('f', Some(s)) => options.input_field_delimiter = Regex::new(&s)?,
                 Opt('I', None) => options.invert_fields = true,
+                Opt('i', None) => options.insensitive = true,
                 Opt('h', None) => options.help = true,
                 Opt('J', None) => options.json_output = true,
                 Opt('j', None) => options.json_input = true,

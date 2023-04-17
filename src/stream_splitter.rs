@@ -2,7 +2,10 @@
 //! expressions.
 
 use std::io::{Read, Result};
+use std::iter::zip;
+use std::cmp::Ordering;
 
+use bstr::ByteSlice;
 use regex::bytes::Regex;
 use serde::Serialize;
 
@@ -11,6 +14,21 @@ use serde::Serialize;
 pub(crate) struct Record {
     /// The bytes lexed from the input.
     pub(crate) data: Vec<u8>,
+}
+
+impl Record {
+    /// Compares the `data` fields of 2 `Record`s case-insensitively, without
+    /// allocating.
+    pub(crate) fn icmp(&self, other: &Self) -> Ordering {
+        let mut order = Ordering::Equal;
+        for (s, o) in zip(self.data.chars(), other.data.chars()) {
+            order = s.to_lowercase().cmp(o.to_lowercase());
+        }
+        match order {
+            Ordering::Equal => self.data.len().cmp(&other.data.len()),
+            _ => order,
+        }
+    }
 }
 
 /// An `Iterator` that lexes a `Read`, searching for the `delimiter`, and yields

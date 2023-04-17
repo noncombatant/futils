@@ -1,8 +1,8 @@
 //! The `futils common` command.
 
+use std::cmp::Ordering;
 use std::fs::File;
 use std::io::{stdin, stdout, Write};
-use std::cmp::Ordering::*;
 
 use crate::shell::{parse_options, Options, ShellResult};
 use crate::stream_splitter::{Record, StreamSplitter};
@@ -60,17 +60,21 @@ pub(crate) fn common_main(arguments: &[String]) -> ShellResult {
     let mut record2 = records2.next();
     while record1.is_some() || record2.is_some() {
         match (&record1, &record2) {
-            (Some(r1), Some(r2)) => match r1.cmp(r2) {
-                Equal => {
+            (Some(r1), Some(r2)) => match if options.insensitive {
+                r1.icmp(r2)
+            } else {
+                r1.cmp(r2)
+            } {
+                Ordering::Equal => {
                     print(3, r1, &options)?;
                     record1 = records1.next();
                     record2 = records2.next();
                 }
-                Less => {
+                Ordering::Less => {
                     print(1, r1, &options)?;
                     record1 = records1.next();
                 }
-                Greater => {
+                Ordering::Greater => {
                     print(2, r2, &options)?;
                     record2 = records2.next();
                 }

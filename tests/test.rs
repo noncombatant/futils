@@ -314,6 +314,17 @@ fn test_common_basic() {
             ",	,	Atlanta
 ,	,	Boston
 Cincinnati
+,	cincinnati
+,	Detroit
+",
+            0,
+        ),
+        TestCase::new(
+            "common",
+            &["-F", ",\\t", "-i", "test-data/common1.txt", "test-data/common2.txt"],
+            ",	,	Atlanta
+,	,	Boston
+,	,	Cincinnati
 ,	Detroit
 ",
             0,
