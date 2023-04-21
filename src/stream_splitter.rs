@@ -1,9 +1,9 @@
 //! An `Iterator` that yields `Records` from streams, delimited by regular
 //! expressions.
 
+use std::cmp::Ordering;
 use std::io::{Read, Result};
 use std::iter::zip;
-use std::cmp::Ordering;
 
 use bstr::ByteSlice;
 use regex::bytes::Regex;

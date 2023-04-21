@@ -1,4 +1,5 @@
 use std::process::Command;
+use std::str::from_utf8;
 
 #[cfg(test)]
 const FUTILS: &str = "target/debug/futils";
@@ -8,6 +9,7 @@ struct TestCase<'a> {
     program: &'a str,
     arguments: &'a [&'a str],
     expected: &'a str,
+    sorted: bool,
     expected_status: i32,
 }
 
@@ -17,12 +19,14 @@ impl<'a> TestCase<'a> {
         program: &'a str,
         arguments: &'a [&'a str],
         expected: &'a str,
+        sorted: bool,
         expected_status: i32,
     ) -> Self {
         Self {
             program,
             arguments,
             expected,
+            sorted,
             expected_status,
         }
     }
@@ -34,7 +38,18 @@ impl<'a> TestCase<'a> {
             .output();
         match output {
             Ok(output) => {
-                assert_eq!(self.expected.as_bytes(), output.stdout);
+                if self.sorted {
+                    let mut lines = from_utf8(&output.stdout)
+                        .unwrap()
+                        .split('\n')
+                        .filter(|l| !l.is_empty())
+                        .collect::<Vec<&str>>();
+                    lines.sort();
+                    let output = lines.join("\n");
+                    assert_eq!(self.expected, output);
+                } else {
+                    assert_eq!(self.expected.as_bytes(), output.stdout);
+                }
                 assert!(output.stderr.is_empty());
                 assert_eq!(self.expected_status, output.status.code().unwrap());
             }
@@ -56,25 +71,33 @@ fn run_tests(cases: &[TestCase]) {
 #[test]
 fn test_files_match_basic() {
     run_tests(&[
-        TestCase::new("files", &["-m", "goat", "test-data"], "test-data/goat\n", 0),
+        TestCase::new(
+            "files",
+            &["-m", "goat", "test-data"],
+            "test-data/goat\n",
+            false,
+            0,
+        ),
         TestCase::new(
             "files",
             &["-m", "(?i)goat", "test-data"],
             "test-data/Goats
-test-data/goat
-",
+test-data/goat",
+            true,
             0,
         ),
         TestCase::new(
             "files",
             &["-m", "(?i)goats", "test-data"],
-            "test-data/Goats\n",
+            "test-data/Goats",
+            true,
             0,
         ),
         TestCase::new(
             "files",
             &["-m", "p/y", "test-data"],
-            "test-data/lurp/norp/yibb\n",
+            "test-data/lurp/norp/yibb",
+            true,
             0,
         ),
     ]);
@@ -82,36 +105,34 @@ test-data/goat
 
 #[test]
 fn test_files_prune_basic() {
-    // TODO BUG: These tests assume the OS orders the files the same way,
-    // which of course is not guaranteed.
     run_tests(&[
         TestCase::new(
             "files",
             &["-p", "(?i)goat", "test-data"],
             "test-data
+test-data/columns.txt
 test-data/common1.txt
 test-data/common2.txt
-test-data/numbers.txt
-test-data/columns.txt
 test-data/farm-animals.txt
 test-data/lurp
 test-data/lurp/norp
 test-data/lurp/norp/yibb
-",
+test-data/numbers.txt",
+            true,
             0,
         ),
         TestCase::new(
             "files",
             &["-p", "(?i)(goat|yibb)", "test-data"],
             "test-data
+test-data/columns.txt
 test-data/common1.txt
 test-data/common2.txt
-test-data/numbers.txt
-test-data/columns.txt
 test-data/farm-animals.txt
 test-data/lurp
 test-data/lurp/norp
-",
+test-data/numbers.txt",
+            true,
             0,
         ),
     ]);
@@ -126,6 +147,7 @@ fn test_fields_basic() {
             "yeah
 whee
 ",
+            false,
             0,
         ),
         TestCase::new(
@@ -134,12 +156,14 @@ whee
             "1	yeah	hey
 2	whee	ouch
 ",
+            false,
             0,
         ),
         TestCase::new(
             "fields",
             &["-RX", "-FY", "test-data/columns.txt"],
             "yeahYwowYheyYfriendsXwheeYbonkYouchYboingX",
+            false,
             0,
         ),
         TestCase::new(
@@ -148,6 +172,7 @@ whee
             "yeah	hey	friends
 whee	ouch	boing
 ",
+            false,
             0,
         ),
         TestCase::new(
@@ -156,6 +181,7 @@ whee	ouch	boing
             "friends	hey
 boing	ouch
 ",
+            false,
             0,
         ),
         TestCase::new(
@@ -164,6 +190,7 @@ boing	ouch
             "1	yeah	wow
 2	whee	bonk
 ",
+            false,
             0,
         ),
         TestCase::new(
@@ -172,6 +199,7 @@ boing	ouch
             "1	friends	hey
 2	boing	ouch
 ",
+            false,
             0,
         ),
     ]);
@@ -186,6 +214,7 @@ fn test_filter_basic() {
             "test-data/farm-animals.txt	1	mountain goat	grass, moss, vegetation
 test-data/farm-animals.txt	4	billy goats	grass, moss, vegetation, tin cans
 ",
+            false,
             0,
         ),
         TestCase::new(
@@ -194,6 +223,7 @@ test-data/farm-animals.txt	4	billy goats	grass, moss, vegetation, tin cans
             "test-data/farm-animals.txt	1	1	mountain goat	grass, moss, vegetation
 test-data/farm-animals.txt	2	4	billy goats	grass, moss, vegetation, tin cans
 ",
+            false,
             0,
         ),
         TestCase::new(
@@ -202,12 +232,14 @@ test-data/farm-animals.txt	2	4	billy goats	grass, moss, vegetation, tin cans
             "test-data/farm-animals.txt	3	12	sheep	grass, more grass
 test-data/farm-animals.txt	4	1,749	llamas	exclusively human flesh (for some reason)
 ",
+            false,
             0,
         ),
         TestCase::new(
             "filter",
             &["-m", "GOAT", "test-data/farm-animals.txt"],
             "",
+            false,
             1,
         ),
     ]);
@@ -220,18 +252,21 @@ fn test_filter_limit0() {
             "filter",
             &["-l", "0", "-m", "chunk", "test-data/farm-animals.txt"],
             "",
+            false,
             1,
         ),
         TestCase::new(
             "filter",
             &["-l", "0", "-p", "chunk", "test-data/farm-animals.txt"],
             "",
+            false,
             0,
         ),
         TestCase::new(
             "filter",
             &["-l", "0", "-m", "(?i)goat", "test-data/farm-animals.txt"],
             "",
+            false,
             0,
         ),
     ]);
@@ -248,6 +283,7 @@ fn test_records_basic() {
 12	sheep	grass, more grass
 1,749	llamas	exclusively human flesh (for some reason)
 ",
+            false,
             0,
         ),
         TestCase::new(
@@ -258,6 +294,7 @@ fn test_records_basic() {
 3	12	sheep	grass, more grass
 4	1,749	llamas	exclusively human flesh (for some reason)
 ",
+            false,
             0,
         ),
         TestCase::new(
@@ -266,6 +303,7 @@ fn test_records_basic() {
             "1	mountain goat	grass, moss, vegetation
 4	billy goats	grass, moss, vegetation, tin cans
 ",
+            false,
             0,
         ),
     ]);
@@ -279,6 +317,7 @@ fn test_reduce_basic() {
             &["-x", "+", "test-data/numbers.txt"],
             "2102784
 ",
+            false,
             0,
         ),
         TestCase::new(
@@ -286,6 +325,7 @@ fn test_reduce_basic() {
             &["-x", "-", "test-data/numbers.txt"],
             "-2100736
 ",
+            false,
             0,
         ),
         TestCase::new(
@@ -293,6 +333,7 @@ fn test_reduce_basic() {
             &["-x", "*", "test-data/numbers.txt"],
             "2361183241434822606848
 ",
+            false,
             0,
         ),
         TestCase::new(
@@ -300,6 +341,7 @@ fn test_reduce_basic() {
             &["-x", "/", "test-data/numbers.txt"],
             "0.000000000000000444089209850062616169452667236328125
 ",
+            false,
             0,
         ),
     ]);
@@ -310,23 +352,36 @@ fn test_common_basic() {
     run_tests(&[
         TestCase::new(
             "common",
-            &["-F", ",\\t", "test-data/common1.txt", "test-data/common2.txt"],
+            &[
+                "-F",
+                ",\\t",
+                "test-data/common1.txt",
+                "test-data/common2.txt",
+            ],
             ",	,	Atlanta
 ,	,	Boston
 Cincinnati
 ,	cincinnati
 ,	Detroit
 ",
+            false,
             0,
         ),
         TestCase::new(
             "common",
-            &["-F", ",\\t", "-i", "test-data/common1.txt", "test-data/common2.txt"],
+            &[
+                "-F",
+                ",\\t",
+                "-i",
+                "test-data/common1.txt",
+                "test-data/common2.txt",
+            ],
             ",	,	Atlanta
 ,	,	Boston
 ,	,	Cincinnati
 ,	Detroit
 ",
+            false,
             0,
         ),
     ]);
