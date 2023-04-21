@@ -21,7 +21,7 @@ struct EnumeratedRecord {
 
 impl EnumeratedRecord {
     fn write_columns(&self, output: &mut dyn Write, options: &Options) -> Result<(), Error> {
-        if !self.r.data.is_empty() {
+        if options.print_empty || !self.r.data.is_empty() {
             if let Some(n) = self.n {
                 write!(output, "{}", n + 1)?;
                 output.write_all(&options.output_field_delimiter)?;
@@ -32,8 +32,13 @@ impl EnumeratedRecord {
         Ok(())
     }
 
-    fn write_json(&self, output: &mut dyn Write, pretty: bool) -> Result<(), Error> {
-        if !self.r.data.is_empty() {
+    fn write_json(
+        &self,
+        output: &mut dyn Write,
+        pretty: bool,
+        options: &Options,
+    ) -> Result<(), Error> {
+        if options.print_empty || !self.r.data.is_empty() {
             let to_json = if pretty {
                 serde_json::to_writer_pretty
             } else {
@@ -93,7 +98,7 @@ pub(crate) fn records_main(arguments: &[String]) -> ShellResult {
                     r: pair.1,
                 }) {
                     if options.json_output {
-                        er.write_json(&mut stdout, atty::is(Stream::Stdout))?;
+                        er.write_json(&mut stdout, atty::is(Stream::Stdout), &options)?;
                         stdout.write_all(b",\n")?;
                     } else {
                         er.write_columns(&mut stdout, &options)?;

@@ -13,9 +13,6 @@ records, splits each record into fields, selects the requested `field`(s), and
 prints them. You can give more than 1 instance of `-c field`, to select multiple
 fields.
 
-TODO: Add `-n` and `-l`, like `records`? At that point, `records` is just an
-alias for/simplified form of `fields`. That might be ok!
-
 ## Options
 
 * `-c`: Select the `field`(s). This option can be given multiple times, and

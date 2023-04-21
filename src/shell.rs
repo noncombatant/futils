@@ -77,7 +77,7 @@ impl UsageError {
 pub(crate) type ShellResult = Result<i32, ShellError>;
 
 /// The default list of command line flags. See `Options`, below.
-pub(crate) const DEFAULT_OPTION_SPEC: &str = "ac:F:f:hIiJjl:M:m:nP:p:R:r:st:vx:";
+pub(crate) const DEFAULT_OPTION_SPEC: &str = "ac:eF:f:hIiJjl:M:m:nP:p:R:r:st:vx:";
 
 /// These are the standard command line options for `futils` programs.
 ///
@@ -89,6 +89,9 @@ pub(crate) struct Options {
 
     /// `-c` (“column”, “cut”)
     pub(crate) fields: Vec<String>,
+
+    /// `-e`
+    pub(crate) print_empty: bool,
 
     /// `-F`
     pub(crate) output_field_delimiter: Vec<u8>,
@@ -172,6 +175,7 @@ impl Options {
         Ok(Options {
             show_all: false,
             fields: Vec::new(),
+            print_empty: false,
             output_field_delimiter: Vec::from(DEFAULT_OUTPUT_FIELD_DELIMITER),
             input_field_delimiter: Regex::new(DEFAULT_INPUT_FIELD_DELIMITER)?,
             help: false,
@@ -209,6 +213,7 @@ pub(crate) fn parse_options(arguments: &[String]) -> Result<(Options, &[String])
             Some(opt) => match opt {
                 Opt('a', None) => options.show_all = true,
                 Opt('c', Some(s)) => options.fields.push(s.clone()),
+                Opt('e', None) => options.print_empty = true,
                 Opt('F', Some(s)) => {
                     options.output_field_delimiter = Vec::from(unescape_backslashes(&s)?.as_bytes())
                 }

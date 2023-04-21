@@ -3,7 +3,7 @@
 ## Usage
 
 ```
-records [-Jn] [-l limit] [pathname [...]]
+records [-eJn] [-l limit] [pathname [...]]
 ```
 
 ## Description
@@ -13,6 +13,7 @@ records, and prints them.
 
 ## Options
 
+* `-e`: Print empty records, too.
 * `-l`: Limit the number of records printed. If `limit` is < 0, the limit is
   counted back from the last record in the input.
 * `-J`: Output JSON format.
@@ -74,11 +75,6 @@ records -l5 your-file.txt
 tail -n5 your-file.txt
 records -l-5 your-file.txt
 ```
-
-Note that `head` and `tail` yield *lines*, including empty ones, while `records`
-yields only *non-empty* records. TODO: `records` and `fields` should maybe have
-an option to print empty records, and/or input record delimiters, for feature
-parity.
 
 ## See Also
 
