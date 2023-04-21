@@ -13,6 +13,8 @@ records, splits each record into fields, selects the requested `field`(s), and
 prints them. You can give more than 1 instance of `-c field`, to select multiple
 fields.
 
+For records that lack a requested field, prints an empty field.
+
 ## Options
 
 * `-c`: Select the `field`(s). This option can be given multiple times, and

@@ -52,12 +52,6 @@ fn select_fields<'a>(fields: &[&'a [u8]], requested: &[isize], invert: bool) -> 
     } else {
         requested
             .iter()
-            // We use `get` instead of indexing with `[]` to avoid a `panic!` in
-            // case a record does not have the requested field. One could argue
-            // that we should panic, or print an error. For now I'm going with
-            // yielding an empty field. This is a semipredicate error: field not
-            // present vs. present and empty looks the same with this
-            // implementation. TODO: Consider that.
             .map(|n| {
                 if let Some(f) = fields.get(*n) {
                     *f
