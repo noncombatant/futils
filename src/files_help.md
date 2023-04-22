@@ -1,15 +1,5 @@
 # `files` — print the pathnames of matching files
 
-## Usage
-
-```
-files [-aiv] [-d depth] [-M datetime] [-m regex] [-p regex] [-t types]
-      [-x command] [pathname [...]]
-files -hv
-```
-
-## Description
-
 Searches the given `pathname`(s) (assuming “.” if none are given) for files that
 match the given specifications.
 
@@ -17,7 +7,13 @@ If you give no specifications, `files` prints all pathnames (whose basenames do
 not begin with `.`) under the given `path`s (or `.`). If you give multiple
 specifications, they must all be satisfied for `files` to print the pathname.
 
-## Options
+## Usage
+
+```
+files [-aiv] [-d depth] [-M datetime] [-m regex] [-p regex] [-t types]
+      [-x command] [pathname [...]]
+files -hv
+```
 
 * `-a`: Search all paths, including those containing components whose basenames
   start with “.”. By default, `files` ignores these files and directories.

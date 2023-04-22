@@ -1,5 +1,8 @@
 # `futils` — functional shell utilities
 
+`futils` is a suite of shell utilities that somewhat resemble functional
+programming primitives and operate on streams.
+
 ## Usage
 
 ```
@@ -8,11 +11,9 @@ futils help
 futils version
 ```
 
-## Description
+## Details
 
-`futils` is a suite of shell utilities that somewhat resemble functional
-programming primitives and operate on streams. The suite currently consists of
-the following programs:
+The suite currently consists of the following programs:
 
 * `fields`
 * `files`

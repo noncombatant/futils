@@ -1,14 +1,5 @@
 # `fields` — selects and formats the fields from input records
 
-## Usage
-
-```
-fields [-Ins] [-c field] [pathname [...]]
-fields -hv
-```
-
-## Description
-
 Reads the given `pathname`s (or `stdin` if none are given), splits them into
 records, splits each record into fields, selects the requested `field`(s), and
 prints them. You can give more than 1 instance of `-c field`, to select multiple
@@ -16,7 +7,12 @@ fields.
 
 For records that lack a requested field, prints an empty field.
 
-## Options
+## Usage
+
+```
+fields [-Ins] [-c field] [pathname [...]]
+fields -hv
+```
 
 * `-c`: Select the `field`(s). This option can be given multiple times, and
   fields will be output in the order given on the command line. Field numbering
@@ -27,6 +23,3 @@ For records that lack a requested field, prints an empty field.
   option makes no sense without at least 1 `-f` option.
 * `-n`: Prefix each record with a record number.
 * `-s`: Skip leading space characters in records.
-
-Regular expressions use [the Rust regex library
-syntax](https://docs.rs/regex/latest/regex/).

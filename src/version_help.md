@@ -1,17 +1,11 @@
 # `version` — show program version and build information
 
-## Usage
-
-```
-futils [-J] version
-futils version -hv
-```
-
-## Description
-
 Prints the version of `futils`, metadata, and build-time configuration
 information.
 
-## Options
+## Usage
 
-* `-J`: Output JSON format.
+```
+futils version
+futils version -hv
+```

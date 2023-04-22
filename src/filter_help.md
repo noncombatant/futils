@@ -1,20 +1,16 @@
 # `filter` — filter records from streams using patterns
 
+Searches the given `pathname`(s) (or `stdin`, if none are given) for records
+that match the given specifications.
+
+If you give no specifications, `filter` prints all records.
+
 ## Usage
 
 ```
 filter [-iv] [-l limit] [-m regex] [-p regex] [-x command] [pathname [...]]
 filter -hv
 ```
-
-## Description
-
-Searches the given `pathname`(s) (or `stdin`, if none are given) for records
-that match the given specifications.
-
-If you give no specifications, `filter` prints all records.
-
-## Options
 
 * `-i`: Use case-insensitive regular expressions for `-m` and `-p` expressions
   that come *after* the `-i` in the argument list.

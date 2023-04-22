@@ -1,5 +1,8 @@
 # `status` — print the status of files
 
+Prints the filesystem metadata for each of the given `pathname`s in JSON format.
+If no pathnames are given, prints the status for each file in `.`.
+
 ## Usage
 
 ```
@@ -7,10 +10,9 @@ status [-v] [pathname [...]]
 status -hv
 ```
 
-## Description
+* `-v`: Verbose output (all fields).
 
-Prints the filesystem metadata for each of the given `pathname`s in JSON format.
-If no pathnames are given, prints the status for each file in `.`.
+## Details
 
 The metadata elements are:
 
@@ -35,7 +37,3 @@ For columns output (no `-J`), by default, only the `file_type`, `permissions`,
 `links`, `user`, `group`, `size`, `modified_time`, and `name` fields are printed
 (in that order). To see all fields, pass the `-v` option. For JSON output
 (`-J`), all fields are printed.
-
-## Options
-
-* `-v`: Verbose output (all fields).
