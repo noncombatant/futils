@@ -11,8 +11,6 @@ use crate::shell::{parse_options, Options, ShellResult};
 use crate::time::Time;
 use crate::util::{help, run_command};
 
-// TODO: Add a depth option, and parallelize -x.
-
 /// Command line usage help.
 pub(crate) const FILES_HELP: &str = include_str!("files_help.md");
 
@@ -41,7 +39,12 @@ fn compare_times(e: &DirEntry, t: &Time) -> Result<bool, std::io::Error> {
 
 fn print_matches(pathname: &str, options: &Options) -> ShellResult {
     let mut stdout = stdout();
-    let mut it = WalkDir::new(pathname).into_iter();
+    let mut it = if options.depth > 0 {
+        WalkDir::new(pathname).max_depth(options.depth)
+    } else {
+        WalkDir::new(pathname)
+    }
+    .into_iter();
     let mut status = 0;
 
     'outer: loop {

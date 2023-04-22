@@ -3,7 +3,7 @@
 ## Usage
 
 ```
-files [-aiv] [-M datetime] [-m regex] [-p regex] [-t types]
+files [-aiv] [-d depth] [-M datetime] [-m regex] [-p regex] [-t types]
       [-x command] [pathname [...]]
 ```
 
@@ -20,6 +20,8 @@ specifications, they must all be satisfied for `files` to print the pathname.
 
 * `-a`: Search all paths, including those containing components whose basenames
   start with “.”. By default, `files` ignores these files and directories.
+* `-d`: Descend at most `depth` levels below the command line arguments in the
+  directory hierarchy.
 * `-i`: Use case-insensitive regular expressions for `-m` and `-p` expressions
   that come *after* the `-i` in the argument list.
 * `-m`: Print pathnames that match the regular expression.

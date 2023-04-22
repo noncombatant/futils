@@ -100,6 +100,21 @@ test-data/goat",
             true,
             0,
         ),
+        TestCase::new(
+            "files",
+            &["-d", "1", "test-data"],
+            "test-data
+test-data/Goats
+test-data/columns.txt
+test-data/common1.txt
+test-data/common2.txt
+test-data/farm-animals.txt
+test-data/goat
+test-data/lurp
+test-data/numbers.txt",
+            true,
+            0,
+        ),
     ]);
 }
 
@@ -152,7 +167,16 @@ test-data/numbers.txt",
         ),
         TestCase::new(
             "files",
-            &["-p", "(?i)(goat|yibb)", "-m", "co", "-i", "-p", "MON", "test-data"],
+            &[
+                "-p",
+                "(?i)(goat|yibb)",
+                "-m",
+                "co",
+                "-i",
+                "-p",
+                "MON",
+                "test-data",
+            ],
             "test-data/columns.txt",
             true,
             0,
