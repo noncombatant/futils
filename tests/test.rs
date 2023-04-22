@@ -123,6 +123,21 @@ test-data/numbers.txt",
         ),
         TestCase::new(
             "files",
+            &["-i", "-p", "goat", "test-data"],
+            "test-data
+test-data/columns.txt
+test-data/common1.txt
+test-data/common2.txt
+test-data/farm-animals.txt
+test-data/lurp
+test-data/lurp/norp
+test-data/lurp/norp/yibb
+test-data/numbers.txt",
+            true,
+            0,
+        ),
+        TestCase::new(
+            "files",
             &["-p", "(?i)(goat|yibb)", "test-data"],
             "test-data
 test-data/columns.txt
@@ -132,6 +147,13 @@ test-data/farm-animals.txt
 test-data/lurp
 test-data/lurp/norp
 test-data/numbers.txt",
+            true,
+            0,
+        ),
+        TestCase::new(
+            "files",
+            &["-p", "(?i)(goat|yibb)", "-m", "co", "-i", "-p", "MON", "test-data"],
+            "test-data/columns.txt",
             true,
             0,
         ),
