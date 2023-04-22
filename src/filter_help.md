@@ -3,7 +3,7 @@
 ## Usage
 
 ```
-filter [-v] [-l limit] [-m regex] [-p regex] [-x command] [pathname [...]]
+filter [-iv] [-l limit] [-m regex] [-p regex] [-x command] [pathname [...]]
 ```
 
 ## Description
@@ -15,6 +15,8 @@ If you give no specifications, `filter` prints all records.
 
 ## Options
 
+* `-i`: Use case-insensitive regular expressions for `-m` and `-p` expressions
+  that come *after* the `-i` in the argument list.
 * `-l`: Limit the number of records printed.
   * If `limit` is 0, `filter` prints nothing and exits with status 0 if the
     input contained a matching record, and 1 otherwise.
@@ -74,11 +76,25 @@ As above, but search case-insensitively: this will match “Goats”, “goat”
 filter -m '(?i)goat' farm-animals.txt
 ```
 
+Equivalently:
+
+```
+filter -i -m goat farm-animals.txt
+```
+
 It’s unclear why anyone would want only *non*-goat animals, but this is how to
 do that:
 
 ```
 filter -p '(?i)goat' farm-animals.txt
+filter -i -p goat farm-animals.txt
+```
+
+Show records that match “moss”, but exclude billy goats, regardless of how
+“billy” is capitalized:
+
+```
+filter -m moss -i -p billy farm-animals.txt
 ```
 
 To print a list of the animals for which the (hypothetical) program

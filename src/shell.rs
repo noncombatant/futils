@@ -12,7 +12,7 @@ use chrono::format;
 use derive_more::{Display, From};
 use getopt::Opt;
 use once_cell::sync::Lazy;
-use regex::bytes::Regex;
+use regex::bytes::{Regex, RegexBuilder};
 use rustc_lexer::unescape::EscapeError;
 
 use crate::time::Time;
@@ -199,6 +199,12 @@ impl Options {
     }
 }
 
+fn new_regex(pattern: &str, options: &Options) -> Result<Regex, regex::Error> {
+    RegexBuilder::new(pattern)
+        .case_insensitive(options.insensitive)
+        .build()
+}
+
 /// Parses `arguments` according to `DEFAULT_OPTION_SPEC`. Returns the parsed
 /// `Options` and the remaining positional arguments. Any options not given on
 /// the command line will have their `DEFAULT_*` values in the returned
@@ -217,7 +223,7 @@ pub(crate) fn parse_options(arguments: &[String]) -> Result<(Options, &[String])
                 Opt('F', Some(s)) => {
                     options.output_field_delimiter = Vec::from(unescape_backslashes(&s)?.as_bytes())
                 }
-                Opt('f', Some(s)) => options.input_field_delimiter = Regex::new(&s)?,
+                Opt('f', Some(s)) => options.input_field_delimiter = new_regex(&s, &options)?,
                 Opt('I', None) => options.invert_fields = true,
                 Opt('i', None) => options.insensitive = true,
                 Opt('h', None) => options.help = true,
@@ -225,15 +231,15 @@ pub(crate) fn parse_options(arguments: &[String]) -> Result<(Options, &[String])
                 Opt('j', None) => options.json_input = true,
                 Opt('l', Some(s)) => options.limit = Some(str::parse::<isize>(&s)?),
                 Opt('M', Some(s)) => options.mtime_expressions.push(Time::new(&s)?),
-                Opt('m', Some(s)) => options.match_expressions.push(Regex::new(&s)?),
+                Opt('m', Some(s)) => options.match_expressions.push(new_regex(&s, &options)?),
                 Opt('n', None) => options.enumerate = true,
                 Opt('P', None) => options.parallel = true,
-                Opt('p', Some(s)) => options.prune_expressions.push(Regex::new(&s)?),
+                Opt('p', Some(s)) => options.prune_expressions.push(new_regex(&s, &options)?),
                 Opt('R', Some(s)) => {
                     options.output_record_delimiter =
                         Vec::from(unescape_backslashes(&s)?.as_bytes())
                 }
-                Opt('r', Some(s)) => options.input_record_delimiter = Regex::new(&s)?,
+                Opt('r', Some(s)) => options.input_record_delimiter = new_regex(&s, &options)?,
                 Opt('s', None) => options.skip = true,
                 Opt('t', Some(s)) => options.file_types = s.clone(),
                 Opt('v', None) => options.verbose = true,

@@ -3,7 +3,7 @@
 ## Usage
 
 ```
-files [-av] [-M datetime] [-m regex] [-p regex] [-t types]
+files [-aiv] [-M datetime] [-m regex] [-p regex] [-t types]
       [-x command] [pathname [...]]
 ```
 
@@ -20,6 +20,8 @@ specifications, they must all be satisfied for `files` to print the pathname.
 
 * `-a`: Search all paths, including those containing components whose basenames
   start with “.”. By default, `files` ignores these files and directories.
+* `-i`: Use case-insensitive regular expressions for `-m` and `-p` expressions
+  that come *after* the `-i` in the argument list.
 * `-m`: Print pathnames that match the regular expression.
 * `-M`: Print pathnames that refer to files whose modification times match the
   given `datetime` expression (see below).
@@ -89,6 +91,38 @@ Another way to do this is:
 
 ```
 files -m '\.rs$' | map -x 'filter -n -m goat'
+```
+
+Match all Markdown files:
+
+```
+files -m '\.md$'
+```
+
+Match all Markdown files, even if the file extension is not lowercase:
+
+```
+files -i -m '\.md$'
+```
+
+Note that this will *not* work:
+
+```
+files -m '\.md$' -i
+```
+
+Show all Markdown files, except those whose names case-insensitively match
+“goat”:
+
+```
+files -m '\.md$' -i -p goat
+```
+
+Show all Markdown files regardless of the case of the file extension, except
+those whose names case-insensitively match “goat”:
+
+```
+files -i -m '\.md$' -p goat
 ```
 
 ## See Also
