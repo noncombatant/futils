@@ -219,6 +219,15 @@ test-data/farm-animals.txt	4	billy goats	grass, moss, vegetation, tin cans
         ),
         TestCase::new(
             "filter",
+            &["-i", "-m", "goat", "test-data/farm-animals.txt"],
+            "test-data/farm-animals.txt	1	mountain goat	grass, moss, vegetation
+test-data/farm-animals.txt	4	billy goats	grass, moss, vegetation, tin cans
+",
+            false,
+            0,
+        ),
+        TestCase::new(
+            "filter",
             &["-n", "-m", "(?i)goat", "test-data/farm-animals.txt"],
             "test-data/farm-animals.txt	1	1	mountain goat	grass, moss, vegetation
 test-data/farm-animals.txt	2	4	billy goats	grass, moss, vegetation, tin cans
@@ -237,7 +246,23 @@ test-data/farm-animals.txt	4	1,749	llamas	exclusively human flesh (for some reas
         ),
         TestCase::new(
             "filter",
+            &["-n", "-i", "-p", "goat", "test-data/farm-animals.txt"],
+            "test-data/farm-animals.txt	3	12	sheep	grass, more grass
+test-data/farm-animals.txt	4	1,749	llamas	exclusively human flesh (for some reason)
+",
+            false,
+            0,
+        ),
+        TestCase::new(
+            "filter",
             &["-m", "GOAT", "test-data/farm-animals.txt"],
+            "",
+            false,
+            1,
+        ),
+        TestCase::new(
+            "filter",
+            &["-m", "GOAT", "-i", "test-data/farm-animals.txt"],
             "",
             false,
             1,
