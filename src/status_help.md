@@ -4,7 +4,6 @@
 
 ```
 status [-v] [pathname [...]]
-status [-J] [pathname [...]]
 status -hv
 ```
 
@@ -39,5 +38,4 @@ For columns output (no `-J`), by default, only the `file_type`, `permissions`,
 
 ## Options
 
-* `-J`: Output JSON format.
 * `-v`: Verbose output (all fields).

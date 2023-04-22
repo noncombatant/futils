@@ -1,18 +1,3 @@
-## Additional Options
-
-* `-F`: Set the output field delimiter.
-* `-f`: Set the input field delimiter, a regular expression.
-* `-R`: Set the output record delimiter.
-* `-r`: Set the input record delimiter, a regular expression.
-
-## Exit Status
-
-| Exit Status    | Meaning            |
-|----------------|--------------------|
-|              0 | Success            |
-|             -1 | Generic failure    |
-| greater than 1 | Number of errors   |
-
 ## Examples
 
 Consider a file named farm-animals.txt with the following records of

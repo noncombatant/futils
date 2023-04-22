@@ -25,6 +25,8 @@ If you give no specifications, `filter` prints all records.
     input.
 * `-m`: Print records that match the regular expression.
 * `-p`: Do not print (i.e. prune) records that match the regular expression.
+* `-v`: Print the standard output of commands given with the `-x` option. (By
+  default, `filter` only prints their standard error.)
 * `-x`: Print records for which `command` exited with status 0.
 
 You can provide more than 1 of any of the `-m`, `-p`, and `-x` options. `filter`

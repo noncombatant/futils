@@ -32,6 +32,8 @@ specifications, they must all be satisfied for `files` to print the pathname.
 * `-t`: Print only pathnames that refer to files that are among the given
   `types`: `d`irectory, `f`ile, and `s`ymlink. The default value for
   `types` is `dfs`, i.e. `files` prints pathnames of all 3 types.
+* `-v`: Print the standard output of commands given with the `-x` option. (By
+  default, `files` only prints their standard error.)
 * `-x`: Print pathnames for which `command` exited with status 0.
 
 You can provide more than 1 of any of the `-m`, `-p`, and `-x` options. `files`

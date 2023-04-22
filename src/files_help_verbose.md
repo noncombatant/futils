@@ -1,17 +1,3 @@
-## Additional Options
-
-* `-R`: Set the output record delimiter.
-* `-v`: Print the standard output of commands given with the `-x` option. (By
-  default, `files` only prints their standard error.)
-
-## Exit Status
-
-| Exit Status    | Meaning            |
-|----------------|--------------------|
-|              0 | Success            |
-|             -1 | Generic failure    |
-| greater than 1 | Number of errors   |
-
 ## Examples
 
 To show all files that contain a record matching “foo”:

@@ -12,9 +12,6 @@ Use David Cook’s non-copying `StreamSplitter`, in some magical future when it
 can be made to `impl Iterator`. Currently, we rely too much on the `Iterator`
 trait to do without it.
 
-Combine documentation for all common options into a single Markdown file, and
-include it in verbose help.
-
 Run all documented examples as actual tests with this form:
 
 ```

@@ -3,7 +3,7 @@
 ## Usage
 
 ```
-common [-iJ] [file1] file2
+common [-i] [file1] file2
 common -hv
 ```
 
@@ -16,4 +16,3 @@ in both files.
 ## Options
 
 * `-i`: Compare records case-insensitively.
-* `-J`: Output JSON format.

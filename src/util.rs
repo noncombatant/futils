@@ -18,6 +18,7 @@ pub(crate) fn help(status: i32, message: &str, verbose: Option<&str>) {
         println!("{}", message);
         if let Some(v) = verbose {
             println!("{}", v);
+            println!("{}", include_str!("common_options_help.md"));
         }
     } else {
         eprintln!("{}", message);

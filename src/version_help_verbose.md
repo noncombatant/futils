@@ -1,12 +1,3 @@
-## Additional Options
-
-* `-F`: Set the output field delimiter.
-* `-R`: Set the output record delimiter.
-
-## Exit Status
-
-0 on success, or -1 if there was an error.
-
 ## Examples
 
 Print the version metadata keys and values separated by a colon and a space,

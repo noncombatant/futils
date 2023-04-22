@@ -3,7 +3,7 @@
 ## Usage
 
 ```
-fields [-IJns] [-c field] [pathname [...]]
+fields [-Ins] [-c field] [pathname [...]]
 fields -hv
 ```
 
@@ -25,7 +25,6 @@ For records that lack a requested field, prints an empty field.
   `fields` will print all fields.
 * `-I`: Inverts the behavior of `-c`: selects the fields *not* listed. This
   option makes no sense without at least 1 `-f` option.
-* `-J`: Output JSON format.
 * `-n`: Prefix each record with a record number.
 * `-s`: Skip leading space characters in records.
 

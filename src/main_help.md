@@ -50,6 +50,14 @@ map -h
 files -h
 ```
 
+To get verbose help, with more information about options common to all commands,
+usage examples, and more, use `-v`:
+
+```
+map -h
+files -h
+```
+
 The help pages are always marked up in Markdown format. You can pipe them to a
 Markdown translator or display program:
 
@@ -90,17 +98,8 @@ of [the Rust regex library syntax](https://docs.rs/regex/latest/regex/).
 `futils` tries to be as consistent as possible, so most command line flags mean
 the same thing in most programs.
 
-Some command line flags are common to most `futils` programs. For example:
-
-* `-F`: Set the output field delimiter. The default delimiter is `\t`.
-* `-f`: Set the input field delimiter, a regular expression. The default
-  delimiter is `r"\t"`.
-* `-h`: Prints the help page.
-* `-J`: Output JSON format.
-* `-j`: Input JSON format.
-* `-R`: Set the output record delimiter. The default delimiter is `\n`.
-* `-r`: Set the input record delimiter, a regular expression. The default
-  delimiter is `r"(\r\n|\n|\r)"`.
+Some command line flags are common to most `futils` programs. For details on
+them, pass `-hv` to any `futils` program.
 
 ### Matching Input And Output Delimiters
 
@@ -153,4 +152,5 @@ files -R '\x00' ... | map -r '\x00' ...
   * `cut`(1)
   * `paste`(1)
   * `colrm`(1)
-* `find`(1), `xargs`(1)
+* `find`(1)
+* `xargs`(1)

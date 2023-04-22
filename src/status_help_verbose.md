@@ -1,16 +1,3 @@
-## Additional Options
-
-* `-F`: Set the output field delimiter.
-* `-R`: Set the output record delimiter.
-
-## Exit Status
-
-| Exit Status    | Meaning            |
-|----------------|--------------------|
-|              0 | Success            |
-|             -1 | Generic failure    |
-| greater than 1 | Number of errors   |
-
 ## Examples
 
 To get a nice spreadsheet-like view of a large directory:
