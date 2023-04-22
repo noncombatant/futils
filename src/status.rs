@@ -300,9 +300,7 @@ pub(crate) fn status_main(arguments: &[String]) -> ShellResult {
                 b"User".as_slice(),
                 b"Group".as_slice(),
                 b"Size".as_slice(),
-                b"Modified".as_slice(),
-                // TODO: The Modified column's data is too wide, so the Name
-                // header is misaligned.
+                b"Modified           ".as_slice(),
                 b"Name".as_slice(),
             ]
         };
