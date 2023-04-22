@@ -13,9 +13,12 @@ use crate::shell::{ShellError, ShellResult};
 
 /// Prints `message` and `exit`s with `status`. If `status` is 0, prints
 /// `message` to `stdout`, otherwise to `stderr`.
-pub(crate) fn help(status: i32, message: &str) {
+pub(crate) fn help(status: i32, message: &str, verbose: Option<&str>) {
     if status == 0 {
         println!("{}", message);
+        if let Some(v) = verbose {
+            println!("{}", v);
+        }
     } else {
         eprintln!("{}", message);
     }

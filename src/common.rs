@@ -11,6 +11,8 @@ use crate::util::help;
 /// Command line usage help.
 pub(crate) const COMMON_HELP: &str = include_str!("common_help.md");
 
+pub(crate) const COMMON_HELP_VERBOSE: &str = include_str!("common_help_verbose.md");
+
 fn print(column: i8, field: &Record, options: &Options) -> ShellResult {
     let mut out = stdout();
     match column {
@@ -31,10 +33,18 @@ fn print(column: i8, field: &Record, options: &Options) -> ShellResult {
 pub(crate) fn common_main(arguments: &[String]) -> ShellResult {
     let (options, arguments) = parse_options(arguments)?;
     if options.help {
-        help(0, COMMON_HELP);
+        help(
+            0,
+            COMMON_HELP,
+            if options.verbose {
+                Some(COMMON_HELP_VERBOSE)
+            } else {
+                None
+            },
+        );
     }
     if arguments.is_empty() || arguments.len() > 2 {
-        help(1, COMMON_HELP);
+        help(-1, COMMON_HELP, None);
     }
 
     let mut stdin = stdin();

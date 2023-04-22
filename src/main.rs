@@ -65,26 +65,26 @@ fn main() {
         arguments.remove(0);
     }
     if arguments.is_empty() {
-        help(-1, MAIN_HELP);
+        help(-1, MAIN_HELP, None);
     } else {
         program_name = file_name(&arguments[0]).unwrap();
     }
 
     if program_name == "help" || program_name == "-h" || program_name == "--help" {
         if arguments.len() < 2 {
-            help(0, MAIN_HELP);
+            help(0, MAIN_HELP, None);
         } else {
             match arguments[1].as_str() {
-                "common" => help(0, COMMON_HELP),
-                "fields" => help(0, FIELDS_HELP),
-                "files" => help(0, FILES_HELP),
-                "filter" => help(0, FILTER_HELP),
-                "map" => help(0, MAP_HELP),
-                "records" => help(0, RECORDS_HELP),
-                "reduce" => help(0, REDUCE_HELP),
-                "status" => help(0, STATUS_HELP),
-                "version" => help(0, VERSION_HELP),
-                &_ => help(-1, MAIN_HELP),
+                "common" => help(0, COMMON_HELP, None),
+                "fields" => help(0, FIELDS_HELP, None),
+                "files" => help(0, FILES_HELP, None),
+                "filter" => help(0, FILTER_HELP, None),
+                "map" => help(0, MAP_HELP, None),
+                "records" => help(0, RECORDS_HELP, None),
+                "reduce" => help(0, REDUCE_HELP, None),
+                "status" => help(0, STATUS_HELP, None),
+                "version" => help(0, VERSION_HELP, None),
+                &_ => help(-1, MAIN_HELP, None),
             };
         }
     }
@@ -100,7 +100,7 @@ fn main() {
         "status" => status_main(&arguments),
         "version" => version_main(&arguments),
         _ => {
-            help(-1, MAIN_HELP);
+            help(-1, MAIN_HELP, None);
             unreachable!()
         }
     } {

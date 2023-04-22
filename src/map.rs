@@ -7,6 +7,8 @@ use crate::util::{help, run_command};
 /// Command line usage help.
 pub(crate) const MAP_HELP: &str = include_str!("map_help.md");
 
+pub(crate) const MAP_HELP_VERBOSE: &str = include_str!("map_help_verbose.md");
+
 /// Iterates over `StreamSplitter` and runs each of the `commands` on each
 /// record, with each field of the record as a distinct argument to the command.
 fn map(splitter: StreamSplitter, options: &Options) -> ShellResult {
@@ -37,7 +39,15 @@ fn map(splitter: StreamSplitter, options: &Options) -> ShellResult {
 pub(crate) fn map_main(arguments: &[String]) -> ShellResult {
     let (options, arguments) = parse_options(arguments)?;
     if options.help {
-        help(0, MAP_HELP);
+        help(
+            0,
+            MAP_HELP,
+            if options.verbose {
+                Some(MAP_HELP_VERBOSE)
+            } else {
+                None
+            },
+        );
     }
     if options.json_input || options.json_output {
         unimplemented!()

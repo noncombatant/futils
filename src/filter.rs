@@ -9,6 +9,8 @@ use crate::util::{help, run_command};
 /// Command line usage help.
 pub(crate) const FILTER_HELP: &str = include_str!("filter_help.md");
 
+pub(crate) const FILTER_HELP_VERBOSE: &str = include_str!("filter_help_verbose.md");
+
 /// TODO: Define an `EnumeratedMatch`, like `EnumeratedRecord`, and give it
 /// `write_{columns,json}`.
 
@@ -77,7 +79,15 @@ fn print_matches(pathname: &str, splitter: StreamSplitter, options: &Options) ->
 pub(crate) fn filter_main(arguments: &[String]) -> ShellResult {
     let (options, arguments) = parse_options(arguments)?;
     if options.help {
-        help(0, FILTER_HELP);
+        help(
+            0,
+            FILTER_HELP,
+            if options.verbose {
+                Some(FILTER_HELP_VERBOSE)
+            } else {
+                None
+            },
+        );
     }
     if options.json_input || options.json_output {
         unimplemented!()

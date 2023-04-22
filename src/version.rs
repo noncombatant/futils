@@ -11,6 +11,8 @@ use crate::util::help;
 /// Command line usage help.
 pub(crate) const VERSION_HELP: &str = include_str!("version_help.md");
 
+pub(crate) const VERSION_HELP_VERBOSE: &str = include_str!("version_help_verbose.md");
+
 #[derive(Serialize)]
 struct VersionDatum<'a> {
     key: &'a str,
@@ -108,7 +110,15 @@ const VERSION_DATA: [VersionDatum; 15] = [
 pub(crate) fn version_main(arguments: &[String]) -> ShellResult {
     let (options, arguments) = parse_options(arguments)?;
     if options.help || !arguments.is_empty() {
-        help(0, VERSION_HELP);
+        help(
+            0,
+            VERSION_HELP,
+            if options.verbose {
+                Some(VERSION_HELP_VERBOSE)
+            } else {
+                None
+            },
+        );
     }
 
     let mut stdout = stdout();

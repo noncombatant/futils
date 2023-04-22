@@ -14,6 +14,8 @@ use crate::util::{help, run_command};
 /// Command line usage help.
 pub(crate) const FILES_HELP: &str = include_str!("files_help.md");
 
+pub(crate) const FILES_HELP_VERBOSE: &str = include_str!("files_help_verbose.md");
+
 fn is_hidden(e: &DirEntry) -> bool {
     match e.path().to_str() {
         Some(s) => s.contains("/."),
@@ -140,7 +142,15 @@ fn print_matches(pathname: &str, options: &Options) -> ShellResult {
 pub(crate) fn files_main(arguments: &[String]) -> ShellResult {
     let (options, arguments) = parse_options(arguments)?;
     if options.help {
-        help(0, FILES_HELP);
+        help(
+            0,
+            FILES_HELP,
+            if options.verbose {
+                Some(FILES_HELP_VERBOSE)
+            } else {
+                None
+            },
+        );
     }
     if options.json_input || options.json_output {
         unimplemented!()

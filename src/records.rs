@@ -13,6 +13,8 @@ use crate::util::help;
 /// Command line usage help.
 pub(crate) const RECORDS_HELP: &str = include_str!("records_help.md");
 
+pub(crate) const RECORDS_HELP_VERBOSE: &str = include_str!("records_help_verbose.md");
+
 #[derive(Serialize)]
 struct EnumeratedRecord {
     n: Option<usize>,
@@ -54,7 +56,15 @@ impl EnumeratedRecord {
 pub(crate) fn records_main(arguments: &[String]) -> ShellResult {
     let (options, arguments) = parse_options(arguments)?;
     if options.help {
-        help(0, RECORDS_HELP);
+        help(
+            0,
+            RECORDS_HELP,
+            if options.verbose {
+                Some(RECORDS_HELP_VERBOSE)
+            } else {
+                None
+            },
+        );
     }
 
     let mut status = 0;

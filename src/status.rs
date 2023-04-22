@@ -16,6 +16,8 @@ use crate::util::help;
 /// Command line usage help.
 pub(crate) const STATUS_HELP: &str = include_str!("status_help.md");
 
+pub(crate) const STATUS_HELP_VERBOSE: &str = include_str!("status_help_verbose.md");
+
 fn format_uid(uid: u32) -> String {
     match get_user_by_uid(uid) {
         Some(s) => format!("{}", s.name().to_string_lossy()),
@@ -252,7 +254,15 @@ impl<'a> Status<'a> {
 pub(crate) fn status_main(arguments: &[String]) -> ShellResult {
     let (options, arguments) = parse_options(arguments)?;
     if options.help {
-        help(0, STATUS_HELP);
+        help(
+            0,
+            STATUS_HELP,
+            if options.verbose {
+                Some(STATUS_HELP_VERBOSE)
+            } else {
+                None
+            },
+        );
     }
 
     let arguments = if arguments.is_empty() {

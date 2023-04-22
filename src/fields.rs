@@ -15,6 +15,8 @@ use crate::util::help;
 /// Command line usage help.
 pub(crate) const FIELDS_HELP: &str = include_str!("fields_help.md");
 
+pub(crate) const FIELDS_HELP_VERBOSE: &str = include_str!("fields_help_verbose.md");
+
 /// Returns the index of the first byte that is not a space character.
 fn first_non_space(record: &[u8]) -> Option<usize> {
     static SPACE_CADET: Lazy<Regex> = Lazy::new(|| Regex::new(r"\S").unwrap());
@@ -150,11 +152,18 @@ fn print_fields(
 pub(crate) fn fields_main(arguments: &[String]) -> ShellResult {
     let (options, arguments) = parse_options(arguments)?;
     if options.help {
-        help(0, FIELDS_HELP);
+        help(
+            0,
+            FIELDS_HELP,
+            if options.verbose {
+                Some(FIELDS_HELP_VERBOSE)
+            } else {
+                None
+            },
+        );
     }
-
     if options.invert_fields && options.fields.is_empty() {
-        help(-1, FIELDS_HELP);
+        help(-1, FIELDS_HELP, None);
     }
 
     // TODO: To support named fields, use an `enum Field` here with `isize` and

@@ -12,6 +12,8 @@ use crate::util::{help, parse_number};
 /// Command line usage help.
 pub(crate) const REDUCE_HELP: &str = include_str!("reduce_help.md");
 
+pub(crate) const REDUCE_HELP_VERBOSE: &str = include_str!("reduce_help_verbose.md");
+
 // TODO: Change this program to work on each field in each record, instead of
 // each record. Or, make that an option. That way, you could sum each column in
 // a row, for example. That may mean ignoring number parse errors, or making
@@ -73,7 +75,15 @@ fn reduce(splitter: StreamSplitter, options: &Options) -> ShellResult {
 pub(crate) fn reduce_main(arguments: &[String]) -> ShellResult {
     let (options, arguments) = parse_options(arguments)?;
     if options.help {
-        help(0, REDUCE_HELP);
+        help(
+            0,
+            REDUCE_HELP,
+            if options.verbose {
+                Some(REDUCE_HELP_VERBOSE)
+            } else {
+                None
+            },
+        );
     }
     if options.json_input || options.json_output {
         unimplemented!()

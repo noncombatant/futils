@@ -5,6 +5,7 @@
 ```
 files [-aiv] [-d depth] [-M datetime] [-m regex] [-p regex] [-t types]
       [-x command] [pathname [...]]
+files -hv
 ```
 
 ## Description
@@ -43,92 +44,3 @@ Datetime expressions have 2 parts: a comparison operator (`>` for after, `<` for
 before, and `=` for exactly) and a datetime string. `files` first attempts to
 parse the string as “YYYY-MM-DD HH:MM:SS”, then as “HH:MM:SS”, then as
 “YYYY-MM-DD”.
-
-## Additional Options
-
-* `-h`: Print this help page.
-* `-R`: Set the output record delimiter.
-* `-v`: Print the standard output of commands given with the `-x` option. (By
-  default, `files` only prints their standard error.)
-
-## Exit Status
-
-| Exit Status    | Meaning            |
-|----------------|--------------------|
-|              0 | Success            |
-|             -1 | Generic failure    |
-| greater than 1 | Number of errors   |
-
-## Examples
-
-To show all files that contain a record matching “foo”:
-
-```
-files -x 'filter -l0 -m foo' ...
-```
-
-To show all files that contain a record not matching “foo”:
-
-```
-files -x 'filter -l0 -p foo' ...
-```
-
-To show all files that do not contain a record matching “foo”, we need to treat
-the whole file as a single record, and then try to prune (`-p`) that record. So
-we need to come up with an input record delimiter that never appears in the
-file; `\x00` often works for this purpose, for text files at least. For example:
-
-```
-files -x 'filter -l0 -R '\x00' -p foo' ...
-```
-
-To show (`-v`), for all Rust source code files (`.rs`), lines matching “goat”
-(`-m goat`) and the line numbers (`-n`):
-
-```
-files -m '\.rs$' -x 'filter -n -m goat' -v
-```
-
-Another way to do this is:
-
-```
-files -m '\.rs$' | map -x 'filter -n -m goat'
-```
-
-Match all Markdown files:
-
-```
-files -m '\.md$'
-```
-
-Match all Markdown files, even if the file extension is not lowercase:
-
-```
-files -i -m '\.md$'
-```
-
-Note that this will *not* work:
-
-```
-files -m '\.md$' -i
-```
-
-Show all Markdown files, except those whose names case-insensitively match
-“goat”:
-
-```
-files -m '\.md$' -i -p goat
-```
-
-Show all Markdown files regardless of the case of the file extension, except
-those whose names case-insensitively match “goat”:
-
-```
-files -i -m '\.md$' -p goat
-```
-
-## See Also
-
-* `futils help`
-* `find`(1)
-* `ls`(1)
