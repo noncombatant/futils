@@ -1,9 +1,9 @@
 [package]
 authors = ["Chris Palmer"]
 name = "futils"
-homepage = "https://noncombatant.org/"
+homepage = "https://github.com/noncombatant/futils"
 description = "Functional utilities for the POSIX shell"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2021"
 license = "Apache-2.0"
 keywords = ["functional", "shell"]
