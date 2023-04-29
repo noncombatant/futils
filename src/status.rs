@@ -186,8 +186,6 @@ impl<'a> Status<'a> {
         output.write_all(field_delimiter)?;
         output.write_all(self.permissions.as_bytes())?;
         output.write_all(field_delimiter)?;
-        output.write_all(format!("{}", self.links).as_bytes())?;
-        output.write_all(field_delimiter)?;
         output.write_all(self.user.as_bytes())?;
         output.write_all(field_delimiter)?;
         output.write_all(self.group.as_bytes())?;
@@ -306,7 +304,6 @@ pub(crate) fn status_main(arguments: &[String]) -> ShellResult {
             vec![
                 b"Type".as_slice(),
                 b"Permissions".as_slice(),
-                b"Links".as_slice(),
                 b"User".as_slice(),
                 b"Group".as_slice(),
                 b"Size".as_slice(),
