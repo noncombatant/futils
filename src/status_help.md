@@ -6,10 +6,11 @@ If no pathnames are given, prints the status for each file in `.`.
 ## Usage
 
 ```
-status [-v] [pathname [...]]
+status [-av] [pathname [...]]
 status -hv
 ```
 
+* `-a`: Show all files, even those whose basenames start with `.`.
 * `-v`: Verbose output (all fields).
 
 ## Details

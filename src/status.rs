@@ -270,6 +270,7 @@ pub(crate) fn status_main(arguments: &[String]) -> ShellResult {
         // See also the conversion code at the top of `main`.
         read_dir(Path::new("."))?
             .map(|entry| entry.unwrap().file_name().to_string_lossy().into())
+            .filter(|name: &String| options.show_all || !name.starts_with('.'))
             .collect()
     } else {
         Vec::from(arguments)
