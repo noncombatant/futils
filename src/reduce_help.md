@@ -20,4 +20,3 @@ reduce -hv
 * `-x`: Run `command` on each record of input.
 
 TODO: Describe what happens if multiple `-x`s are given.
-TODO: Maybe have some way to print the input records too.
