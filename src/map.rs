@@ -17,7 +17,7 @@ fn map(splitter: StreamSplitter, options: &Options) -> ShellResult {
         for command in &options.match_commands {
             let fields = options
                 .input_field_delimiter
-                .split(&r.data)
+                .split(&r)
                 .collect::<Vec<&[u8]>>();
             match run_command(command, &fields, true) {
                 Ok(s) => {
@@ -26,7 +26,7 @@ fn map(splitter: StreamSplitter, options: &Options) -> ShellResult {
                     }
                 }
                 Err(e) => {
-                    eprintln!("{}: {}", String::from_utf8_lossy(&r.data), e);
+                    eprintln!("{}: {}", String::from_utf8_lossy(&r), e);
                     status += 1;
                 }
             }

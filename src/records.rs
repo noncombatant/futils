@@ -3,12 +3,13 @@
 use std::io::{stdout, Error, Write};
 
 use atty::Stream;
+use bstr::BString;
 use itertools::Either;
 use serde::Serialize;
 
 use crate::shell::{parse_options, FileOpener, Options, ShellResult, STDIN_PATHNAME};
-use crate::stream_splitter::{Record, StreamSplitter};
-use crate::util::help;
+use crate::stream_splitter::StreamSplitter;
+use crate::util::{help, serialize_str_or_bytes};
 
 /// Command line usage help.
 pub(crate) const RECORDS_HELP: &str = include_str!("records_help.md");
@@ -18,17 +19,18 @@ pub(crate) const RECORDS_HELP_VERBOSE: &str = include_str!("records_help_verbose
 #[derive(Serialize)]
 struct EnumeratedRecord {
     n: Option<usize>,
-    r: Record,
+    #[serde(serialize_with = "serialize_str_or_bytes")]
+    r: BString,
 }
 
 impl EnumeratedRecord {
     fn write_columns(&self, output: &mut dyn Write, options: &Options) -> Result<(), Error> {
-        if options.print_empty || !self.r.data.is_empty() {
+        if options.print_empty || !self.r.is_empty() {
             if let Some(n) = self.n {
                 write!(output, "{}", n + 1)?;
                 output.write_all(&options.output_field_delimiter)?;
             }
-            output.write_all(&self.r.data)?;
+            output.write_all(&self.r)?;
             output.write_all(&options.output_record_delimiter)?;
         }
         Ok(())
@@ -40,7 +42,7 @@ impl EnumeratedRecord {
         pretty: bool,
         options: &Options,
     ) -> Result<(), Error> {
-        if options.print_empty || !self.r.data.is_empty() {
+        if options.print_empty || !self.r.is_empty() {
             let to_json = if pretty {
                 serde_json::to_writer_pretty
             } else {
@@ -85,7 +87,7 @@ pub(crate) fn records_main(arguments: &[String]) -> ShellResult {
                             // for `StreamSplitter`.
                             Either::Left(
                                 records
-                                    .collect::<Vec<Record>>()
+                                    .collect::<Vec<BString>>()
                                     .into_iter()
                                     .rev()
                                     .take(limit.unsigned_abs())
