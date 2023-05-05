@@ -94,8 +94,9 @@ pub(crate) fn icmp(a: &[u8], b: &[u8]) -> Ordering {
     let mut order = Ordering::Equal;
     for (s, o) in zip(a.chars(), b.chars()) {
         order = s.to_lowercase().cmp(o.to_lowercase());
-        // TODO: Return here if order != Equal.
-        // TODO: Unit tests
+        if order != Ordering::Equal {
+            return order;
+        }
     }
     match order {
         Ordering::Equal => a.len().cmp(&b.len()),
@@ -117,7 +118,8 @@ where
 
 #[cfg(test)]
 mod tests {
-    use crate::util::{file_name, unescape_backslashes};
+    use std::cmp::Ordering;
+    use crate::util::{icmp, file_name, unescape_backslashes};
 
     #[test]
     fn test_unescape_backslashes() {
@@ -145,5 +147,17 @@ goat	",
             "test.exe",
             file_name("twerb/twib/test noodle/test.exe").unwrap()
         );
+    }
+
+    #[test]
+    fn test_icmp_basic() {
+        assert_eq!(Ordering::Equal, icmp(b"goat", b"goat"));
+        assert_eq!(Ordering::Equal, icmp(b"Goat", b"goaT"));
+        assert_eq!(Ordering::Less, icmp(b"boat", b"goat"));
+        assert_eq!(Ordering::Less, icmp(b"goat", b"goats"));
+        assert_eq!(Ordering::Less, icmp(b"Boat", b"goat"));
+        assert_eq!(Ordering::Greater, icmp(b"goatee", b"goat"));
+        assert_eq!(Ordering::Greater, icmp(b"goat", b"boat"));
+        assert_eq!(Ordering::Greater, icmp(b"goat", b"BOAT"));
     }
 }
