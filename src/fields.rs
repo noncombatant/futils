@@ -9,7 +9,7 @@ use regex::bytes::Regex;
 use serde::Serialize;
 
 use crate::shell::{parse_options, FileOpener, Options, ShellResult, STDIN_PATHNAME};
-use crate::stream_splitter::{Record, StreamSplitter};
+use crate::stream_splitter::StreamSplitter;
 use crate::util::help;
 
 /// Command line usage help.
@@ -74,19 +74,19 @@ struct EnumeratedRecord<'a> {
 impl<'a> EnumeratedRecord<'a> {
     fn new(
         n: Option<usize>,
-        record: &'a Record,
+        record: &'a [u8],
         requested_fields: &[isize],
         options: &Options,
     ) -> Self {
         let mut start = 0;
         if options.skip {
-            if let Some(s) = first_non_space(&record.data) {
+            if let Some(s) = first_non_space(record) {
                 start = s
             }
         };
         let mut fields = options
             .input_field_delimiter
-            .split(&record.data[start..])
+            .split(&record[start..])
             .collect::<Vec<&[u8]>>();
         if !requested_fields.is_empty() {
             fields = select_fields(&fields, requested_fields, options.invert_fields);

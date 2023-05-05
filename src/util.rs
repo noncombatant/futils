@@ -1,11 +1,12 @@
-//! Utilities (of dubious utility).
-
+use std::cmp::Ordering;
 use std::io::{stderr, stdout, Write};
+use std::iter::zip;
 use std::path::Path;
 use std::process::{exit, Command};
 use std::str::{self, from_utf8, FromStr};
 
 use bigdecimal::BigDecimal;
+use bstr::ByteSlice;
 use locale::Numeric;
 use rustc_lexer::unescape::unescape_str;
 
@@ -85,6 +86,20 @@ pub(crate) fn parse_number(value: &[u8]) -> Result<BigDecimal, ShellError> {
     let value = from_utf8(value)?;
     let value = value.replace(&separator, "");
     Ok(BigDecimal::from_str(&value)?)
+}
+
+/// Compares case-insensitively, without allocating.
+pub(crate) fn icmp(a: &[u8], b: &[u8]) -> Ordering {
+    let mut order = Ordering::Equal;
+    for (s, o) in zip(a.chars(), b.chars()) {
+        order = s.to_lowercase().cmp(o.to_lowercase());
+        // TODO: Return here if order != Equal.
+        // TODO: Unit tests
+    }
+    match order {
+        Ordering::Equal => a.len().cmp(&b.len()),
+        _ => order,
+    }
 }
 
 #[cfg(test)]

@@ -1,43 +1,17 @@
-//! An `Iterator` that yields `Records` from streams, delimited by regular
+//! An `Iterator` that yields `Vec<u8>`s from streams, delimited by regular
 //! expressions.
 
-use std::cmp::Ordering;
 use std::io::{Read, Result};
-use std::iter::zip;
 
-use bstr::ByteSlice;
 use regex::bytes::Regex;
-use serde::Serialize;
-
-/// A record lexed from the input that `StreamSplitter` is splitting.
-#[derive(Eq, Ord, PartialEq, PartialOrd, Serialize)]
-pub(crate) struct Record {
-    /// The bytes lexed from the input.
-    pub(crate) data: Vec<u8>,
-}
-
-impl Record {
-    /// Compares the `data` fields of 2 `Record`s case-insensitively, without
-    /// allocating.
-    pub(crate) fn icmp(&self, other: &Self) -> Ordering {
-        let mut order = Ordering::Equal;
-        for (s, o) in zip(self.data.chars(), other.data.chars()) {
-            order = s.to_lowercase().cmp(o.to_lowercase());
-        }
-        match order {
-            Ordering::Equal => self.data.len().cmp(&other.data.len()),
-            _ => order,
-        }
-    }
-}
 
 /// An `Iterator` that lexes a `Read`, searching for the `delimiter`, and yields
-/// `Record`s containing data and delimiter bytes.
+/// non-delimiter bytes.
 ///
-/// This implementation incurs a new allocation when yielding a `Record`, and
-/// the caller owns it. An alternate implementation using generic associated
-/// types that avoids the allocation is available in a Git branch, but it cannot
-/// implement `Iterator`.
+/// This implementation incurs a new allocation when yielding, and the caller
+/// owns it. An alternate implementation using generic associated types that
+/// avoids the allocation is available in a Git branch, but it cannot implement
+/// `Iterator`.
 ///
 /// This implementation uses a private buffer that may, in pathological cases,
 /// grow large (depending on how long it takes to match `delimiter`).
@@ -59,14 +33,14 @@ const DEFAULT_CAPACITY: usize = 64 * 1024;
 
 impl<'a> StreamSplitter<'a> {
     /// Creates a new `StreamSplitter` that will split the bytes of `reader`
-    /// into `Record`s.
+    /// into `Vec<u8>`s.
     pub(crate) fn new(reader: &'a mut dyn Read, delimiter: &'a Regex) -> Self {
         Self::with_capacity(reader, delimiter, DEFAULT_CAPACITY)
     }
 
     /// Creates a new `StreamSplitter` that will split the bytes of `reader`
-    /// into `Record`s. The internal buffer will be pre-allocated with
-    /// at least `capacity` `u8`s of storage.
+    /// into `Vec<u8>`s. The internal buffer will be pre-allocated with at least
+    /// `capacity` `u8`s of storage.
     pub(crate) fn with_capacity(
         reader: &'a mut dyn Read,
         delimiter: &'a Regex,
@@ -105,7 +79,7 @@ impl<'a> StreamSplitter<'a> {
 }
 
 impl<'a> Iterator for StreamSplitter<'a> {
-    type Item = Result<Record>;
+    type Item = Result<Vec<u8>>;
 
     fn next(&mut self) -> Option<Self::Item> {
         if let Err(e) = self.fill() {
@@ -132,22 +106,18 @@ impl<'a> Iterator for StreamSplitter<'a> {
                 let r = if m.start() == 0 {
                     // We matched the delimiter at the beginning of the section.
                     self.start += m.end();
-                    Ok(Record { data: Vec::new() })
+                    Ok(Vec::new())
                 } else {
                     // We matched a record.
                     self.start += m.end();
-                    Ok(Record {
-                        data: section[0..m.start()].to_vec(),
-                    })
+                    Ok(section[0..m.start()].to_vec())
                 };
                 Some(r)
             }
             None => {
                 // Last record, with no trailing delimiter.
                 self.start = self.end;
-                Some(Ok(Record {
-                    data: section.to_vec(),
-                }))
+                Some(Ok(section.to_vec()))
             }
         }
     }
@@ -175,10 +145,10 @@ mod tests {
         let mut splitter = StreamSplitter::with_capacity(&mut file, &delimiter, SMALL_CAPACITY);
 
         let r = splitter.next().unwrap().unwrap();
-        assert_eq!(b"hello", r.data.as_slice());
+        assert_eq!(b"hello", r.as_slice());
 
         let r = splitter.next().unwrap().unwrap();
-        assert_eq!(b"world", r.data.as_slice());
+        assert_eq!(b"world", r.as_slice());
 
         assert!(splitter.next().is_none());
     }
@@ -197,10 +167,10 @@ mod tests {
         let mut splitter = StreamSplitter::with_capacity(&mut file, &delimiter, SMALL_CAPACITY);
 
         let r = splitter.next().unwrap().unwrap();
-        assert_eq!(b"greetings", r.data.as_slice());
+        assert_eq!(b"greetings", r.as_slice());
 
         let r = splitter.next().unwrap().unwrap();
-        assert_eq!(b"world", r.data.as_slice());
+        assert_eq!(b"world", r.as_slice());
 
         assert!(splitter.next().is_none());
     }

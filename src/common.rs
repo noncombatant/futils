@@ -5,15 +5,15 @@ use std::fs::File;
 use std::io::{stdin, stdout, Write};
 
 use crate::shell::{parse_options, Options, ShellResult};
-use crate::stream_splitter::{Record, StreamSplitter};
-use crate::util::help;
+use crate::stream_splitter::StreamSplitter;
+use crate::util::{help, icmp};
 
 /// Command line usage help.
 pub(crate) const COMMON_HELP: &str = include_str!("common_help.md");
 
 pub(crate) const COMMON_HELP_VERBOSE: &str = include_str!("common_help_verbose.md");
 
-fn print(column: i8, field: &Record, options: &Options) -> ShellResult {
+fn print(column: i8, field: &[u8], options: &Options) -> ShellResult {
     let mut out = stdout();
     match column {
         1 => (),
@@ -24,7 +24,7 @@ fn print(column: i8, field: &Record, options: &Options) -> ShellResult {
         }
         _ => unreachable!(),
     }
-    out.write_all(&field.data)?;
+    out.write_all(field)?;
     out.write_all(&options.output_record_delimiter)?;
     Ok(0)
 }
@@ -71,7 +71,7 @@ pub(crate) fn common_main(arguments: &[String]) -> ShellResult {
     while record1.is_some() || record2.is_some() {
         match (&record1, &record2) {
             (Some(r1), Some(r2)) => match if options.insensitive {
-                r1.icmp(r2)
+                icmp(r1, r2)
             } else {
                 r1.cmp(r2)
             } {
