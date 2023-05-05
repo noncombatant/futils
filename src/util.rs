@@ -91,17 +91,13 @@ pub(crate) fn parse_number(value: &[u8]) -> Result<BigDecimal, ShellError> {
 
 /// Compares case-insensitively, without allocating.
 pub(crate) fn icmp(a: &[u8], b: &[u8]) -> Ordering {
-    let mut order = Ordering::Equal;
-    for (s, o) in zip(a.chars(), b.chars()) {
-        order = s.to_lowercase().cmp(o.to_lowercase());
-        if order != Ordering::Equal {
-            return order;
+    for (a, b) in zip(a.chars(), b.chars()) {
+        let o = a.to_lowercase().cmp(b.to_lowercase());
+        if o != Ordering::Equal {
+            return o;
         }
     }
-    match order {
-        Ordering::Equal => a.len().cmp(&b.len()),
-        _ => order,
-    }
+    a.len().cmp(&b.len())
 }
 
 /// Serializes `string` as a UTF-8 string if possible, or as an array of bytes
