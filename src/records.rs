@@ -8,7 +8,7 @@ use serde::Serialize;
 
 use crate::shell::{parse_options, FileOpener, Options, ShellResult, STDIN_PATHNAME};
 use crate::stream_splitter::StreamSplitter;
-use crate::util::help;
+use crate::util::{help, serialize_str_or_bytes};
 
 /// Command line usage help.
 pub(crate) const RECORDS_HELP: &str = include_str!("records_help.md");
@@ -18,6 +18,7 @@ pub(crate) const RECORDS_HELP_VERBOSE: &str = include_str!("records_help_verbose
 #[derive(Serialize)]
 struct EnumeratedRecord {
     n: Option<usize>,
+    #[serde(serialize_with = "serialize_str_or_bytes")]
     r: Vec<u8>,
 }
 

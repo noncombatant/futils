@@ -9,6 +9,7 @@ use bigdecimal::BigDecimal;
 use bstr::ByteSlice;
 use locale::Numeric;
 use rustc_lexer::unescape::unescape_str;
+use serde::Serializer;
 
 use crate::shell::{ShellError, ShellResult};
 
@@ -99,6 +100,18 @@ pub(crate) fn icmp(a: &[u8], b: &[u8]) -> Ordering {
     match order {
         Ordering::Equal => a.len().cmp(&b.len()),
         _ => order,
+    }
+}
+
+/// Serializes `string` as a UTF-8 string if possible, or as an array of bytes
+/// otherwise.
+pub(crate) fn serialize_str_or_bytes<S>(string: &[u8], serializer: S) -> Result<S::Ok, S::Error>
+where
+    S: Serializer,
+{
+    match string.to_str() {
+        Ok(s) => serializer.serialize_str(s),
+        Err(_) => serializer.serialize_bytes(string.as_bytes()),
     }
 }
 
