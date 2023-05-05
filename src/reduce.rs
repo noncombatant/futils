@@ -8,7 +8,6 @@ use crate::shell::{
 };
 use crate::stream_splitter::StreamSplitter;
 use crate::util::{help, parse_number};
-use bstr::BString;
 
 /// Command line usage help.
 pub(crate) const REDUCE_HELP: &str = include_str!("reduce_help.md");
@@ -21,7 +20,7 @@ pub(crate) const REDUCE_HELP_VERBOSE: &str = include_str!("reduce_help_verbose.m
 // reporting them be optional.
 
 /// Returns the result of applying `command` to `accumulator` and `record`.
-fn apply_command(accumulator: &[u8], command: &str, record: &[u8]) -> Result<BString, ShellError> {
+fn apply_command(accumulator: &[u8], command: &str, record: &[u8]) -> Result<Vec<u8>, ShellError> {
     match command {
         "+" | "-" | "*" | "/" => {
             let a = parse_number(accumulator)?;
@@ -33,7 +32,7 @@ fn apply_command(accumulator: &[u8], command: &str, record: &[u8]) -> Result<BSt
                 "/" => a / b,
                 _ => unreachable!(),
             };
-            Ok(BString::from(format!("{}", r).as_bytes()))
+            Ok(Vec::from(format!("{}", r).as_bytes()))
         }
         _ => {
             // Run `command` with `accumulator` and `record` as its stdin.
@@ -50,18 +49,18 @@ fn reduce(splitter: StreamSplitter, options: &Options) -> ShellResult {
     let mut status = 0;
     let mut splitter = splitter.map_while(Result::ok);
     let mut result = match splitter.next() {
-        Some(r) => r,
+        Some(r) => r.data,
         None => return Err(ShellError::Usage(UsageError::new("No input"))),
     };
 
     for r in splitter {
         for command in &options.match_commands {
-            match apply_command(&result, command, &r) {
+            match apply_command(&result, command, &r.data) {
                 Ok(r) => {
                     result = r;
                 }
                 Err(e) => {
-                    eprintln!("{}: {}", from_utf8(&r).unwrap(), e);
+                    eprintln!("{}: {}", from_utf8(&r.data).unwrap(), e);
                     status += 1;
                 }
             }

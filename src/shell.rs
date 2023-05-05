@@ -8,7 +8,6 @@ use std::num::ParseIntError;
 use std::str;
 
 use bigdecimal::ParseBigDecimalError;
-use bstr::BString;
 use chrono::format;
 use derive_more::{Display, From};
 use getopt::Opt;
@@ -98,7 +97,7 @@ pub(crate) struct Options {
     pub(crate) print_empty: bool,
 
     /// `-F`
-    pub(crate) output_field_delimiter: BString,
+    pub(crate) output_field_delimiter: Vec<u8>,
 
     /// `-f`
     pub(crate) input_field_delimiter: Regex,
@@ -137,7 +136,7 @@ pub(crate) struct Options {
     pub(crate) prune_expressions: Vec<Regex>,
 
     /// `-R`
-    pub(crate) output_record_delimiter: BString,
+    pub(crate) output_record_delimiter: Vec<u8>,
 
     /// `-r`
     pub(crate) input_record_delimiter: Regex,
@@ -181,7 +180,7 @@ impl Options {
             fields: Vec::new(),
             depth: 0,
             print_empty: false,
-            output_field_delimiter: BString::from(DEFAULT_OUTPUT_FIELD_DELIMITER),
+            output_field_delimiter: Vec::from(DEFAULT_OUTPUT_FIELD_DELIMITER),
             input_field_delimiter: Regex::new(DEFAULT_INPUT_FIELD_DELIMITER)?,
             help: false,
             invert_fields: false,
@@ -194,7 +193,7 @@ impl Options {
             enumerate: false,
             parallel: false,
             prune_expressions: Vec::new(),
-            output_record_delimiter: BString::from(DEFAULT_OUTPUT_RECORD_DELIMITER),
+            output_record_delimiter: Vec::from(DEFAULT_OUTPUT_RECORD_DELIMITER),
             input_record_delimiter: Regex::new(DEFAULT_INPUT_RECORD_DELIMITER)?,
             skip: false,
             file_types: String::from(DEFAULT_FILE_TYPES),
@@ -227,8 +226,7 @@ pub(crate) fn parse_options(arguments: &[String]) -> Result<(Options, &[String])
                 Opt('d', Some(s)) => options.depth = str::parse::<usize>(&s)?,
                 Opt('e', None) => options.print_empty = true,
                 Opt('F', Some(s)) => {
-                    options.output_field_delimiter =
-                        BString::from(unescape_backslashes(&s)?.as_bytes())
+                    options.output_field_delimiter = Vec::from(unescape_backslashes(&s)?.as_bytes())
                 }
                 Opt('f', Some(s)) => options.input_field_delimiter = new_regex(&s, &options)?,
                 Opt('I', None) => options.invert_fields = true,
@@ -244,7 +242,7 @@ pub(crate) fn parse_options(arguments: &[String]) -> Result<(Options, &[String])
                 Opt('p', Some(s)) => options.prune_expressions.push(new_regex(&s, &options)?),
                 Opt('R', Some(s)) => {
                     options.output_record_delimiter =
-                        BString::from(unescape_backslashes(&s)?.as_bytes())
+                        Vec::from(unescape_backslashes(&s)?.as_bytes())
                 }
                 Opt('r', Some(s)) => options.input_record_delimiter = new_regex(&s, &options)?,
                 Opt('s', None) => options.skip = true,

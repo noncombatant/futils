@@ -5,19 +5,29 @@ use std::cmp::Ordering;
 use std::io::{Read, Result};
 use std::iter::zip;
 
-use bstr::{BStr, BString, ByteSlice};
+use bstr::ByteSlice;
 use regex::bytes::Regex;
+use serde::Serialize;
 
-/// Compares the `data` fields of 2 `Record`s case-insensitively, without
-/// allocating.
-pub(crate) fn icmp(a: &BStr, other: &BStr) -> Ordering {
-    let mut order = Ordering::Equal;
-    for (s, o) in zip(a.chars(), other.chars()) {
-        order = s.to_lowercase().cmp(o.to_lowercase());
-    }
-    match order {
-        Ordering::Equal => a.len().cmp(&other.len()),
-        _ => order,
+/// A record lexed from the input that `StreamSplitter` is splitting.
+#[derive(Eq, Ord, PartialEq, PartialOrd, Serialize)]
+pub(crate) struct Record {
+    /// The bytes lexed from the input.
+    pub(crate) data: Vec<u8>,
+}
+
+impl Record {
+    /// Compares the `data` fields of 2 `Record`s case-insensitively, without
+    /// allocating.
+    pub(crate) fn icmp(&self, other: &Self) -> Ordering {
+        let mut order = Ordering::Equal;
+        for (s, o) in zip(self.data.chars(), other.data.chars()) {
+            order = s.to_lowercase().cmp(o.to_lowercase());
+        }
+        match order {
+            Ordering::Equal => self.data.len().cmp(&other.data.len()),
+            _ => order,
+        }
     }
 }
 
@@ -34,7 +44,7 @@ pub(crate) fn icmp(a: &BStr, other: &BStr) -> Ordering {
 pub(crate) struct StreamSplitter<'a> {
     reader: &'a mut dyn Read,
     delimiter: &'a Regex,
-    buffer: BString,
+    buffer: Vec<u8>,
     // `buffer[start..end]` is the current slice in which we search for
     // `delimiter`.
     start: usize,
@@ -65,7 +75,7 @@ impl<'a> StreamSplitter<'a> {
         StreamSplitter {
             reader,
             delimiter,
-            buffer: BString::new(vec![0; capacity]),
+            buffer: vec![0; capacity],
             start: 0,
             end: 0,
             eof: false,
@@ -81,8 +91,7 @@ impl<'a> StreamSplitter<'a> {
                 self.end = 0;
             } else {
                 // The buffer is full. To read more, we must grow it:
-                let capacity = self.buffer.capacity();
-                self.buffer.resize(2 * capacity, 0);
+                self.buffer.resize(2 * self.buffer.capacity(), 0);
             }
         }
         let cap = self.buffer.capacity();
@@ -96,7 +105,7 @@ impl<'a> StreamSplitter<'a> {
 }
 
 impl<'a> Iterator for StreamSplitter<'a> {
-    type Item = Result<BString>;
+    type Item = Result<Record>;
 
     fn next(&mut self) -> Option<Self::Item> {
         if let Err(e) = self.fill() {
@@ -123,18 +132,22 @@ impl<'a> Iterator for StreamSplitter<'a> {
                 let r = if m.start() == 0 {
                     // We matched the delimiter at the beginning of the section.
                     self.start += m.end();
-                    Ok(BString::new(vec![]))
+                    Ok(Record { data: Vec::new() })
                 } else {
                     // We matched a record.
                     self.start += m.end();
-                    Ok(section[0..m.start()].into())
+                    Ok(Record {
+                        data: section[0..m.start()].to_vec(),
+                    })
                 };
                 Some(r)
             }
             None => {
                 // Last record, with no trailing delimiter.
                 self.start = self.end;
-                Some(Ok(section.into()))
+                Some(Ok(Record {
+                    data: section.to_vec(),
+                }))
             }
         }
     }
@@ -162,10 +175,10 @@ mod tests {
         let mut splitter = StreamSplitter::with_capacity(&mut file, &delimiter, SMALL_CAPACITY);
 
         let r = splitter.next().unwrap().unwrap();
-        assert_eq!(b"hello", r.as_slice());
+        assert_eq!(b"hello", r.data.as_slice());
 
         let r = splitter.next().unwrap().unwrap();
-        assert_eq!(b"world", r.as_slice());
+        assert_eq!(b"world", r.data.as_slice());
 
         assert!(splitter.next().is_none());
     }
@@ -184,10 +197,10 @@ mod tests {
         let mut splitter = StreamSplitter::with_capacity(&mut file, &delimiter, SMALL_CAPACITY);
 
         let r = splitter.next().unwrap().unwrap();
-        assert_eq!(b"greetings", r.as_slice());
+        assert_eq!(b"greetings", r.data.as_slice());
 
         let r = splitter.next().unwrap().unwrap();
-        assert_eq!(b"world", r.as_slice());
+        assert_eq!(b"world", r.data.as_slice());
 
         assert!(splitter.next().is_none());
     }

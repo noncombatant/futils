@@ -4,10 +4,8 @@ use std::cmp::Ordering;
 use std::fs::File;
 use std::io::{stdin, stdout, Write};
 
-use bstr::BStr;
-
 use crate::shell::{parse_options, Options, ShellResult};
-use crate::stream_splitter::{icmp, StreamSplitter};
+use crate::stream_splitter::{Record, StreamSplitter};
 use crate::util::help;
 
 /// Command line usage help.
@@ -15,7 +13,7 @@ pub(crate) const COMMON_HELP: &str = include_str!("common_help.md");
 
 pub(crate) const COMMON_HELP_VERBOSE: &str = include_str!("common_help_verbose.md");
 
-fn print(column: i8, field: &BStr, options: &Options) -> ShellResult {
+fn print(column: i8, field: &Record, options: &Options) -> ShellResult {
     let mut out = stdout();
     match column {
         1 => (),
@@ -26,7 +24,7 @@ fn print(column: i8, field: &BStr, options: &Options) -> ShellResult {
         }
         _ => unreachable!(),
     }
-    out.write_all(field)?;
+    out.write_all(&field.data)?;
     out.write_all(&options.output_record_delimiter)?;
     Ok(0)
 }
@@ -73,30 +71,30 @@ pub(crate) fn common_main(arguments: &[String]) -> ShellResult {
     while record1.is_some() || record2.is_some() {
         match (&record1, &record2) {
             (Some(r1), Some(r2)) => match if options.insensitive {
-                icmp(r1.as_slice().into(), r2.as_slice().into())
+                r1.icmp(r2)
             } else {
                 r1.cmp(r2)
             } {
                 Ordering::Equal => {
-                    print(3, r1.as_slice().into(), &options)?;
+                    print(3, r1, &options)?;
                     record1 = records1.next();
                     record2 = records2.next();
                 }
                 Ordering::Less => {
-                    print(1, r1.as_slice().into(), &options)?;
+                    print(1, r1, &options)?;
                     record1 = records1.next();
                 }
                 Ordering::Greater => {
-                    print(2, r2.as_slice().into(), &options)?;
+                    print(2, r2, &options)?;
                     record2 = records2.next();
                 }
             },
             (Some(r1), None) => {
-                print(1, r1.as_slice().into(), &options)?;
+                print(1, r1, &options)?;
                 record1 = records1.next();
             }
             (None, Some(r2)) => {
-                print(2, r2.as_slice().into(), &options)?;
+                print(2, r2, &options)?;
                 record2 = records2.next();
             }
             _ => (),

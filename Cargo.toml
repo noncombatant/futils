@@ -15,7 +15,7 @@ categories = ["command-line-utilities"]
 
 atty = "*"
 bigdecimal = "*"
-bstr = { version = "*", features = ["serde"] }
+bstr = "*"
 chrono = "*"
 derive_more = "*"
 getopt = "*"

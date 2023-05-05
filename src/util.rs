@@ -6,10 +6,8 @@ use std::process::{exit, Command};
 use std::str::{self, from_utf8, FromStr};
 
 use bigdecimal::BigDecimal;
-use bstr::{BString, ByteSlice};
 use locale::Numeric;
 use rustc_lexer::unescape::unescape_str;
-use serde::Serializer;
 
 use crate::shell::{ShellError, ShellResult};
 
@@ -87,18 +85,6 @@ pub(crate) fn parse_number(value: &[u8]) -> Result<BigDecimal, ShellError> {
     let value = from_utf8(value)?;
     let value = value.replace(&separator, "");
     Ok(BigDecimal::from_str(&value)?)
-}
-
-/// Serializes `string` as a UTF-8 string if possible, or as an array of bytes
-/// otherwise.
-pub(crate) fn serialize_str_or_bytes<S>(string: &BString, serializer: S) -> Result<S::Ok, S::Error>
-where
-    S: Serializer,
-{
-    match string.to_str() {
-        Ok(s) => serializer.serialize_str(s),
-        Err(_) => serializer.serialize_bytes(string.as_bytes()),
-    }
 }
 
 #[cfg(test)]
