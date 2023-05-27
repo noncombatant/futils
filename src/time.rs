@@ -1,3 +1,6 @@
+// Copyright 2022 by [Chris Palmer](https://noncombatant.org)
+// SPDX-License-Identifier: Apache-2.0
+
 //! A not-very-good way to represent and compare times provided as text strings
 //! on the command line.
 

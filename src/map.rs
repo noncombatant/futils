@@ -1,3 +1,6 @@
+// Copyright 2022 by [Chris Palmer](https://noncombatant.org)
+// SPDX-License-Identifier: Apache-2.0
+
 //! The `futils map` command.
 
 use crate::shell::{parse_options, FileOpener, Options, ShellResult, STDIN_PATHNAME};

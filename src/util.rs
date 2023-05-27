@@ -1,3 +1,6 @@
+// Copyright 2022 by [Chris Palmer](https://noncombatant.org)
+// SPDX-License-Identifier: Apache-2.0
+
 use std::cmp::Ordering;
 use std::io::{stderr, stdout, Write};
 use std::iter::zip;

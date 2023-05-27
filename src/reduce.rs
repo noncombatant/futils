@@ -1,3 +1,6 @@
+// Copyright 2022 by [Chris Palmer](https://noncombatant.org)
+// SPDX-License-Identifier: Apache-2.0
+
 //! The `futils reduce` command.
 
 use std::io::{stdout, Write};

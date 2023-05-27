@@ -1,3 +1,6 @@
+// Copyright 2022 by [Chris Palmer](https://noncombatant.org)
+// SPDX-License-Identifier: Apache-2.0
+
 //! An `Iterator` that yields `Vec<u8>`s from streams, delimited by regular
 //! expressions.
 
