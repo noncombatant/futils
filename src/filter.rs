@@ -23,7 +23,6 @@ fn print_matches(pathname: &str, splitter: StreamSplitter, options: &Options) ->
     'outer: for (n, r) in splitter
         .map_while(Result::ok)
         .enumerate()
-        .filter(|pair| !pair.1.is_empty())
     {
         for re in &options.prune_expressions {
             if re.is_match(&r) {
