@@ -193,7 +193,7 @@ impl<'a> Status<'a> {
         output.write_all(field_delimiter)?;
         output.write_all(self.group.as_bytes())?;
         output.write_all(field_delimiter)?;
-        output.write_all(format!("{}", self.size).as_bytes())?;
+        output.write_all(format!("{:>9}", self.size).as_bytes())?;
         output.write_all(field_delimiter)?;
         output.write_all(self.modified_time.as_bytes())?;
         output.write_all(field_delimiter)?;
@@ -221,11 +221,11 @@ impl<'a> Status<'a> {
         output.write_all(field_delimiter)?;
         output.write_all(self.permissions.as_bytes())?;
         output.write_all(field_delimiter)?;
-        output.write_all(format!("{}", self.links).as_bytes())?;
+        output.write_all(format!("{:>3}", self.links).as_bytes())?;
         output.write_all(field_delimiter)?;
-        output.write_all(format!("{}", self.device).as_bytes())?;
+        output.write_all(format!("{:>4}", self.device).as_bytes())?;
         output.write_all(field_delimiter)?;
-        output.write_all(format!("{}", self.inode).as_bytes())?;
+        output.write_all(format!("{:>6}", self.inode).as_bytes())?;
         output.write_all(field_delimiter)?;
         output.write_all(self.accessed_time.as_bytes())?;
         output.write_all(field_delimiter)?;
@@ -233,7 +233,7 @@ impl<'a> Status<'a> {
         output.write_all(field_delimiter)?;
         output.write_all(self.birth_time.as_bytes())?;
         output.write_all(field_delimiter)?;
-        output.write_all(format!("{}", self.mode).as_bytes())?;
+        output.write_all(format!("{:>9}", self.mode).as_bytes())?;
         output.write_all(field_delimiter)?;
         output.write_all(format!("{}", self.blocks).as_bytes())?;
         output.write_all(field_delimiter)?;
@@ -310,7 +310,7 @@ pub(crate) fn status_main(arguments: &[String]) -> ShellResult {
                 b"Permissions".as_slice(),
                 b"User".as_slice(),
                 b"Group".as_slice(),
-                b"Size".as_slice(),
+                b"     Size".as_slice(),
                 b"Modified           ".as_slice(),
                 b"Name".as_slice(),
             ]

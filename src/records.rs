@@ -29,7 +29,7 @@ impl EnumeratedRecord {
     fn write_columns(&self, output: &mut dyn Write, options: &Options) -> Result<(), Error> {
         if options.print_empty || !self.r.is_empty() {
             if let Some(n) = self.n {
-                write!(output, "{}", n + 1)?;
+                write!(output, "{:>5}", n + 1)?;
                 output.write_all(&options.output_field_delimiter)?;
             }
             output.write_all(&self.r)?;

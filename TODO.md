@@ -28,5 +28,3 @@ Write a `futils tutorial` that has a more discursive tone and lots of examples.
 `files | map -x status` show headers every time. Fix that. Good way to do it
 would be to give it `xargs`-like behavior, with a maximum argument count option
 (`-N`, like `xargs`’ `-n`), and default to fitting as many args as possible.
-
-Right-justify all numbers

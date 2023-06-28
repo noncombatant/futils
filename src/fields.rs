@@ -100,7 +100,7 @@ impl<'a> EnumeratedRecord<'a> {
     fn write_columns(&self, output: &mut dyn Write, options: &Options) -> Result<(), Error> {
         if !self.fields.is_empty() {
             if let Some(n) = self.n {
-                write!(output, "{}", n + 1)?;
+                write!(output, "{:>5}", n + 1)?;
                 output.write_all(&options.output_field_delimiter)?;
             }
             for (n, f) in self.fields.iter().enumerate() {
