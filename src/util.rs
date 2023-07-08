@@ -117,8 +117,8 @@ where
 
 #[cfg(test)]
 mod tests {
+    use crate::util::{file_name, icmp, unescape_backslashes};
     use std::cmp::Ordering;
-    use crate::util::{icmp, file_name, unescape_backslashes};
 
     #[test]
     fn test_unescape_backslashes() {
