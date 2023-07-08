@@ -20,10 +20,7 @@ pub(crate) const FILTER_HELP_VERBOSE: &str = include_str!("filter_help_verbose.m
 fn print_matches(pathname: &str, splitter: StreamSplitter, options: &Options) -> ShellResult {
     let mut stdout = stdout();
     let mut matched = false;
-    'outer: for (n, r) in splitter
-        .map_while(Result::ok)
-        .enumerate()
-    {
+    'outer: for (n, r) in splitter.map_while(Result::ok).enumerate() {
         for re in &options.prune_expressions {
             if re.is_match(&r) {
                 continue 'outer;
