@@ -49,7 +49,7 @@ impl<'a> StreamSplitter<'a> {
         delimiter: &'a Regex,
         capacity: usize,
     ) -> Self {
-        StreamSplitter {
+        Self {
             reader,
             delimiter,
             buffer: vec![0; capacity],
