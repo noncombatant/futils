@@ -14,8 +14,8 @@ pub(crate) const FILTER_HELP: &str = include_str!("filter_help.md");
 
 pub(crate) const FILTER_HELP_VERBOSE: &str = include_str!("filter_help_verbose.md");
 
-/// TODO: Define an `EnumeratedMatch`, like `EnumeratedRecord`, and give it
-/// `write_{columns,json}`.
+// TODO: Define an `EnumeratedMatch`, like `EnumeratedRecord`, and give it
+// `write_{columns,json}`.
 
 fn print_matches(pathname: &str, splitter: StreamSplitter, options: &Options) -> ShellResult {
     let mut stdout = stdout();
