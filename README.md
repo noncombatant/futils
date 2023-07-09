@@ -12,7 +12,6 @@ pronounce it « foutils », given that the project is a bit mad.
 * Modern: Unicode everywhere, complete Markdown documentation, complete tests
 * Flexible: regular expressions everywhere applicable
 * Consistent command line structure and behavior
-* At least as time- and space- efficient as classic equivalents
 * Safe: Memory-safe, typeful, mistake-resistant UX, as side-effect safe as
   possible
 
@@ -93,7 +92,7 @@ that does syntax highlighting. It’s also good for viewing help pages:
 filter -h | bat -l md
 ```
 
-## Development
+## Development Aspirations
 
 Every `pub` identifier has a Rustdoc comment. Rustdoc is always well-formed
 Markdown.
@@ -103,6 +102,8 @@ Every function has thorough unit tests.
 Every command line program has thorough functional tests.
 
 Never `panic!`.
+
+At least as time- and space- efficient as classic equivalents.
 
 ### TODO
 
