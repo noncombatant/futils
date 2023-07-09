@@ -8,7 +8,7 @@ use std::io::{stdout, Write};
 use std::path::Path;
 
 use atty::Stream;
-use nix::sys::stat::{stat, FileStat, Mode};
+use nix::sys::stat::{lstat, FileStat, Mode};
 use serde::Serialize;
 use users::{get_group_by_gid, get_user_by_uid};
 
@@ -35,40 +35,45 @@ fn format_gid(gid: u32) -> String {
     }
 }
 
+fn get_permissions(mode: u16) -> Option<Mode> {
+    Mode::from_bits(mode & (Mode::S_IRWXU.bits() | Mode::S_IRWXG.bits() | Mode::S_IRWXO.bits()))
+}
+
 fn format_permissions(mode: u16) -> String {
-    let mode = Mode::from_bits(
-        mode & (Mode::S_IRWXU.bits() | Mode::S_IRWXG.bits() | Mode::S_IRWXO.bits()),
-    )
-    .unwrap();
-    let mut bytes = vec![b'-'; 9];
-    if mode.contains(Mode::S_IRUSR) {
-        bytes[0] = b'r';
+    match get_permissions(mode) {
+        Some(mode) => {
+            let mut bytes = vec![b'-'; 9];
+            if mode.contains(Mode::S_IRUSR) {
+                bytes[0] = b'r';
+            }
+            if mode.contains(Mode::S_IWUSR) {
+                bytes[1] = b'w';
+            }
+            if mode.contains(Mode::S_IXUSR) {
+                bytes[2] = b'x';
+            }
+            if mode.contains(Mode::S_IRGRP) {
+                bytes[3] = b'r';
+            }
+            if mode.contains(Mode::S_IWGRP) {
+                bytes[4] = b'w';
+            }
+            if mode.contains(Mode::S_IXGRP) {
+                bytes[5] = b'x';
+            }
+            if mode.contains(Mode::S_IROTH) {
+                bytes[6] = b'r';
+            }
+            if mode.contains(Mode::S_IWOTH) {
+                bytes[7] = b'w';
+            }
+            if mode.contains(Mode::S_IXOTH) {
+                bytes[8] = b'x';
+            }
+            String::from_utf8(bytes).unwrap()
+        }
+        None => "---------".to_string(),
     }
-    if mode.contains(Mode::S_IWUSR) {
-        bytes[1] = b'w';
-    }
-    if mode.contains(Mode::S_IXUSR) {
-        bytes[2] = b'x';
-    }
-    if mode.contains(Mode::S_IRGRP) {
-        bytes[3] = b'r';
-    }
-    if mode.contains(Mode::S_IWGRP) {
-        bytes[4] = b'w';
-    }
-    if mode.contains(Mode::S_IXGRP) {
-        bytes[5] = b'x';
-    }
-    if mode.contains(Mode::S_IROTH) {
-        bytes[6] = b'r';
-    }
-    if mode.contains(Mode::S_IWOTH) {
-        bytes[7] = b'w';
-    }
-    if mode.contains(Mode::S_IXOTH) {
-        bytes[8] = b'x';
-    }
-    String::from_utf8(bytes).unwrap()
 }
 
 fn format_type(mode: u16) -> String {
@@ -109,19 +114,32 @@ fn format_type(mode: u16) -> String {
     static S_ISUID: u16 = 0o0004000;
     static S_ISGID: u16 = 0o0002000;
 
+    let permissions = get_permissions(mode);
     let mode = mode & S_IFMT;
     let r = if S_ISUID == mode & S_ISUID || S_ISGID == mode & S_ISGID {
         "💣"
     } else if S_IFIFO == mode & S_IFIFO {
         "🚰"
+    } else if S_IFLNK == mode & S_IFLNK {
+        "→"
     } else if S_IFBLK == mode & S_IFBLK || S_IFCHR == mode & S_IFCHR {
         "🐧"
     } else if S_IFDIR == mode & S_IFDIR {
         "📁"
     } else if S_IFREG == mode & S_IFREG {
-        " "
-    } else if S_IFLNK == mode & S_IFLNK {
-        "→"
+        match permissions {
+            Some(mode) => {
+                if mode.contains(Mode::S_IXUSR)
+                    || mode.contains(Mode::S_IXGRP)
+                    || mode.contains(Mode::S_IXOTH)
+                {
+                    "⚡️"
+                } else {
+                    "📝"
+                }
+            }
+            None => " ",
+        }
     } else if S_IFSOCK == mode & S_IFSOCK {
         "🧦"
     } else {
@@ -319,7 +337,7 @@ pub(crate) fn status_main(arguments: &[String]) -> ShellResult {
         stdout.write_all(&options.output_record_delimiter)?;
     }
     for (i, pathname) in arguments.iter().enumerate() {
-        match stat(pathname.as_str()) {
+        match lstat(pathname.as_str()) {
             Ok(s) => {
                 let s = Status::new(&s, pathname);
                 if options.json_output {
