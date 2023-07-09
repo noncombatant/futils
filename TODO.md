@@ -28,3 +28,7 @@ Write a `futils tutorial` that has a more discursive tone and lots of examples.
 `files | map -x status` show headers every time. Fix that. Good way to do it
 would be to give it `xargs`-like behavior, with a maximum argument count option
 (use `-l`), and default (`-l0`) to fitting as many arguments as possible.
+
+Resurrect `apply` and have it treat each record’s fields as distinct arguments
+to the command, as opposed to `map`, which treats the whole record as a single
+argument.
