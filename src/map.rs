@@ -3,6 +3,8 @@
 
 //! The `futils map` command.
 
+use itertools::Itertools;
+
 use crate::shell::{parse_options, FileOpener, Options, ShellResult, STDIN_PATHNAME};
 use crate::stream_splitter::StreamSplitter;
 use crate::util::{help, run_command};
@@ -13,23 +15,36 @@ pub(crate) const MAP_HELP: &str = include_str!("map_help.md");
 pub(crate) const MAP_HELP_VERBOSE: &str = include_str!("map_help_verbose.md");
 
 /// Iterates over `StreamSplitter` and runs each of the `commands` on each
-/// record, with each field of the record as a distinct argument to the command.
+/// record.
 fn map(splitter: StreamSplitter, options: &Options) -> ShellResult {
     let mut status = 0;
-    for r in splitter.map_while(Result::ok) {
+    let chunk_size = match options.limit {
+        Some(limit) => {
+            if limit > 0 {
+                limit as usize
+            } else {
+                1
+            }
+        }
+        None => 1,
+    };
+    for chunk in splitter
+        .map_while(Result::ok)
+        .chunks(chunk_size)
+        .into_iter()
+    {
+        // TODO: This is ugly and allocates.
+        let records: Vec<Vec<u8>> = chunk.collect();
+        let records: Vec<&[u8]> = records.iter().map(|r| r.as_slice()).collect();
         for command in &options.match_commands {
-            let fields = options
-                .input_field_delimiter
-                .split(&r)
-                .collect::<Vec<&[u8]>>();
-            match run_command(command, &fields, true) {
+            match run_command(command, &records, true) {
                 Ok(s) => {
                     if s != 0 {
                         status += 1;
                     }
                 }
                 Err(e) => {
-                    eprintln!("{}: {}", String::from_utf8_lossy(&r), e);
+                    eprintln!("{} ... : {}", command, e);
                     status += 1;
                 }
             }
