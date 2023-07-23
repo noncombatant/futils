@@ -30,3 +30,6 @@ to the command, as opposed to `map`, which treats the whole record as a single
 argument.
 
 BUG: `-l` is not working for `filter`.
+
+Make a mode for `map` such that, if there is no `-x`, treat the arguments as a
+command.
