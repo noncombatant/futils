@@ -9,9 +9,9 @@ use std::path::Path;
 
 use atty::Stream;
 use nix::sys::stat::{lstat, FileStat, Mode};
-use serde::Serialize;
 use users::{get_group_by_gid, get_user_by_uid};
 
+use crate::os;
 use crate::shell::{parse_options, Options, ShellError, ShellResult};
 use crate::time::format_utc_timestamp;
 use crate::util::help;
@@ -35,11 +35,11 @@ fn format_gid(gid: u32) -> String {
     }
 }
 
-fn get_permissions(mode: u16) -> Option<Mode> {
+fn get_permissions(mode: os::Mode) -> Option<Mode> {
     Mode::from_bits(mode & (Mode::S_IRWXU.bits() | Mode::S_IRWXG.bits() | Mode::S_IRWXO.bits()))
 }
 
-fn format_permissions(mode: u16) -> String {
+fn format_permissions(mode: os::Mode) -> String {
     match get_permissions(mode) {
         Some(mode) => {
             let mut bytes = vec![b'-'; 9];
@@ -76,7 +76,7 @@ fn format_permissions(mode: u16) -> String {
     }
 }
 
-fn format_type(mode: u16) -> String {
+fn format_type(mode: os::Mode) -> String {
     // Darwin's `stat`(2) says:
     // #define S_IFMT 0170000           /* type of file */
     // #define        S_IFIFO  0010000  /* named pipe (fifo) */
@@ -115,18 +115,22 @@ fn format_type(mode: u16) -> String {
     static S_ISGID: u16 = 0o0002000;
 
     let permissions = get_permissions(mode);
-    let mode = mode & S_IFMT;
-    let r = if S_ISUID == mode & S_ISUID || S_ISGID == mode & S_ISGID {
+    let mode = mode & S_IFMT as os::Mode;
+    let r = if S_ISUID as os::Mode == mode & S_ISUID as os::Mode
+        || S_ISGID as os::Mode == mode & S_ISGID as os::Mode
+    {
         "💣"
-    } else if S_IFIFO == mode & S_IFIFO {
+    } else if S_IFIFO as os::Mode == mode & S_IFIFO as os::Mode {
         "🚰"
-    } else if S_IFLNK == mode & S_IFLNK {
+    } else if S_IFLNK as os::Mode == mode & S_IFLNK as os::Mode {
         "→"
-    } else if S_IFBLK == mode & S_IFBLK || S_IFCHR == mode & S_IFCHR {
+    } else if S_IFBLK as os::Mode == mode & S_IFBLK as os::Mode
+        || S_IFCHR as os::Mode == mode & S_IFCHR as os::Mode
+    {
         "🐧"
-    } else if S_IFDIR == mode & S_IFDIR {
+    } else if S_IFDIR as os::Mode == mode & S_IFDIR as os::Mode {
         "📁"
-    } else if S_IFREG == mode & S_IFREG {
+    } else if S_IFREG as os::Mode == mode & S_IFREG as os::Mode {
         match permissions {
             Some(mode) => {
                 if mode.contains(Mode::S_IXUSR)
@@ -140,7 +144,7 @@ fn format_type(mode: u16) -> String {
             }
             None => " ",
         }
-    } else if S_IFSOCK == mode & S_IFSOCK {
+    } else if S_IFSOCK as os::Mode == mode & S_IFSOCK as os::Mode {
         "🧦"
     } else {
         "⁉️"
@@ -148,29 +152,9 @@ fn format_type(mode: u16) -> String {
     r.to_string()
 }
 
-#[derive(Serialize)]
-struct Status<'a> {
-    name: &'a str,
-    file_type: String,
-    size: i64,
-    modified_time: String,
-    user: String,
-    group: String,
-    permissions: String,
-    links: u16,
-    device: i32,
-    inode: u64,
-    accessed_time: String,
-    changed_time: String,
-    birth_time: String,
-    mode: u16,
-    blocks: i64,
-    block_size: i32,
-}
-
-impl<'a> Status<'a> {
-    fn new(status: &FileStat, name: &'a str) -> Status<'a> {
-        Status {
+impl<'a> os::Status<'a> {
+    fn new(status: &FileStat, name: &'a str) -> os::Status<'a> {
+        os::Status {
             name,
             file_type: format_type(status.st_mode),
             size: status.st_size,
@@ -183,6 +167,7 @@ impl<'a> Status<'a> {
             inode: status.st_ino,
             accessed_time: format_utc_timestamp(status.st_atime),
             changed_time: format_utc_timestamp(status.st_ctime),
+            #[cfg(target_os = "macos")]
             birth_time: format_utc_timestamp(status.st_birthtime),
             mode: status.st_mode,
             blocks: status.st_blocks,
@@ -249,8 +234,11 @@ impl<'a> Status<'a> {
         output.write_all(field_delimiter)?;
         output.write_all(self.changed_time.as_bytes())?;
         output.write_all(field_delimiter)?;
-        output.write_all(self.birth_time.as_bytes())?;
-        output.write_all(field_delimiter)?;
+        #[cfg(target_os = "macos")]
+        {
+            output.write_all(self.birth_time.as_bytes())?;
+            output.write_all(field_delimiter)?;
+        }
         output.write_all(format!("{:>9}", self.mode).as_bytes())?;
         output.write_all(field_delimiter)?;
         output.write_all(format!("{}", self.blocks).as_bytes())?;
@@ -339,7 +327,7 @@ pub(crate) fn status_main(arguments: &[String]) -> ShellResult {
     for (i, pathname) in arguments.iter().enumerate() {
         match lstat(pathname.as_str()) {
             Ok(s) => {
-                let s = Status::new(&s, pathname);
+                let s = os::Status::new(&s, pathname);
                 if options.json_output {
                     s.write_json(&mut stdout, atty::is(Stream::Stdout))?;
                 } else {

@@ -20,6 +20,10 @@ mod time;
 mod util;
 mod version;
 
+#[cfg_attr(target_os = "linux", path = "linux.rs")]
+#[cfg_attr(target_os = "macos", path = "macos.rs")]
+mod os;
+
 use common::{common_main, COMMON_HELP};
 use fields::{fields_main, FIELDS_HELP};
 use files::{files_main, FILES_HELP};
