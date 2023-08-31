@@ -21,7 +21,7 @@ mod util;
 mod version;
 
 #[cfg_attr(target_os = "linux", path = "linux.rs")]
-#[cfg_attr(target_os = "macos", path = "macos.rs")]
+#[cfg_attr(target_os = "macos", path = "darwin.rs")]
 mod os;
 
 use common::{common_main, COMMON_HELP};
