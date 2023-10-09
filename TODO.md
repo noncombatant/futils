@@ -33,3 +33,5 @@ BUG: `-l` is not working for `filter`.
 
 Make a mode for `map` such that, if there is no `-x`, treat the arguments as a
 command.
+
+Consider adding an option to force Markdown formatting on/off.
