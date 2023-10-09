@@ -35,3 +35,6 @@ Make a mode for `map` such that, if there is no `-x`, treat the arguments as a
 command.
 
 Consider adding an option to force Markdown formatting on/off.
+
+For `filter`, `fields`, and `records`, add an option to turn printing the input
+pathname on/off.
