@@ -8,27 +8,48 @@ use std::path::Path;
 use std::process::{exit, Command};
 use std::str::{self, from_utf8, FromStr};
 
+use atty::Stream;
 use bigdecimal::BigDecimal;
 use bstr::ByteSlice;
+use derive_more::Display;
 use locale::Numeric;
 use rustc_lexer::unescape::unescape_str;
 use serde::Serializer;
+use termimad::{FmtText, MadSkin};
 
 use crate::shell::{ShellError, ShellResult};
+
+#[derive(Display)]
+enum TerminalText<'a> {
+    String(&'a str),
+    Formatted(FmtText<'a, 'a>),
+}
+
+fn terminal_text<'a>(s: &'a str, stream: Stream, skin: &'a MadSkin) -> TerminalText<'a> {
+    if atty::is(stream) {
+        TerminalText::Formatted(skin.term_text(s))
+    } else {
+        TerminalText::String(s)
+    }
+}
 
 /// Prints `message` and `exit`s with `status`. If `status` is 0, prints
 /// `message` to `stdout`, otherwise to `stderr`.
 pub(crate) fn help(status: i32, message: &str, common: bool, verbose: Option<&str>) {
+    let md = MadSkin::default();
     if status == 0 {
-        println!("{}", message);
+        println!("{}", terminal_text(message, Stream::Stdout, &md));
         if common {
-            print!("{}", include_str!("common_options.md"));
+            print!(
+                "{}",
+                terminal_text(include_str!("common_options.md"), Stream::Stdout, &md)
+            );
         }
         if let Some(v) = verbose {
-            print!("{}", v);
+            print!("{}", terminal_text(v, Stream::Stdout, &md));
         }
     } else {
-        eprintln!("{}", message);
+        eprintln!("{}", terminal_text(message, Stream::Stderr, &md));
     }
     exit(status);
 }
