@@ -15,7 +15,7 @@ use derive_more::Display;
 use locale::Numeric;
 use rustc_lexer::unescape::unescape_str;
 use serde::Serializer;
-use termimad::{FmtText, MadSkin};
+use termimad::{Alignment, FmtText, MadSkin};
 
 use crate::shell::{ShellError, ShellResult};
 
@@ -36,7 +36,8 @@ fn terminal_text<'a>(s: &'a str, stream: Stream, skin: &'a MadSkin) -> TerminalT
 /// Prints `message` and `exit`s with `status`. If `status` is 0, prints
 /// `message` to `stdout`, otherwise to `stderr`.
 pub(crate) fn help(status: i32, message: &str, common: bool, verbose: Option<&str>) {
-    let md = MadSkin::default();
+    let mut md = MadSkin::default();
+    md.headers[0].align = Alignment::Left;
     if status == 0 {
         println!("{}", terminal_text(message, Stream::Stdout, &md));
         if common {
