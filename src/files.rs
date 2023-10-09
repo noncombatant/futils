@@ -15,9 +15,9 @@ use crate::time::Time;
 use crate::util::{help, run_command};
 
 /// Command line usage help.
-pub(crate) const FILES_HELP: &str = include_str!("files_help.md");
+pub(crate) const FILES_HELP: &str = include_str!("files.md");
 
-pub(crate) const FILES_HELP_VERBOSE: &str = include_str!("files_help_verbose.md");
+pub(crate) const FILES_HELP_VERBOSE: &str = include_str!("files_verbose.md");
 
 fn is_hidden(e: &DirEntry) -> bool {
     match e.path().to_str() {
@@ -148,6 +148,7 @@ pub(crate) fn files_main(arguments: &[String]) -> ShellResult {
         help(
             0,
             FILES_HELP,
+            true,
             if options.verbose {
                 Some(FILES_HELP_VERBOSE)
             } else {

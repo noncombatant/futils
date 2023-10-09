@@ -11,10 +11,8 @@ use serde::Serialize;
 use crate::shell::{parse_options, ShellError, ShellResult};
 use crate::util::help;
 
-/// Command line usage help.
-pub(crate) const VERSION_HELP: &str = include_str!("version_help.md");
-
-pub(crate) const VERSION_HELP_VERBOSE: &str = include_str!("version_help_verbose.md");
+pub(crate) const VERSION_HELP: &str = include_str!("version.md");
+pub(crate) const VERSION_HELP_VERBOSE: &str = include_str!("version_verbose.md");
 
 #[derive(Serialize)]
 struct VersionDatum<'a> {
@@ -116,6 +114,7 @@ pub(crate) fn version_main(arguments: &[String]) -> ShellResult {
         help(
             0,
             VERSION_HELP,
+            true,
             if options.verbose {
                 Some(VERSION_HELP_VERBOSE)
             } else {

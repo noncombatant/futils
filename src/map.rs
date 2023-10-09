@@ -9,10 +9,8 @@ use crate::shell::{parse_options, FileOpener, Options, ShellResult, STDIN_PATHNA
 use crate::stream_splitter::StreamSplitter;
 use crate::util::{help, run_command};
 
-/// Command line usage help.
-pub(crate) const MAP_HELP: &str = include_str!("map_help.md");
-
-pub(crate) const MAP_HELP_VERBOSE: &str = include_str!("map_help_verbose.md");
+pub(crate) const MAP_HELP: &str = include_str!("map.md");
+pub(crate) const MAP_HELP_VERBOSE: &str = include_str!("map_verbose.md");
 
 /// Iterates over `StreamSplitter` and runs each of the `commands` on each
 /// record.
@@ -60,6 +58,7 @@ pub(crate) fn map_main(arguments: &[String]) -> ShellResult {
         help(
             0,
             MAP_HELP,
+            true,
             if options.verbose {
                 Some(MAP_HELP_VERBOSE)
             } else {

@@ -15,10 +15,8 @@ use crate::shell::{parse_options, FileOpener, Options, ShellResult, STDIN_PATHNA
 use crate::stream_splitter::StreamSplitter;
 use crate::util::help;
 
-/// Command line usage help.
-pub(crate) const FIELDS_HELP: &str = include_str!("fields_help.md");
-
-pub(crate) const FIELDS_HELP_VERBOSE: &str = include_str!("fields_help_verbose.md");
+pub(crate) const FIELDS_HELP: &str = include_str!("fields.md");
+pub(crate) const FIELDS_HELP_VERBOSE: &str = include_str!("fields_verbose.md");
 
 /// Returns the index of the first byte that is not a space character.
 fn first_non_space(record: &[u8]) -> Option<usize> {
@@ -158,6 +156,7 @@ pub(crate) fn fields_main(arguments: &[String]) -> ShellResult {
         help(
             0,
             FIELDS_HELP,
+            true,
             if options.verbose {
                 Some(FIELDS_HELP_VERBOSE)
             } else {
@@ -166,7 +165,7 @@ pub(crate) fn fields_main(arguments: &[String]) -> ShellResult {
         );
     }
     if options.invert_fields && options.fields.is_empty() {
-        help(-1, FIELDS_HELP, None);
+        help(-1, FIELDS_HELP, false, None);
     }
 
     // TODO: To support named fields, use an `enum Field` here with `isize` and

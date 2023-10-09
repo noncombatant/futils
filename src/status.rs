@@ -16,10 +16,8 @@ use crate::shell::{parse_options, Options, ShellError, ShellResult};
 use crate::time::format_utc_timestamp;
 use crate::util::help;
 
-/// Command line usage help.
-pub(crate) const STATUS_HELP: &str = include_str!("status_help.md");
-
-pub(crate) const STATUS_HELP_VERBOSE: &str = include_str!("status_help_verbose.md");
+pub(crate) const STATUS_HELP: &str = include_str!("status.md");
+pub(crate) const STATUS_HELP_VERBOSE: &str = include_str!("status_verbose.md");
 
 fn format_uid(uid: u32) -> String {
     match get_user_by_uid(uid) {
@@ -264,6 +262,7 @@ pub(crate) fn status_main(arguments: &[String]) -> ShellResult {
         help(
             0,
             STATUS_HELP,
+            true,
             if options.verbose {
                 Some(STATUS_HELP_VERBOSE)
             } else {

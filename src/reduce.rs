@@ -13,9 +13,9 @@ use crate::stream_splitter::StreamSplitter;
 use crate::util::{help, parse_number};
 
 /// Command line usage help.
-pub(crate) const REDUCE_HELP: &str = include_str!("reduce_help.md");
+pub(crate) const REDUCE_HELP: &str = include_str!("reduce.md");
 
-pub(crate) const REDUCE_HELP_VERBOSE: &str = include_str!("reduce_help_verbose.md");
+pub(crate) const REDUCE_HELP_VERBOSE: &str = include_str!("reduce_verbose.md");
 
 // TODO: Change this program to work on each field in each record, instead of
 // each record. Or, make that an option. That way, you could sum each column in
@@ -81,6 +81,7 @@ pub(crate) fn reduce_main(arguments: &[String]) -> ShellResult {
         help(
             0,
             REDUCE_HELP,
+            true,
             if options.verbose {
                 Some(REDUCE_HELP_VERBOSE)
             } else {

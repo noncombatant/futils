@@ -36,7 +36,7 @@ use util::{file_name, help};
 use version::{version_main, VERSION_HELP};
 
 /// Command line usage help.
-const MAIN_HELP: &str = include_str!("main_help.md");
+const MAIN_HELP: &str = include_str!("main.md");
 
 fn reset_sigpipe() {
     if cfg!(unix) {
@@ -72,26 +72,26 @@ fn main() {
         arguments.remove(0);
     }
     if arguments.is_empty() {
-        help(-1, MAIN_HELP, None);
+        help(-1, MAIN_HELP, false, None);
     } else {
         program_name = file_name(&arguments[0]).unwrap();
     }
 
     if program_name == "help" || program_name == "-h" || program_name == "--help" {
         if arguments.len() < 2 {
-            help(0, MAIN_HELP, None);
+            help(0, MAIN_HELP, false, None);
         } else {
             match arguments[1].as_str() {
-                "common" => help(0, COMMON_HELP, None),
-                "fields" => help(0, FIELDS_HELP, None),
-                "files" => help(0, FILES_HELP, None),
-                "filter" => help(0, FILTER_HELP, None),
-                "map" => help(0, MAP_HELP, None),
-                "records" => help(0, RECORDS_HELP, None),
-                "reduce" => help(0, REDUCE_HELP, None),
-                "status" => help(0, STATUS_HELP, None),
-                "version" => help(0, VERSION_HELP, None),
-                &_ => help(-1, MAIN_HELP, None),
+                "common" => help(0, COMMON_HELP, true, None),
+                "fields" => help(0, FIELDS_HELP, true, None),
+                "files" => help(0, FILES_HELP, true, None),
+                "filter" => help(0, FILTER_HELP, true, None),
+                "map" => help(0, MAP_HELP, true, None),
+                "records" => help(0, RECORDS_HELP, true, None),
+                "reduce" => help(0, REDUCE_HELP, true, None),
+                "status" => help(0, STATUS_HELP, true, None),
+                "version" => help(0, VERSION_HELP, true, None),
+                &_ => help(-1, MAIN_HELP, false, None),
             };
         }
     }
@@ -107,7 +107,7 @@ fn main() {
         "status" => status_main(&arguments),
         "version" => version_main(&arguments),
         _ => {
-            help(-1, MAIN_HELP, None);
+            help(-1, MAIN_HELP, false, None);
             unreachable!()
         }
     } {

@@ -11,10 +11,8 @@ use crate::shell::{parse_options, Options, ShellResult};
 use crate::stream_splitter::StreamSplitter;
 use crate::util::{help, icmp};
 
-/// Command line usage help.
-pub(crate) const COMMON_HELP: &str = include_str!("common_help.md");
-
-pub(crate) const COMMON_HELP_VERBOSE: &str = include_str!("common_help_verbose.md");
+pub(crate) const COMMON_HELP: &str = include_str!("common.md");
+pub(crate) const COMMON_HELP_VERBOSE: &str = include_str!("common_verbose.md");
 
 fn print(column: i8, field: &[u8], options: &Options) -> ShellResult {
     let mut out = stdout();
@@ -39,6 +37,7 @@ pub(crate) fn common_main(arguments: &[String]) -> ShellResult {
         help(
             0,
             COMMON_HELP,
+            true,
             if options.verbose {
                 Some(COMMON_HELP_VERBOSE)
             } else {
@@ -47,7 +46,7 @@ pub(crate) fn common_main(arguments: &[String]) -> ShellResult {
         );
     }
     if arguments.is_empty() || arguments.len() > 2 {
-        help(-1, COMMON_HELP, None);
+        help(-1, COMMON_HELP, false, None);
     }
 
     let mut stdin = stdin();

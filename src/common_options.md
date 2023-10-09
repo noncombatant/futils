@@ -1,4 +1,4 @@
-## Additional Options
+## Common Options
 
 * `-F`: Set the output field delimiter.
 * `-f`: Set the input field delimiter, a regular expression.
@@ -10,10 +10,3 @@
 Regular expressions use [the Rust regex library
 syntax](https://docs.rs/regex/latest/regex/).
 
-## Exit Status
-
-| Exit Status    | Meaning            |
-|----------------|--------------------|
-|              0 | Success            |
-|             -1 | Generic failure    |
-| greater than 1 | Number of errors   |

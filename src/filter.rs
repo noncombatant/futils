@@ -9,10 +9,8 @@ use crate::shell::{parse_options, FileOpener, Options, ShellResult, STDIN_PATHNA
 use crate::stream_splitter::StreamSplitter;
 use crate::util::{help, run_command};
 
-/// Command line usage help.
-pub(crate) const FILTER_HELP: &str = include_str!("filter_help.md");
-
-pub(crate) const FILTER_HELP_VERBOSE: &str = include_str!("filter_help_verbose.md");
+pub(crate) const FILTER_HELP: &str = include_str!("filter.md");
+pub(crate) const FILTER_HELP_VERBOSE: &str = include_str!("filter_verbose.md");
 
 // TODO: Define an `EnumeratedMatch`, like `EnumeratedRecord`, and give it
 // `write_{columns,json}`.
@@ -76,6 +74,7 @@ pub(crate) fn filter_main(arguments: &[String]) -> ShellResult {
         help(
             0,
             FILTER_HELP,
+            true,
             if options.verbose {
                 Some(FILTER_HELP_VERBOSE)
             } else {
