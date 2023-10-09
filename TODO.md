@@ -38,3 +38,5 @@ Consider adding an option to force Markdown formatting on/off.
 
 For `filter`, `fields`, and `records`, add an option to turn printing the input
 pathname on/off.
+
+Wrap `terminal_text` into a new program, for viewing Markdown in the terminal.
