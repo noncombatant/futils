@@ -3,6 +3,7 @@
 
 //! The `futils filter` command.
 
+use itertools::Either;
 use std::io::{stdout, Write};
 
 use crate::shell::{parse_options, FileOpener, Options, ShellResult, STDIN_PATHNAME};
@@ -18,7 +19,16 @@ pub(crate) const FILTER_HELP_VERBOSE: &str = include_str!("filter_verbose.md");
 fn print_matches(pathname: &str, splitter: StreamSplitter, options: &Options) -> ShellResult {
     let mut stdout = stdout();
     let mut matched = false;
-    'outer: for (n, r) in splitter.map_while(Result::ok).enumerate() {
+    let records = splitter.map_while(Result::ok);
+    let records = match options.limit {
+        Some(limit) => Either::Right(if limit > 0 {
+            Either::Right(records.take(limit as usize))
+        } else {
+            Either::Left(records)
+        }),
+        None => Either::Left(records),
+    };
+    'outer: for (n, r) in records.enumerate() {
         for re in &options.prune_expressions {
             if re.is_match(&r) {
                 continue 'outer;
