@@ -38,3 +38,8 @@ For `filter`, `fields`, and `records`, add an option to turn printing the input
 pathname on/off.
 
 Wrap `terminal_text` into a new program, for viewing Markdown in the terminal.
+
+Organize everything into chained iterators: `StreamSplitter`; but then also
+`Matcher`, `Enumerator`, `PathnamePrefixer`, ... Then, each program should
+mostly become a thin wrapper around the iterators that chains them in the right
+way.
