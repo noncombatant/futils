@@ -1,7 +1,8 @@
 // Copyright 2022 by [Chris Palmer](https://noncombatant.org)
 // SPDX-License-Identifier: Apache-2.0
 
-use std::cmp::Ordering;
+use std::cmp::{min, Ordering};
+use std::env;
 use std::io::{stderr, stdout, Write};
 use std::iter::zip;
 use std::path::Path;
@@ -15,7 +16,7 @@ use derive_more::Display;
 use locale::Numeric;
 use rustc_lexer::unescape::unescape_str;
 use serde::Serializer;
-use termimad::{Alignment, FmtText, MadSkin};
+use termimad::{terminal_size, Alignment, FmtText, MadSkin};
 
 use crate::shell::{ShellError, ShellResult};
 
@@ -25,27 +26,22 @@ enum TerminalText<'a> {
     Formatted(FmtText<'a, 'a>),
 }
 
-// Until https://github.com/Canop/termimad/issues/50 is fixed, doing this makes
-// things look sad.
-// use std::cmp::min;
-// use std::env;
-// use termimad::terminal_size;
-//fn text_width() -> usize {
-//    let (terminal_width, _) = terminal_size();
-//    let terminal_width = terminal_width as usize;
-//    match env::var("MANWIDTH") {
-//        Ok(man_width) => match man_width.parse::<usize>() {
-//            Ok(w) => min(terminal_width, w),
-//            Err(_) => min(terminal_width, 80_usize),
-//        },
-//        Err(_) => min(terminal_width, 80_usize),
-//    }
-//}
+// Known bug: https://github.com/Canop/termimad/issues/50
+fn text_width() -> usize {
+    let (terminal_width, _) = terminal_size();
+    let terminal_width = terminal_width as usize;
+    match env::var("MANWIDTH") {
+        Ok(man_width) => match man_width.parse::<usize>() {
+            Ok(w) => min(terminal_width, w),
+            Err(_) => min(terminal_width, 80_usize),
+        },
+        Err(_) => min(terminal_width, 80_usize),
+    }
+}
 
 fn terminal_text<'a>(s: &'a str, stream: Stream, skin: &'a MadSkin) -> TerminalText<'a> {
     if atty::is(stream) {
-        //TerminalText::Formatted(skin.text(s, Some(text_width())))
-        TerminalText::Formatted(skin.text(s, None))
+        TerminalText::Formatted(skin.text(s, Some(text_width())))
     } else {
         TerminalText::String(s)
     }
