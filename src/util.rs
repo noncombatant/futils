@@ -25,9 +25,27 @@ enum TerminalText<'a> {
     Formatted(FmtText<'a, 'a>),
 }
 
+// Until https://github.com/Canop/termimad/issues/50 is fixed, doing this makes
+// things look sad.
+// use std::cmp::min;
+// use std::env;
+// use termimad::terminal_size;
+//fn text_width() -> usize {
+//    let (terminal_width, _) = terminal_size();
+//    let terminal_width = terminal_width as usize;
+//    match env::var("MANWIDTH") {
+//        Ok(man_width) => match man_width.parse::<usize>() {
+//            Ok(w) => min(terminal_width, w),
+//            Err(_) => min(terminal_width, 80_usize),
+//        },
+//        Err(_) => min(terminal_width, 80_usize),
+//    }
+//}
+
 fn terminal_text<'a>(s: &'a str, stream: Stream, skin: &'a MadSkin) -> TerminalText<'a> {
     if atty::is(stream) {
-        TerminalText::Formatted(skin.term_text(s))
+        //TerminalText::Formatted(skin.text(s, Some(text_width())))
+        TerminalText::Formatted(skin.text(s, None))
     } else {
         TerminalText::String(s)
     }
@@ -38,6 +56,7 @@ fn terminal_text<'a>(s: &'a str, stream: Stream, skin: &'a MadSkin) -> TerminalT
 pub(crate) fn help(status: i32, message: &str, common: bool, verbose: Option<&str>) {
     let mut md = MadSkin::default();
     md.headers[0].align = Alignment::Left;
+
     if status == 0 {
         println!("{}", terminal_text(message, Stream::Stdout, &md));
         if common {

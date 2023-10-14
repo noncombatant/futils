@@ -1,8 +1,6 @@
 # `status` — print the status of files
 
-Prints the filesystem metadata for each of the given `pathname`s in JSON format.
-If no pathnames are given, prints the status for each file in `*`; with `-a`,
-also prints files whose names begin with `.`.
+Prints the filesystem metadata for each of the given `pathname`s in JSON format. If no pathnames are given, prints the status for each file in `*`; with `-a`, also prints files whose names begin with `.`.
 
 ## Usage
 
@@ -35,7 +33,4 @@ The metadata elements are:
 * `blocks`: number of storage blocks used
 * `block_size`: size of storage blocks
 
-For columns output (no `-J`), by default, only the `file_type`, `permissions`,
-`links`, `user`, `group`, `size`, `modified_time`, and `name` fields are printed
-(in that order). To see all fields, pass the `-v` option. For JSON output
-(`-J`), all fields are printed.
+For columns output (no `-J`), by default, only the `file_type`, `permissions`, `links`, `user`, `group`, `size`, `modified_time`, and `name` fields are printed (in that order). To see all fields, pass the `-v` option. For JSON output (`-J`), all fields are printed.

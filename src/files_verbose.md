@@ -12,17 +12,13 @@ To show all files that contain a record not matching “foo”:
 files -x 'filter -l0 -p foo' ...
 ```
 
-To show all files that do not contain a record matching “foo”, we need to treat
-the whole file as a single record, and then try to prune (`-p`) that record. So
-we need to come up with an input record delimiter that never appears in the
-file; `\x00` often works for this purpose, for text files at least. For example:
+To show all files that do not contain a record matching “foo”, we need to treat the whole file as a single record, and then try to prune (`-p`) that record. So we need to come up with an input record delimiter that never appears in the file; `\x00` often works for this purpose, for text files at least. For example:
 
 ```
 files -x 'filter -l0 -R '\x00' -p foo' ...
 ```
 
-To show (`-v`), for all Rust source code files (`.rs`), lines matching “goat”
-(`-m goat`) and the line numbers (`-n`):
+To show (`-v`), for all Rust source code files (`.rs`), lines matching “goat” (`-m goat`) and the line numbers (`-n`):
 
 ```
 files -m '\.rs$' -x 'filter -n -m goat' -v
@@ -59,8 +55,7 @@ Show all Markdown files, except those whose names case-insensitively match
 files -m '\.md$' -i -p goat
 ```
 
-Show all Markdown files regardless of the case of the file extension, except
-those whose names case-insensitively match “goat”:
+Show all Markdown files regardless of the case of the file extension, except those whose names case-insensitively match “goat”:
 
 ```
 files -i -m '\.md$' -p goat

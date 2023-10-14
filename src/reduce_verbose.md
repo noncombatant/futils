@@ -1,7 +1,6 @@
 ## Examples
 
-Given a numbers.txt that contains a number on each line, this will yield the sum
-of those numbers:
+Given a numbers.txt that contains a number on each line, this will yield the sum of those numbers:
 
 ```
 reduce -x + numbers.txt

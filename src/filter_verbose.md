@@ -17,8 +17,7 @@ To show only the lines in the file that contain goats:
 filter -m goat farm-animals.txt
 ```
 
-As above, but search case-insensitively: this will match “Goats”, “goat”,
-“GOATS”, and so on:
+As above, but search case-insensitively: this will match “Goats”, “goat”, “GOATS”, and so on:
 
 ```
 filter -m '(?i)goat' farm-animals.txt
@@ -30,23 +29,20 @@ Equivalently:
 filter -i -m goat farm-animals.txt
 ```
 
-It’s unclear why anyone would want only *non*-goat animals, but this is how to
-do that:
+It’s unclear why anyone would want only *non*-goat animals, but this is how to do that:
 
 ```
 filter -p '(?i)goat' farm-animals.txt
 filter -i -p goat farm-animals.txt
 ```
 
-Show records that match “moss”, but exclude billy goats, regardless of how
-“billy” is capitalized:
+Show records that match “moss”, but exclude billy goats, regardless of how “billy” is capitalized:
 
 ```
 filter -m moss -i -p billy farm-animals.txt
 ```
 
-To print a list of the animals for which the (hypothetical) program
-`check-if-hungry` succeeds:
+To print a list of the animals for which the (hypothetical) program `check-if-hungry` succeeds:
 
 ```
 filter -x check-if-hungry farm-animals.txt

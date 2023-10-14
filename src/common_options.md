@@ -7,6 +7,5 @@
 * `-R`: Set the output record delimiter.
 * `-r`: Set the input record delimiter, a regular expression.
 
-Regular expressions use [the Rust regex library
-syntax](https://docs.rs/regex/latest/regex/).
+Regular expressions use [the Rust regex library syntax](https://docs.rs/regex/latest/regex/).
 

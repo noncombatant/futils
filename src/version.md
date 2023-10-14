@@ -1,7 +1,6 @@
 # `version` — show program version and build information
 
-Prints the version of `futils`, metadata, and build-time configuration
-information.
+Prints the version of `futils`, metadata, and build-time configuration information.
 
 ## Usage
 

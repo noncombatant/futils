@@ -1,7 +1,6 @@
 ## Examples
 
-Print the version metadata keys and values separated by a colon and a space,
-instead of a tab as usual:
+Print the version metadata keys and values separated by a colon and a space, instead of a tab as usual:
 
 ```
 futils version -F': '

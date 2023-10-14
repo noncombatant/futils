@@ -7,8 +7,7 @@ status | vd
 status -J | vd -f json
 ```
 
-`status` prints the most-often-interesting fields first. To print only the first
-few fields, try this:
+`status` prints the most-often-interesting fields first. To print only the first few fields, try this:
 
 ```
 status | fields -c 1 -c 2 -c 0
