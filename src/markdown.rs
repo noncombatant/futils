@@ -1,7 +1,7 @@
 // Copyright 2023 by [Chris Palmer](https://noncombatant.org)
 // SPDX-License-Identifier: Apache-2.0
 
-use crate::shell::{parse_options, ShellResult, STDIN_PATHNAME, FileOpener};
+use crate::shell::{parse_options, FileOpener, ShellResult, STDIN_PATHNAME};
 use crate::util::help;
 
 use termimad::{Alignment, MadSkin};
@@ -26,7 +26,7 @@ pub(crate) fn markdown_main(arguments: &[String]) -> ShellResult {
                 match read.read_to_string(&mut buffer) {
                     Ok(_) => {
                         println!("{}", skin.text(&buffer, None))
-                    },
+                    }
                     Err(e) => {
                         let p = file.pathname.unwrap_or(&STDIN_PATHNAME);
                         eprintln!("{}: {}", p, e);
