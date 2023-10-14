@@ -20,6 +20,7 @@ The suite currently consists of the following programs:
 * `filter`
 * `help`
 * `map`
+* `markdown`
 * `records`
 * `reduce`
 * `status`
