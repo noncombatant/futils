@@ -54,22 +54,22 @@ fn terminal_text<'a>(s: &'a str, stream: Stream, skin: &'a MadSkin) -> TerminalT
 /// Prints `message` and `exit`s with `status`. If `status` is 0, prints
 /// `message` to `stdout`, otherwise to `stderr`.
 pub(crate) fn help(status: i32, message: &str, common: bool, verbose: Option<&str>) {
-    let mut md = MadSkin::default();
-    md.headers[0].align = Alignment::Left;
+    let mut skin = MadSkin::default();
+    skin.headers[0].align = Alignment::Left;
 
     if status == 0 {
-        println!("{}", terminal_text(message, Stream::Stdout, &md));
+        println!("{}", terminal_text(message, Stream::Stdout, &skin));
         if common {
             print!(
                 "{}",
-                terminal_text(include_str!("common_options.md"), Stream::Stdout, &md)
+                terminal_text(include_str!("common_options.md"), Stream::Stdout, &skin)
             );
         }
         if let Some(v) = verbose {
-            print!("{}", terminal_text(v, Stream::Stdout, &md));
+            print!("{}", terminal_text(v, Stream::Stdout, &skin));
         }
     } else {
-        eprintln!("{}", terminal_text(message, Stream::Stderr, &md));
+        eprintln!("{}", terminal_text(message, Stream::Stderr, &skin));
     }
     exit(status);
 }
