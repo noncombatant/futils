@@ -48,7 +48,10 @@ fn format_permissions(mode: os::Mode) -> String {
                 bytes[1] = b'w';
             }
             if mode.contains(Mode::S_IXUSR) {
-                bytes[2] = b'x';
+                bytes[2] = b'x'
+            }
+            if mode.contains(Mode::S_ISUID) {
+                bytes[2] = b'S'
             }
             if mode.contains(Mode::S_IRGRP) {
                 bytes[3] = b'r';
@@ -57,7 +60,10 @@ fn format_permissions(mode: os::Mode) -> String {
                 bytes[4] = b'w';
             }
             if mode.contains(Mode::S_IXGRP) {
-                bytes[5] = b'x';
+                bytes[5] = b'x'
+            }
+            if mode.contains(Mode::S_ISGID) {
+                bytes[5] = b'S'
             }
             if mode.contains(Mode::S_IROTH) {
                 bytes[6] = b'r';
@@ -66,7 +72,11 @@ fn format_permissions(mode: os::Mode) -> String {
                 bytes[7] = b'w';
             }
             if mode.contains(Mode::S_IXOTH) {
-                bytes[8] = b'x';
+                bytes[8] = if mode.contains(Mode::S_ISVTX) {
+                    b'T'
+                } else {
+                    b'x'
+                }
             }
             String::from_utf8(bytes).unwrap()
         }
@@ -76,7 +86,7 @@ fn format_permissions(mode: os::Mode) -> String {
 
 fn format_type(mode: os::Mode) -> String {
     // Darwin's `stat`(2) says:
-    // #define S_IFMT 0170000           /* type of file */
+    // #define        S_IFMT   0170000  /* type of file */
     // #define        S_IFIFO  0010000  /* named pipe (fifo) */
     // #define        S_IFCHR  0020000  /* character special */
     // #define        S_IFDIR  0040000  /* directory */
@@ -112,22 +122,32 @@ fn format_type(mode: os::Mode) -> String {
     static S_ISUID: u16 = 0o0004000;
     static S_ISGID: u16 = 0o0002000;
 
+    // From ls(1):
+    //
+    // -F    Display a slash (‘/’) immediately after each pathname that is a
+    //       directory, an asterisk (‘*’) after each that is executable, an at
+    //       sign (‘@’) after each symbolic link, an equals sign (‘=’) after
+    //       each socket, a percent sign (‘%’) after each whiteout, and a
+    //       vertical bar (‘|’) after each that is a FIFO.
+    //
+    // TODO: The setuid/et c. bit checks aren't working.
+
     let permissions = get_permissions(mode);
     let mode = mode & S_IFMT as os::Mode;
     let r = if S_ISUID as os::Mode == mode & S_ISUID as os::Mode
         || S_ISGID as os::Mode == mode & S_ISGID as os::Mode
     {
-        "💣"
+        "!"
     } else if S_IFIFO as os::Mode == mode & S_IFIFO as os::Mode {
-        "🚰"
+        "|"
     } else if S_IFLNK as os::Mode == mode & S_IFLNK as os::Mode {
-        "→"
-    } else if S_IFBLK as os::Mode == mode & S_IFBLK as os::Mode
-        || S_IFCHR as os::Mode == mode & S_IFCHR as os::Mode
-    {
-        "🐧"
+        "@"
+    } else if S_IFBLK as os::Mode == mode & S_IFBLK as os::Mode {
+        "b"
+    } else if S_IFCHR as os::Mode == mode & S_IFCHR as os::Mode {
+        "c"
     } else if S_IFDIR as os::Mode == mode & S_IFDIR as os::Mode {
-        "📁"
+        "d"
     } else if S_IFREG as os::Mode == mode & S_IFREG as os::Mode {
         match permissions {
             Some(mode) => {
@@ -135,17 +155,17 @@ fn format_type(mode: os::Mode) -> String {
                     || mode.contains(Mode::S_IXGRP)
                     || mode.contains(Mode::S_IXOTH)
                 {
-                    "⚡️"
+                    "*"
                 } else {
-                    "📝"
+                    " "
                 }
             }
-            None => " ",
+            None => "?",
         }
     } else if S_IFSOCK as os::Mode == mode & S_IFSOCK as os::Mode {
-        "🧦"
+        "="
     } else {
-        "⁉️"
+        "?"
     };
     r.to_string()
 }
@@ -199,7 +219,6 @@ impl<'a> os::Status<'a> {
         output.write_all(self.modified_time.as_bytes())?;
         output.write_all(field_delimiter)?;
         output.write_all(self.name.as_bytes())?;
-        output.write_all(field_delimiter)?;
         Ok(())
     }
 
