@@ -6,6 +6,7 @@
 * `-j`: Parse the input as JSON.
 * `-R`: Set the output record delimiter.
 * `-r`: Set the input record delimiter, a regular expression.
+* `-v`: Print verbose output.
 
 Regular expressions use [the Rust regex library syntax](https://docs.rs/regex/latest/regex/).
 
