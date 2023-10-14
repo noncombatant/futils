@@ -2,6 +2,7 @@
 
 * `-F`: Set the output field delimiter.
 * `-f`: Set the input field delimiter, a regular expression.
+* `-h`: Print the help page.
 * `-J`: Output JSON format.
 * `-j`: Parse the input as JSON.
 * `-R`: Set the output record delimiter.
