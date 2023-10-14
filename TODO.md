@@ -37,7 +37,8 @@ Consider adding an option to force Markdown formatting on/off.
 For `filter`, `fields`, and `records`, add an option to turn printing the input
 pathname on/off.
 
-Honor `MANCOLOR` as well as `MANWIDTH`.
+Honor `MANCOLOR` as well as `MANWIDTH`. Document them in the main help and in
+`markdown` help.
 
 Organize everything into chained iterators: `StreamSplitter`; but then also
 `Matcher`, `Enumerator`, `PathnamePrefixer`, ... Then, each program should
