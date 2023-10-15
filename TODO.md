@@ -2,8 +2,7 @@
 
 More programs: `join` (like `join`(1)). A `trash` program that puts things in a
 trashcan, for 2-phase delete? Hard to do safely and correctly, and therefore
-fun? A Markdown printing function and program, like `glow`, and use it when
-printing all help messages.
+fun?
 
 Completeness: Unit and integration tests for everything. Rustdoc for all
 top-level and `pub` identifiers.
@@ -30,9 +29,7 @@ to the command, as opposed to `map`, which treats the whole record as a single
 argument.
 
 Make a mode for `map` such that, if there is no `-x`, treat the arguments as a
-command.
-
-Consider adding an option to force Markdown formatting on/off.
+command. Possibly: `mapx`, which always reads from `stdin`.
 
 For `filter`, `fields`, and `records`, add an option to turn printing the input
 pathname on/off.
