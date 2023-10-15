@@ -307,7 +307,7 @@ dependencies = [
  "itertools",
  "libc",
  "locale",
- "nix",
+ "nix 0.26.2",
  "once_cell",
  "regex",
  "rustc_lexer",
@@ -316,6 +316,7 @@ dependencies = [
  "shell-words",
  "tempfile",
  "termimad",
+ "terminal-light",
  "users",
  "walkdir",
 ]
@@ -466,6 +467,15 @@ checksum = "f665ee40bc4a3c5590afb1e9677db74a508659dfd71e126420da8274909a0167"
 
 [[package]]
 name = "memoffset"
+version = "0.6.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5aa361d4faea93603064a027415f07bd8e1d5c88c9fbf68bf56a285428fd79ce"
+dependencies = [
+ "autocfg",
+]
+
+[[package]]
+name = "memoffset"
 version = "0.7.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5de893c32cde5f383baa4c04c5d6dbdd735cfd4a794b0debdb2bb1b421da5ff4"
@@ -501,6 +511,19 @@ dependencies = [
  "log",
  "wasi 0.11.0+wasi-snapshot-preview1",
  "windows-sys",
+]
+
+[[package]]
+name = "nix"
+version = "0.22.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e4916f159ed8e5de0082076562152a76b7a1f64a01fd9d1e0fea002c37624faf"
+dependencies = [
+ "bitflags",
+ "cc",
+ "cfg-if",
+ "libc",
+ "memoffset 0.6.5",
 ]
 
 [[package]]
@@ -854,6 +877,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "terminal-light"
+version = "1.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9077b39afb70f12391e4c1fcf46319999cfc32b45d605a668052bc4d1b4511af"
+dependencies = [
+ "coolor",
+ "crossterm",
+ "thiserror",
+ "xterm-query",
+]
+
+[[package]]
 name = "thiserror"
 version = "1.0.49"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1085,3 +1120,14 @@ name = "windows_x86_64_msvc"
 version = "0.48.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ed94fce61571a4006852b7389a063ab983c02eb1bb37b47f8272ce92d06d9538"
+
+[[package]]
+name = "xterm-query"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ec02abe9c7efbcb010adc0d90bc4a054653477cd4a3eb8eef5a689799c146a13"
+dependencies = [
+ "mio",
+ "nix 0.22.3",
+ "thiserror",
+]

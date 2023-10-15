@@ -2,9 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use crate::shell::{parse_options, FileOpener, ShellResult, STDIN_PATHNAME};
-use crate::util::help;
-
-use termimad::{Alignment, MadSkin};
+use crate::util::{help, get_skin};
 
 pub(crate) const MARKDOWN_HELP: &str = include_str!("markdown.md");
 
@@ -15,9 +13,7 @@ pub(crate) fn markdown_main(arguments: &[String]) -> ShellResult {
         help(0, MARKDOWN_HELP, false, None);
     }
 
-    let mut skin = MadSkin::default();
-    skin.headers[0].align = Alignment::Left;
-
+    let skin = get_skin();
     let mut status = 0;
     for file in FileOpener::new(arguments) {
         match file.read {
