@@ -1,11 +1,11 @@
 ## Common Options
 
-* `-F`: Set the output field delimiter.
+* `-F`: Set the output field delimiter, a string literal.
 * `-f`: Set the input field delimiter, a regular expression.
 * `-h`: Print the help page.
 * `-J`: Output JSON format.
 * `-j`: Parse the input as JSON.
-* `-R`: Set the output record delimiter.
+* `-R`: Set the output record delimiter, a string literal.
 * `-r`: Set the input record delimiter, a regular expression.
 * `-v`: Print verbose output.
 

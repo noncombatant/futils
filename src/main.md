@@ -12,7 +12,7 @@ futils version
 
 ## Details
 
-The suite currently consists of the following programs:
+The suite consists of the following programs:
 
 * `common`
 * `fields`
