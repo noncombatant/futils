@@ -17,7 +17,7 @@ files -hv
 * `-m`: Print pathnames that match the regular expression.
 * `-M`: Print pathnames that refer to files whose modification times match the given `datetime` expression (see below).
 * `-p`: Do not print (i.e. prune) pathnames that match the regular expression.
-* `-t`: Print only pathnames that refer to files that are among the given `types`: **d**irectory, **f**ile, and **s**ymlink. The default value for `types` is “dfs”, i.e. `files` prints pathnames of all 3 types.
+* `-t`: Print only pathnames that refer to files that are among the given `types`: ‘d’irectory, ‘f’ile, and ‘s’ymlink. The default value for `types` is “dfs”, i.e. `files` prints pathnames of all 3 types.
 * `-v`: Print the standard output of commands given with the `-x` option. (By default, `files` only prints their standard error.)
 * `-x`: Print pathnames for which `command` exited with status 0.
 
