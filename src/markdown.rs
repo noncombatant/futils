@@ -1,6 +1,8 @@
 // Copyright 2023 by [Chris Palmer](https://noncombatant.org)
 // SPDX-License-Identifier: Apache-2.0
 
+use atty::Stream;
+
 use crate::shell::{parse_options, FileOpener, ShellResult, STDIN_PATHNAME};
 use crate::util::{help, get_skin};
 
@@ -13,7 +15,7 @@ pub(crate) fn markdown_main(arguments: &[String]) -> ShellResult {
         help(0, MARKDOWN_HELP, false, None);
     }
 
-    let skin = get_skin();
+    let skin = get_skin(Stream::Stdout);
     let mut status = 0;
     for file in FileOpener::new(arguments) {
         match file.read {

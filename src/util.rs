@@ -12,7 +12,6 @@ use std::str::{self, from_utf8, FromStr};
 use atty::Stream;
 use bigdecimal::BigDecimal;
 use bstr::ByteSlice;
-use derive_more::Display;
 use locale::Numeric;
 use rustc_lexer::unescape::unescape_str;
 use serde::Serializer;
@@ -20,12 +19,6 @@ use termimad::{terminal_size, Alignment, FmtText, MadSkin};
 use terminal_light::luma;
 
 use crate::shell::{ShellError, ShellResult};
-
-#[derive(Display)]
-enum TerminalText<'a> {
-    String(&'a str),
-    Formatted(FmtText<'a, 'a>),
-}
 
 // Known bug: https://github.com/Canop/termimad/issues/50
 fn text_width() -> usize {
@@ -40,19 +33,21 @@ fn text_width() -> usize {
     }
 }
 
-fn terminal_text<'a>(s: &'a str, stream: Stream, skin: &'a MadSkin) -> TerminalText<'a> {
-    if atty::is(stream) {
-        TerminalText::Formatted(skin.text(s, Some(text_width())))
-    } else {
-        TerminalText::String(s)
-    }
+fn terminal_text<'a>(s: &'a str, skin: &'a MadSkin) -> FmtText<'a, 'a> {
+    skin.text(s, Some(text_width()))
 }
 
-pub(crate) fn get_skin() -> MadSkin {
-    let mut skin = if luma().map_or(false, |luma| luma > 0.6) {
-        MadSkin::default_light()
+// TODO take stream as ref
+pub(crate) fn get_skin(stream: Stream) -> MadSkin {
+    let man_color = env::var("MANCOLOR").is_ok();
+    let mut skin = if man_color || atty::is(stream) {
+        if luma().map_or(false, |luma| luma > 0.6) {
+            MadSkin::default_light()
+        } else {
+            MadSkin::default_dark()
+        }
     } else {
-        MadSkin::default_dark()
+        MadSkin::no_style()
     };
     skin.headers[0].align = Alignment::Left;
     skin
@@ -61,21 +56,21 @@ pub(crate) fn get_skin() -> MadSkin {
 /// Prints `message` and `exit`s with `status`. If `status` is 0, prints
 /// `message` to `stdout`, otherwise to `stderr`.
 pub(crate) fn help(status: i32, message: &str, common: bool, verbose: Option<&str>) {
-    let skin = get_skin();
+    let skin = get_skin(Stream::Stdout);
 
     if status == 0 {
-        println!("{}", terminal_text(message, Stream::Stdout, &skin));
+        println!("{}", terminal_text(message, &skin));
         if common {
             print!(
                 "{}",
-                terminal_text(include_str!("common_options.md"), Stream::Stdout, &skin)
+                terminal_text(include_str!("common_options.md"), &skin)
             );
         }
         if let Some(v) = verbose {
-            print!("{}", terminal_text(v, Stream::Stdout, &skin));
+            print!("{}", terminal_text(v, &skin));
         }
     } else {
-        eprintln!("{}", terminal_text(message, Stream::Stderr, &skin));
+        eprintln!("{}", terminal_text(message, &skin));
     }
     exit(status);
 }
