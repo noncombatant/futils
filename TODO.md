@@ -28,5 +28,5 @@ Resurrect `apply` and have it treat each record’s fields as distinct arguments
 to the command, as opposed to `map`, which treats the whole record as a single
 argument.
 
-For `filter`, `fields`, and `records`, add an option to turn printing the input
-pathname on/off. Or, have `-n` always print the pathname and the record number?
+For `filter`, `fields`, and `records`, make `-n` always print the pathname and
+the record number, and print neither if `-n` is not present.
