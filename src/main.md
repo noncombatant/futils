@@ -124,6 +124,11 @@ That also works for lexing strings, thankfully, so you can be consistent and use
 files -R '\x00' ... | map -r '\x00' ...
 ```
 
+## Environment Variables
+
+* `MANWIDTH`: `markdown` and `-h` will limit text output to the number of columns given in this variable’s value. If not present, the text width will be the width of the terminal.
+* `MANCOLOR`: `markdown` and `-h` will render Markdown with terminal escape codes if this value is set or if `stdout` is a terminal. Otherwise, they will render Markdown as plain text.
+
 ## See Also
 
 * Classic Unix text processing tools, such as
