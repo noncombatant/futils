@@ -1,6 +1,6 @@
 # `futils` — functional shell utilities
 
-`futils` is a suite of shell utilities that somewhat resemble functional programming primitives and operate on streams.
+`futils` is a suite of shell utilities which somewhat resemble functional programming primitives and which operate on streams.
 
 ## Usage
 
@@ -20,6 +20,7 @@ The suite currently consists of the following programs:
 * `filter`
 * `help`
 * `map`
+* `mapx`
 * `markdown`
 * `records`
 * `reduce`
@@ -35,7 +36,7 @@ futils program -h
 or
 
 ```
-futils help sub-command
+futils help program
 ```
 
 For example, to get help for `map`:
@@ -50,28 +51,33 @@ You can also invoke `futils` utilities directly, for example:
 ```
 map -h
 files -h
+...
 ```
 
 To get verbose help, with more information about options common to all commands, usage examples, and more, use `-v`:
 
 ```
-map -h
-files -h
+map -hv
+files -hv
+...
 ```
 
-The help pages are always marked up in Markdown format. You can pipe them to a Markdown translator or display program:
+The help pages are marked up in Markdown format. `futils` renders the Markdown with terminal escape codes when printed to a terminal. By default, if `stdout` is a file or pipe, `futils` prints the text with no formatting. You can set the `MANCOLOR` environment variable to force escape-code rendering:
 
 ```
-records -h | glow -p
-map -h | bat -l md
-fields -h | md-to-html > fields-help.html
+MANCOLOR=yes records -h | less -R
+MANCOLOR=yes fields -h > fields.help
 ```
+
+`futils` will also honor the `MANWIDTH` variable, if set. (See `man`(1) for history.)
+
+TODO: Consider implementing a way to make `futils` print un-rendered Markdown, so that people can process it with some other program.
 
 ## Concepts
 
 Most `futils` programs operate on **streams** of bytes, usually either from files on disk (identified by **pathname**) or from the **standard input** (`stdin`).
 
-Most programs treat the stream of bytes as being composed of **records**, each of which contains 0 or more **fields**. Records and fields are lexically **delimited** by strings, called **delimiters**.
+Most programs treat the stream of bytes as being composed of **records**, each of which contains 0 or more **fields**. Records and fields are lexically **delimited** by regular expressions, called **delimiters**.
 
 When reading a stream, we use regular expressions to describe and scan for the record and field delimiters. (Of course, literal strings also count as regular expressions, if that’s what you need.)
 
@@ -112,7 +118,7 @@ error: backreferences are not supported
 
 Rust’s regular expression library (`regex`) doesn’t follow the same rules as its string lexer (specifically `rustc_lexer::unescape`).
 
-The way to avoid this problem, express the input delimiter as a valid Rust regular expression; in the case of `NUL`, the hexadecimal byte literal `\x00` works:
+To avoid this problem, express the input delimiter as a valid Rust regular expression. In the case of `NUL`, the hexadecimal byte literal `\x00` works:
 
 ```
 files -R '\0' ... | map -r '\x00' ...
@@ -137,4 +143,5 @@ files -R '\x00' ... | map -r '\x00' ...
   * `paste`(1)
   * `colrm`(1)
 * `find`(1)
+* `man`(1)
 * `xargs`(1)
