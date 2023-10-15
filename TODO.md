@@ -29,9 +29,4 @@ to the command, as opposed to `map`, which treats the whole record as a single
 argument.
 
 For `filter`, `fields`, and `records`, add an option to turn printing the input
-pathname on/off.
-
-Organize everything into chained iterators: `StreamSplitter`; but then also
-`Matcher`, `Enumerator`, `PathnamePrefixer`, ... Then, each program should
-mostly become a thin wrapper around the iterators that chains them in the right
-way.
+pathname on/off. Or, have `-n` always print the pathname and the record number?
