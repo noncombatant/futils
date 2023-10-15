@@ -11,6 +11,7 @@ mod fields;
 mod files;
 mod filter;
 mod map;
+mod mapx;
 mod markdown;
 mod records;
 mod reduce;
@@ -30,6 +31,7 @@ use fields::{fields_main, FIELDS_HELP};
 use files::{files_main, FILES_HELP};
 use filter::{filter_main, FILTER_HELP};
 use map::{map_main, MAP_HELP};
+use mapx::{mapx_main, MAPX_HELP};
 use markdown::{markdown_main, MARKDOWN_HELP};
 use records::{records_main, RECORDS_HELP};
 use reduce::{reduce_main, REDUCE_HELP};
@@ -89,6 +91,7 @@ fn main() {
                 "files" => help(0, FILES_HELP, true, None),
                 "filter" => help(0, FILTER_HELP, true, None),
                 "map" => help(0, MAP_HELP, true, None),
+                "mapx" => help(0, MAPX_HELP, true, None),
                 "markdown" => help(0, MARKDOWN_HELP, true, None),
                 "records" => help(0, RECORDS_HELP, true, None),
                 "reduce" => help(0, REDUCE_HELP, true, None),
@@ -105,6 +108,7 @@ fn main() {
         "files" => files_main(&arguments),
         "filter" => filter_main(&arguments),
         "map" => map_main(&arguments),
+        "mapx" => mapx_main(&arguments),
         "markdown" => markdown_main(&arguments),
         "records" => records_main(&arguments),
         "reduce" => reduce_main(&arguments),
