@@ -4,7 +4,7 @@
 use atty::Stream;
 
 use crate::shell::{parse_options, FileOpener, ShellResult, STDIN_PATHNAME};
-use crate::util::{help, get_skin};
+use crate::util::{get_skin, help};
 
 pub(crate) const MARKDOWN_HELP: &str = include_str!("markdown.md");
 
