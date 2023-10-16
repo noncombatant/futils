@@ -17,16 +17,19 @@ pub(crate) const RECORDS_HELP: &str = include_str!("records.md");
 pub(crate) const RECORDS_HELP_VERBOSE: &str = include_str!("records_verbose.md");
 
 #[derive(Serialize)]
-struct EnumeratedRecord {
+struct EnumeratedRecord<'a> {
     n: Option<usize>,
+    pathname: &'a str,
     #[serde(serialize_with = "serialize_str_or_bytes")]
     r: Vec<u8>,
 }
 
-impl EnumeratedRecord {
+impl EnumeratedRecord<'_> {
     fn write_columns(&self, output: &mut dyn Write, options: &Options) -> Result<(), Error> {
         if options.print_empty || !self.r.is_empty() {
             if let Some(n) = self.n {
+                output.write_all(self.pathname.as_bytes())?;
+                output.write_all(&options.output_field_delimiter)?;
                 write!(output, "{:>5}", n + 1)?;
                 output.write_all(&options.output_field_delimiter)?;
             }
@@ -73,6 +76,7 @@ pub(crate) fn records_main(arguments: &[String]) -> ShellResult {
     let mut status = 0;
     let mut stdout = stdout();
     for file in FileOpener::new(arguments) {
+        let pathname = file.pathname.unwrap_or(&STDIN_PATHNAME);
         match file.read {
             Ok(mut read) => {
                 let records = StreamSplitter::new(&mut read, &options.input_record_delimiter)
@@ -108,6 +112,7 @@ pub(crate) fn records_main(arguments: &[String]) -> ShellResult {
                     } else {
                         None
                     },
+                    pathname,
                     r: pair.1,
                 }) {
                     if options.json_output {
@@ -122,8 +127,7 @@ pub(crate) fn records_main(arguments: &[String]) -> ShellResult {
                 }
             }
             Err(e) => {
-                let p = file.pathname.unwrap_or(&STDIN_PATHNAME);
-                eprintln!("{}: {}", p, e);
+                eprintln!("{}: {}", pathname, e);
                 status += 1;
             }
         }

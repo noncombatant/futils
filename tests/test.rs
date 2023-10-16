@@ -51,7 +51,8 @@ impl<'a> TestCase<'a> {
                     let output = lines.join("\n");
                     assert_eq!(self.expected, output);
                 } else {
-                    assert_eq!(self.expected.as_bytes(), output.stdout);
+                    println!("{:#?}", self.arguments);
+                    assert_eq!(self.expected, from_utf8(&output.stdout).unwrap());
                 }
                 assert!(output.stderr.is_empty());
                 assert_eq!(self.expected_status, output.status.code().unwrap());
@@ -202,8 +203,8 @@ whee
         TestCase::new(
             "fields",
             &["-c0", "-c2", "-n", "test-data/columns.txt"],
-            "    1	yeah	hey
-    2	whee	ouch
+            "test-data/columns.txt	    1	yeah	hey
+test-data/columns.txt	    2	whee	ouch
 ",
             false,
             0,
@@ -236,8 +237,8 @@ boing	ouch
         TestCase::new(
             "fields",
             &["-I", "-c-1", "-c-2", "-n", "test-data/columns.txt"],
-            "    1	yeah	wow
-    2	whee	bonk
+            "test-data/columns.txt	    1	yeah	wow
+test-data/columns.txt	    2	whee	bonk
 ",
             false,
             0,
@@ -245,8 +246,8 @@ boing	ouch
         TestCase::new(
             "fields",
             &["-c-1", "-c-2", "-n", "test-data/columns.txt"],
-            "    1	friends	hey
-    2	boing	ouch
+            "test-data/columns.txt	    1	friends	hey
+test-data/columns.txt	    2	boing	ouch
 ",
             false,
             0,
@@ -260,8 +261,8 @@ fn test_filter_basic() {
         TestCase::new(
             "filter",
             &["-m", "(?i)goat", "test-data/farm-animals.txt"],
-            "test-data/farm-animals.txt	1	mountain goat	grass, moss, vegetation
-test-data/farm-animals.txt	4	billy goats	grass, moss, vegetation, tin cans
+            "1	mountain goat	grass, moss, vegetation
+4	billy goats	grass, moss, vegetation, tin cans
 ",
             false,
             0,
@@ -269,8 +270,8 @@ test-data/farm-animals.txt	4	billy goats	grass, moss, vegetation, tin cans
         TestCase::new(
             "filter",
             &["-i", "-m", "goat", "test-data/farm-animals.txt"],
-            "test-data/farm-animals.txt	1	mountain goat	grass, moss, vegetation
-test-data/farm-animals.txt	4	billy goats	grass, moss, vegetation, tin cans
+            "1	mountain goat	grass, moss, vegetation
+4	billy goats	grass, moss, vegetation, tin cans
 ",
             false,
             0,
@@ -363,10 +364,10 @@ fn test_records_basic() {
         TestCase::new(
             "records",
             &["-n", "test-data/farm-animals.txt"],
-            "    1	1	mountain goat	grass, moss, vegetation
-    2	4	billy goats	grass, moss, vegetation, tin cans
-    3	12	sheep	grass, more grass
-    4	1,749	llamas	exclusively human flesh (for some reason)
+            "test-data/farm-animals.txt	    1	1	mountain goat	grass, moss, vegetation
+test-data/farm-animals.txt	    2	4	billy goats	grass, moss, vegetation, tin cans
+test-data/farm-animals.txt	    3	12	sheep	grass, more grass
+test-data/farm-animals.txt	    4	1,749	llamas	exclusively human flesh (for some reason)
 ",
             false,
             0,

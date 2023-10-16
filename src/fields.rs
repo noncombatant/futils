@@ -69,12 +69,14 @@ fn select_fields<'a>(fields: &[&'a [u8]], requested: &[isize], invert: bool) -> 
 #[derive(Serialize)]
 struct EnumeratedRecord<'a> {
     n: Option<usize>,
+    pathname: &'a str,
     fields: Vec<&'a [u8]>,
 }
 
 impl<'a> EnumeratedRecord<'a> {
     fn new(
         n: Option<usize>,
+        pathname: &'a str,
         record: &'a [u8],
         requested_fields: &[isize],
         options: &Options,
@@ -92,12 +94,18 @@ impl<'a> EnumeratedRecord<'a> {
         if !requested_fields.is_empty() {
             fields = select_fields(&fields, requested_fields, options.invert_fields);
         }
-        EnumeratedRecord { n, fields }
+        EnumeratedRecord {
+            n,
+            pathname,
+            fields,
+        }
     }
 
     fn write_columns(&self, output: &mut dyn Write, options: &Options) -> Result<(), Error> {
         if !self.fields.is_empty() {
             if let Some(n) = self.n {
+                output.write_all(self.pathname.as_bytes())?;
+                output.write_all(&options.output_field_delimiter)?;
                 write!(output, "{:>5}", n + 1)?;
                 output.write_all(&options.output_field_delimiter)?;
             }
@@ -127,6 +135,7 @@ impl<'a> EnumeratedRecord<'a> {
 
 fn print_fields(
     reader: &mut dyn Read,
+    pathname: &str,
     options: &Options,
     requested_fields: &[isize],
 ) -> ShellResult {
@@ -136,6 +145,7 @@ fn print_fields(
     {
         let fields = EnumeratedRecord::new(
             if options.enumerate { Some(n) } else { None },
+            pathname,
             &r,
             requested_fields,
             options,
@@ -178,18 +188,17 @@ pub(crate) fn fields_main(arguments: &[String]) -> ShellResult {
 
     let mut status = 0;
     for file in FileOpener::new(arguments) {
+        let pathname = file.pathname.unwrap_or(&STDIN_PATHNAME);
         match file.read {
-            Ok(mut read) => match print_fields(&mut read, &options, &requested_fields) {
+            Ok(mut read) => match print_fields(&mut read, pathname, &options, &requested_fields) {
                 Ok(_) => {}
                 Err(e) => {
-                    let p = file.pathname.unwrap_or(&STDIN_PATHNAME);
-                    eprintln!("{}: {}", p, e);
+                    eprintln!("{}: {}", pathname, e);
                     status += 1;
                 }
             },
             Err(e) => {
-                let p = file.pathname.unwrap_or(&STDIN_PATHNAME);
-                eprintln!("{}: {}", p, e);
+                eprintln!("{}: {}", pathname, e);
                 status += 1;
             }
         }

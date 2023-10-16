@@ -27,6 +27,3 @@ Write a `futils tutorial` that has a more discursive tone and lots of examples.
 Resurrect `apply` and have it treat each record’s fields as distinct arguments
 to the command, as opposed to `map`, which treats the whole record as a single
 argument.
-
-For `filter`, `fields`, and `records`, make `-n` always print the pathname and
-the record number, and print neither if `-n` is not present.

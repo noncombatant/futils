@@ -13,5 +13,5 @@ fields -hv
 
 * `-c`: Select the `field`(s). This option can be given multiple times, and fields will be output in the order given on the command line. Field numbering starts from 0. Negative field indices count from the end starting at -1; i.e. `-c-1` prints the last field of each record. If no `-c` options are given, `fields` will print all fields.
 * `-I`: Inverts the behavior of `-c`: selects the fields *not* listed. This option makes no sense without at least 1 `-c` option.
-* `-n`: Prefix each record with a record number.
+* `-n`: Prefix each record with the file’s pathname and a record number.
 * `-s`: Skip leading space characters in records.

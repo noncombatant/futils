@@ -65,9 +65,9 @@ fn print_matches(pathname: &str, splitter: StreamSplitter, options: &Options) ->
             }
         }
 
-        stdout.write_all(pathname.as_bytes())?;
-        stdout.write_all(&options.output_field_delimiter)?;
         if options.enumerate {
+            stdout.write_all(pathname.as_bytes())?;
+            stdout.write_all(&options.output_field_delimiter)?;
             write!(stdout, "{:>5}", n + 1)?;
             stdout.write_all(&options.output_field_delimiter)?;
         }
