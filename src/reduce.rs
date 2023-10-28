@@ -12,9 +12,7 @@ use crate::shell::{
 use crate::stream_splitter::StreamSplitter;
 use crate::util::{help, parse_number};
 
-/// Command line usage help.
 pub(crate) const REDUCE_HELP: &str = include_str!("reduce.md");
-
 pub(crate) const REDUCE_HELP_VERBOSE: &str = include_str!("reduce_verbose.md");
 
 // TODO: Change this program to work on each field in each record, instead of
