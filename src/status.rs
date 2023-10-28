@@ -162,7 +162,7 @@ fn format_type(mode: os::Mode) -> String {
                 {
                     "*"
                 } else {
-                    " "
+                    "-"
                 }
             }
             None => "?",

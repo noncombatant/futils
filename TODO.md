@@ -29,3 +29,14 @@ to the command, as opposed to `map`/`mapx`, which treats the whole record as a
 single argument.
 
 Consider inverting the meaning of `-n`.
+
+It should be possible to do this:
+
+```
+status | (head -n1 && tail -n +2 | sort -k 5)
+```
+
+with `records` in place of `head` and `tail`. I.e. there need to be options for
+skipping ahead.
+
+Maybe there should also be an option to suppress the header.
