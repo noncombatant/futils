@@ -34,7 +34,14 @@ fn format_gid(gid: u32) -> String {
 }
 
 fn get_permissions(mode: os::Mode) -> Option<Mode> {
-    Mode::from_bits(mode & (Mode::S_IRWXU.bits() | Mode::S_IRWXG.bits() | Mode::S_IRWXO.bits()))
+    Mode::from_bits(
+        mode & (Mode::S_IRWXU.bits()
+            | Mode::S_IRWXG.bits()
+            | Mode::S_IRWXO.bits()
+            | Mode::S_ISUID.bits()
+            | Mode::S_ISGID.bits()
+            | Mode::S_ISVTX.bits()),
+    )
 }
 
 fn format_permissions(mode: os::Mode) -> String {
@@ -129,14 +136,12 @@ fn format_type(mode: os::Mode) -> String {
     //       sign (‘@’) after each symbolic link, an equals sign (‘=’) after
     //       each socket, a percent sign (‘%’) after each whiteout, and a
     //       vertical bar (‘|’) after each that is a FIFO.
-    //
-    // TODO: The setuid/et c. bit checks aren't working.
 
     let permissions = get_permissions(mode);
+    let setuid = (mode & S_ISUID as os::Mode) != 0;
+    let setgid = (mode & S_ISGID as os::Mode) != 0;
     let mode = mode & S_IFMT as os::Mode;
-    let r = if S_ISUID as os::Mode == mode & S_ISUID as os::Mode
-        || S_ISGID as os::Mode == mode & S_ISGID as os::Mode
-    {
+    let r = if setuid || setgid {
         "!"
     } else if S_IFIFO as os::Mode == mode & S_IFIFO as os::Mode {
         "|"
