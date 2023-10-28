@@ -17,7 +17,11 @@ pub(crate) struct EnumeratedRecord<'a> {
 }
 
 impl EnumeratedRecord<'_> {
-    pub(crate) fn write_columns(&self, output: &mut dyn Write, options: &Options) -> Result<(), Error> {
+    pub(crate) fn write_columns(
+        &self,
+        output: &mut dyn Write,
+        options: &Options,
+    ) -> Result<(), Error> {
         if options.print_empty || !self.r.is_empty() {
             if let Some(n) = self.n {
                 output.write_all(self.pathname.as_bytes())?;
@@ -48,4 +52,3 @@ impl EnumeratedRecord<'_> {
         Ok(())
     }
 }
-
