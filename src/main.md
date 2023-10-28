@@ -139,9 +139,10 @@ files -R '\x00' ... | map -r '\x00' ...
 
 * Classic Unix text processing tools, such as
   * `awk`(1)
+  * `colrm`(1)
   * `cut`(1)
   * `paste`(1)
-  * `colrm`(1)
+  * `rs`
 * `find`(1)
 * `man`(1)
 * `xargs`(1)
