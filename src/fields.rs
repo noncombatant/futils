@@ -66,6 +66,7 @@ fn select_fields<'a>(fields: &[&'a [u8]], requested: &[isize], invert: bool) -> 
     }
 }
 
+// TODO: Consider folding this into enumerated_record.rs?
 #[derive(Serialize)]
 struct EnumeratedRecord<'a> {
     n: Option<usize>,

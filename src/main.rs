@@ -7,6 +7,7 @@ use std::env;
 use std::process::exit;
 
 mod common;
+mod enumerated_record;
 mod fields;
 mod files;
 mod filter;

@@ -3,59 +3,18 @@
 
 //! The `futils records` command.
 
-use std::io::{stdout, Error, Write};
+use std::io::{stdout, Write};
 
 use atty::Stream;
 use itertools::Either;
-use serde::Serialize;
 
-use crate::shell::{parse_options, FileOpener, Options, ShellResult, STDIN_PATHNAME};
+use crate::enumerated_record::EnumeratedRecord;
+use crate::shell::{parse_options, FileOpener, ShellResult, STDIN_PATHNAME};
 use crate::stream_splitter::StreamSplitter;
-use crate::util::{help, serialize_str_or_bytes};
+use crate::util::help;
 
 pub(crate) const RECORDS_HELP: &str = include_str!("records.md");
 pub(crate) const RECORDS_HELP_VERBOSE: &str = include_str!("records_verbose.md");
-
-#[derive(Serialize)]
-struct EnumeratedRecord<'a> {
-    n: Option<usize>,
-    pathname: &'a str,
-    #[serde(serialize_with = "serialize_str_or_bytes")]
-    r: Vec<u8>,
-}
-
-impl EnumeratedRecord<'_> {
-    fn write_columns(&self, output: &mut dyn Write, options: &Options) -> Result<(), Error> {
-        if options.print_empty || !self.r.is_empty() {
-            if let Some(n) = self.n {
-                output.write_all(self.pathname.as_bytes())?;
-                output.write_all(&options.output_field_delimiter)?;
-                write!(output, "{:>5}", n + 1)?;
-                output.write_all(&options.output_field_delimiter)?;
-            }
-            output.write_all(&self.r)?;
-            output.write_all(&options.output_record_delimiter)?;
-        }
-        Ok(())
-    }
-
-    fn write_json(
-        &self,
-        output: &mut dyn Write,
-        pretty: bool,
-        options: &Options,
-    ) -> Result<(), Error> {
-        if options.print_empty || !self.r.is_empty() {
-            let to_json = if pretty {
-                serde_json::to_writer_pretty
-            } else {
-                serde_json::to_writer
-            };
-            to_json(output, &self)?;
-        }
-        Ok(())
-    }
-}
 
 /// Runs the `records` command on `arguments`.
 pub(crate) fn records_main(arguments: &[String]) -> ShellResult {
