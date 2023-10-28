@@ -25,5 +25,7 @@ Assert that running the command produces the output.
 Write a `futils tutorial` that has a more discursive tone and lots of examples.
 
 Resurrect `apply` and have it treat each record’s fields as distinct arguments
-to the command, as opposed to `map`, which treats the whole record as a single
-argument.
+to the command, as opposed to `map`/`mapx`, which treats the whole record as a
+single argument.
+
+Consider inverting the meaning of `-n`.

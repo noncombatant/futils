@@ -39,7 +39,6 @@ use status::{status_main, STATUS_HELP};
 use util::{file_name, help};
 use version::{version_main, VERSION_HELP};
 
-/// Command line usage help.
 const MAIN_HELP: &str = include_str!("main.md");
 
 fn reset_sigpipe() {

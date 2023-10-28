@@ -37,7 +37,6 @@ fn terminal_text<'a>(s: &'a str, skin: &'a MadSkin) -> FmtText<'a, 'a> {
     skin.text(s, Some(text_width()))
 }
 
-// TODO take stream as ref
 pub(crate) fn get_skin(stream: Stream) -> MadSkin {
     let man_color = env::var("MANCOLOR").is_ok();
     let mut skin = if man_color || atty::is(stream) {
