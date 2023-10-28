@@ -142,7 +142,7 @@ files -R '\x00' ... | map -r '\x00' ...
   * `colrm`(1)
   * `cut`(1)
   * `paste`(1)
-  * `rs`
+  * `rs`(1)
 * `find`(1)
 * `man`(1)
 * `xargs`(1)
