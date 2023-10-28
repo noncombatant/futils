@@ -3,18 +3,18 @@
 
 //! The `futils filter` command.
 
-use itertools::Either;
 use std::io::{stdout, Write};
 
+use atty::Stream;
+use itertools::Either;
+
+use crate::enumerated_record::EnumeratedRecord;
 use crate::shell::{parse_options, FileOpener, Options, ShellResult, STDIN_PATHNAME};
 use crate::stream_splitter::StreamSplitter;
 use crate::util::{help, run_command};
 
 pub(crate) const FILTER_HELP: &str = include_str!("filter.md");
 pub(crate) const FILTER_HELP_VERBOSE: &str = include_str!("filter_verbose.md");
-
-// TODO: Define an `EnumeratedMatch`, like `EnumeratedRecord`, and give it
-// `write_{columns,json}`.
 
 fn print_matches(pathname: &str, splitter: StreamSplitter, options: &Options) -> ShellResult {
     let mut stdout = stdout();
@@ -28,51 +28,62 @@ fn print_matches(pathname: &str, splitter: StreamSplitter, options: &Options) ->
         }),
         None => Either::Left(records),
     };
-    'outer: for (n, r) in records.enumerate() {
-        for re in &options.prune_expressions {
-            if re.is_match(&r) {
-                continue 'outer;
-            }
-            matched = true;
-            if options.limit == Some(0) {
-                break 'outer;
-            }
-        }
-        for re in &options.match_expressions {
-            if !re.is_match(&r) {
-                continue 'outer;
-            }
-            matched = true;
-            if options.limit == Some(0) {
-                break 'outer;
-            }
-        }
-        for command in &options.match_commands {
-            match run_command(command, &[&r], options.verbose) {
-                Ok(status) => {
-                    if status != 0 {
-                        continue 'outer;
-                    }
-                    matched = true;
-                    if options.limit == Some(0) {
-                        break 'outer;
-                    }
+    for er in records
+        .enumerate()
+        .map(|pair| EnumeratedRecord {
+            n: if options.enumerate {
+                Some(pair.0)
+            } else {
+                None
+            },
+            pathname,
+            r: pair.1,
+        })
+        .filter(|er| {
+            for re in &options.prune_expressions {
+                if re.is_match(&er.r) {
+                    return false;
                 }
-                Err(e) => {
-                    eprintln!("{} \"{}\": {}", command, String::from_utf8_lossy(&r), e);
-                    continue 'outer;
+                matched = true;
+                if options.limit == Some(0) {
+                    return false;
                 }
             }
+            for re in &options.match_expressions {
+                if !re.is_match(&er.r) {
+                    return false;
+                }
+                matched = true;
+                if options.limit == Some(0) {
+                    return false;
+                }
+            }
+            for command in &options.match_commands {
+                match run_command(command, &[&er.r], options.verbose) {
+                    Ok(status) => {
+                        if status != 0 {
+                            return false;
+                        }
+                        matched = true;
+                        if options.limit == Some(0) {
+                            return false;
+                        }
+                    }
+                    Err(e) => {
+                        eprintln!("{} \"{}\": {}", command, String::from_utf8_lossy(&er.r), e);
+                        return false;
+                    }
+                }
+            }
+            true
+        })
+    {
+        if options.json_output {
+            er.write_json(&mut stdout, atty::is(Stream::Stdout), options)?;
+            stdout.write_all(b",\n")?;
+        } else {
+            er.write_columns(&mut stdout, options)?;
         }
-
-        if options.enumerate {
-            stdout.write_all(pathname.as_bytes())?;
-            stdout.write_all(&options.output_field_delimiter)?;
-            write!(stdout, "{:>5}", n + 1)?;
-            stdout.write_all(&options.output_field_delimiter)?;
-        }
-        stdout.write_all(&r)?;
-        stdout.write_all(&options.output_record_delimiter)?;
     }
     Ok(if matched { 0 } else { 1 })
 }
