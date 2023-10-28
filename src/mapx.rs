@@ -35,7 +35,6 @@ fn mapx(splitter: StreamSplitter, options: &Options, command: &[String]) -> Shel
     {
         // TODO: This is ugly and allocates.
         let records: Vec<Vec<u8>> = chunk.collect();
-        // TODO: concat iterator with arguments iterator.map(as_bytes).
         let arguments = chain(
             command.iter().skip(1).map(|r| r.as_bytes()),
             records.iter().map(|r| r.as_slice()),
