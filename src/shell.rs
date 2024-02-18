@@ -130,7 +130,7 @@ pub(crate) struct Options {
     pub(crate) match_expressions: Vec<Regex>,
 
     /// `-n`
-    pub(crate) enumerate: bool,
+    pub(crate) no_enumerate: bool,
 
     /// `-P`
     pub(crate) parallel: bool,
@@ -193,7 +193,7 @@ impl Options {
             limit: None,
             mtime_expressions: Vec::new(),
             match_expressions: Vec::new(),
-            enumerate: false,
+            no_enumerate: false,
             parallel: false,
             prune_expressions: Vec::new(),
             output_record_delimiter: Vec::from(DEFAULT_OUTPUT_RECORD_DELIMITER),
@@ -240,7 +240,7 @@ pub(crate) fn parse_options(arguments: &[String]) -> Result<(Options, &[String])
                 Opt('l', Some(s)) => options.limit = Some(str::parse::<isize>(&s)?),
                 Opt('M', Some(s)) => options.mtime_expressions.push(Time::new(&s)?),
                 Opt('m', Some(s)) => options.match_expressions.push(new_regex(&s, &options)?),
-                Opt('n', None) => options.enumerate = true,
+                Opt('n', None) => options.no_enumerate = true,
                 Opt('P', None) => options.parallel = true,
                 Opt('p', Some(s)) => options.prune_expressions.push(new_regex(&s, &options)?),
                 Opt('R', Some(s)) => {

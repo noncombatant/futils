@@ -15,7 +15,7 @@ filter -hv
 * `-l`: Limit the number of records printed.
   * If `limit` is <= 0, `filter` prints nothing and exits with status 0 if the input contained a matching record, and 1 otherwise.
 * `-m`: Print records that match the regular expression.
-* `-n`: Prefix each record with the file’s pathname and a record number.
+* `-n`: Do not prefix each record with the file’s pathname and a record number.
 * `-p`: Do not print (i.e. prune) records that match the regular expression.
 * `-v`: Print the standard output of commands given with the `-x` option. (By default, `filter` only prints their standard error.)
 * `-x`: Print records for which `command` exited with status 0.

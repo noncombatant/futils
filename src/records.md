@@ -11,4 +11,4 @@ records -hv
 
 * `-e`: Print empty records, too.
 * `-l`: Limit the number of records printed. If `limit` is < 0, the limit is counted back from the last record in the input.
-* `-n`: Prefix each record with the file’s pathname and a record number.
+* `-n`: Do not prefix each record with the file’s pathname and a record number.

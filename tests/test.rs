@@ -194,8 +194,8 @@ fn test_fields_basic() {
         TestCase::new(
             "fields",
             &["-c0", "test-data/columns.txt"],
-            "yeah
-whee
+            "test-data/columns.txt	    1	yeah
+test-data/columns.txt	    2	whee
 ",
             false,
             0,
@@ -203,15 +203,15 @@ whee
         TestCase::new(
             "fields",
             &["-c0", "-c2", "-n", "test-data/columns.txt"],
-            "test-data/columns.txt	    1	yeah	hey
-test-data/columns.txt	    2	whee	ouch
+            "yeah	hey
+whee	ouch
 ",
             false,
             0,
         ),
         TestCase::new(
             "fields",
-            &["-RX", "-FY", "test-data/columns.txt"],
+            &["-RX", "-FY", "-n", "test-data/columns.txt"],
             "yeahYwowYheyYfriendsXwheeYbonkYouchYboingX",
             false,
             0,
@@ -219,15 +219,15 @@ test-data/columns.txt	    2	whee	ouch
         TestCase::new(
             "fields",
             &["-I", "-c1", "test-data/columns.txt"],
-            "yeah	hey	friends
-whee	ouch	boing
+            "test-data/columns.txt	    1	yeah	hey	friends
+test-data/columns.txt	    2	whee	ouch	boing
 ",
             false,
             0,
         ),
         TestCase::new(
             "fields",
-            &["-c-1", "-c-2", "test-data/columns.txt"],
+            &["-c-1", "-c-2", "-n", "test-data/columns.txt"],
             "friends	hey
 boing	ouch
 ",
@@ -236,7 +236,7 @@ boing	ouch
         ),
         TestCase::new(
             "fields",
-            &["-I", "-c-1", "-c-2", "-n", "test-data/columns.txt"],
+            &["-I", "-c-1", "-c-2", "test-data/columns.txt"],
             "test-data/columns.txt	    1	yeah	wow
 test-data/columns.txt	    2	whee	bonk
 ",
@@ -245,7 +245,7 @@ test-data/columns.txt	    2	whee	bonk
         ),
         TestCase::new(
             "fields",
-            &["-c-1", "-c-2", "-n", "test-data/columns.txt"],
+            &["-c-1", "-c-2", "test-data/columns.txt"],
             "test-data/columns.txt	    1	friends	hey
 test-data/columns.txt	    2	boing	ouch
 ",
@@ -260,7 +260,7 @@ fn test_filter_basic() {
     run_tests(&[
         TestCase::new(
             "filter",
-            &["-m", "(?i)goat", "test-data/farm-animals.txt"],
+            &["-nm", "(?i)goat", "test-data/farm-animals.txt"],
             "1	mountain goat	grass, moss, vegetation
 4	billy goats	grass, moss, vegetation, tin cans
 ",
@@ -270,15 +270,6 @@ fn test_filter_basic() {
         TestCase::new(
             "filter",
             &["-i", "-m", "goat", "test-data/farm-animals.txt"],
-            "1	mountain goat	grass, moss, vegetation
-4	billy goats	grass, moss, vegetation, tin cans
-",
-            false,
-            0,
-        ),
-        TestCase::new(
-            "filter",
-            &["-n", "-m", "(?i)goat", "test-data/farm-animals.txt"],
             "test-data/farm-animals.txt	    1	1	mountain goat	grass, moss, vegetation
 test-data/farm-animals.txt	    2	4	billy goats	grass, moss, vegetation, tin cans
 ",
@@ -287,7 +278,16 @@ test-data/farm-animals.txt	    2	4	billy goats	grass, moss, vegetation, tin cans
         ),
         TestCase::new(
             "filter",
-            &["-n", "-p", "(?i)goat", "test-data/farm-animals.txt"],
+            &["-n", "-m", "(?i)goat", "test-data/farm-animals.txt"],
+            "1	mountain goat	grass, moss, vegetation
+4	billy goats	grass, moss, vegetation, tin cans
+",
+            false,
+            0,
+        ),
+        TestCase::new(
+            "filter",
+            &["-p", "(?i)goat", "test-data/farm-animals.txt"],
             "test-data/farm-animals.txt	    3	12	sheep	grass, more grass
 test-data/farm-animals.txt	    4	1,749	llamas	exclusively human flesh (for some reason)
 ",
@@ -297,8 +297,8 @@ test-data/farm-animals.txt	    4	1,749	llamas	exclusively human flesh (for some 
         TestCase::new(
             "filter",
             &["-n", "-i", "-p", "goat", "test-data/farm-animals.txt"],
-            "test-data/farm-animals.txt	    3	12	sheep	grass, more grass
-test-data/farm-animals.txt	    4	1,749	llamas	exclusively human flesh (for some reason)
+            "12	sheep	grass, more grass
+1,749	llamas	exclusively human flesh (for some reason)
 ",
             false,
             0,
@@ -352,7 +352,7 @@ fn test_records_basic() {
     run_tests(&[
         TestCase::new(
             "records",
-            &["test-data/farm-animals.txt"],
+            &["-n", "test-data/farm-animals.txt"],
             "1	mountain goat	grass, moss, vegetation
 4	billy goats	grass, moss, vegetation, tin cans
 12	sheep	grass, more grass
@@ -363,7 +363,7 @@ fn test_records_basic() {
         ),
         TestCase::new(
             "records",
-            &["-n", "test-data/farm-animals.txt"],
+            &["test-data/farm-animals.txt"],
             "test-data/farm-animals.txt	    1	1	mountain goat	grass, moss, vegetation
 test-data/farm-animals.txt	    2	4	billy goats	grass, moss, vegetation, tin cans
 test-data/farm-animals.txt	    3	12	sheep	grass, more grass
@@ -375,8 +375,8 @@ test-data/farm-animals.txt	    4	1,749	llamas	exclusively human flesh (for some 
         TestCase::new(
             "records",
             &["-l", "2", "test-data/farm-animals.txt"],
-            "1	mountain goat	grass, moss, vegetation
-4	billy goats	grass, moss, vegetation, tin cans
+            "test-data/farm-animals.txt	    1	1	mountain goat	grass, moss, vegetation
+test-data/farm-animals.txt	    2	4	billy goats	grass, moss, vegetation, tin cans
 ",
             false,
             0,

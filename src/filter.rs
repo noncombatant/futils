@@ -31,10 +31,10 @@ fn print_matches(pathname: &str, splitter: StreamSplitter, options: &Options) ->
     for er in records
         .enumerate()
         .map(|pair| EnumeratedRecord {
-            n: if options.enumerate {
-                Some(pair.0)
-            } else {
+            n: if options.no_enumerate {
                 None
+            } else {
+                Some(pair.0)
             },
             pathname,
             r: pair.1,

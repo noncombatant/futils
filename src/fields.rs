@@ -145,7 +145,7 @@ fn print_fields(
         .enumerate()
     {
         let fields = EnumeratedRecord::new(
-            if options.enumerate { Some(n) } else { None },
+            if options.no_enumerate { None } else { Some(n) },
             pathname,
             &r,
             requested_fields,

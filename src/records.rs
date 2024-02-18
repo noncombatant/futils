@@ -66,10 +66,10 @@ pub(crate) fn records_main(arguments: &[String]) -> ShellResult {
                     println!("[");
                 }
                 for er in records.enumerate().map(|pair| EnumeratedRecord {
-                    n: if options.enumerate {
-                        Some(pair.0)
-                    } else {
+                    n: if options.no_enumerate {
                         None
+                    } else {
+                        Some(pair.0)
                     },
                     pathname,
                     r: pair.1,
