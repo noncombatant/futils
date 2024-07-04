@@ -9,6 +9,7 @@ use std::process::exit;
 mod common;
 mod enumerated_record;
 mod fields;
+mod fileid;
 mod files;
 mod filter;
 mod map;
@@ -29,6 +30,7 @@ mod os;
 
 use common::{common_main, COMMON_HELP};
 use fields::{fields_main, FIELDS_HELP};
+use fileid::{fileid_main, FILEID_HELP};
 use files::{files_main, FILES_HELP};
 use filter::{filter_main, FILTER_HELP};
 use map::{map_main, MAP_HELP};
@@ -88,6 +90,7 @@ fn main() {
             match arguments[1].as_str() {
                 "common" => help(0, COMMON_HELP, true, None),
                 "fields" => help(0, FIELDS_HELP, true, None),
+                "fileid" => help(0, FILEID_HELP, true, None),
                 "files" => help(0, FILES_HELP, true, None),
                 "filter" => help(0, FILTER_HELP, true, None),
                 "map" => help(0, MAP_HELP, true, None),
@@ -105,6 +108,7 @@ fn main() {
     match match program_name {
         "common" => common_main(&arguments),
         "fields" => fields_main(&arguments),
+        "fileid" => fileid_main(&arguments),
         "files" => files_main(&arguments),
         "filter" => filter_main(&arguments),
         "map" => map_main(&arguments),

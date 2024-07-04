@@ -14,6 +14,7 @@ categories = ["command-line-utilities"]
 [dependencies]
 
 atty = "*"
+base64ct = { version = "*", features = ["alloc"] }
 bigdecimal = "*"
 bstr = "*"
 chrono = "*"
@@ -28,6 +29,7 @@ regex = "*"
 rustc_lexer = "*"
 serde = { version = "*", features = ["derive"] }
 serde_json = "*"
+sha2 = "*"
 shell-words = "*"
 tempfile = "*"
 termimad = "*"

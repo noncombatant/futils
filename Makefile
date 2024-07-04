@@ -16,6 +16,7 @@ install:
 	strip $(INSTALL_ROOT)/bin/futils
 	ln -f $(INSTALL_ROOT)/bin/futils $(INSTALL_ROOT)/bin/common
 	ln -f $(INSTALL_ROOT)/bin/futils $(INSTALL_ROOT)/bin/fields
+	ln -f $(INSTALL_ROOT)/bin/futils $(INSTALL_ROOT)/bin/fileid
 	ln -f $(INSTALL_ROOT)/bin/futils $(INSTALL_ROOT)/bin/files
 	ln -f $(INSTALL_ROOT)/bin/futils $(INSTALL_ROOT)/bin/filter
 	ln -f $(INSTALL_ROOT)/bin/futils $(INSTALL_ROOT)/bin/map

@@ -40,3 +40,11 @@ with `records` in place of `head` and `tail`. I.e. there need to be options for
 skipping ahead.
 
 Maybe there should also be an option to suppress the header.
+
+Make `write_columns` and `write_json` into a trait `StructuredWrite`, and wrap
+them into a `write` function of that trait that takes `&Options` and picks the
+right one.
+
+Overall pattern: “walk and awk”
+
+Make `pretty: bool` be a member of `Options` and a command-line switch.

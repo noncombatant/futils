@@ -6,7 +6,7 @@
 
 use std::fmt::{Debug, Display};
 use std::fs::File;
-use std::io::{self, stdin, Read};
+use std::io::{self, stdin, Error, Read, Write};
 use std::num::ParseIntError;
 use std::str;
 
@@ -249,7 +249,7 @@ pub(crate) fn parse_options(arguments: &[String]) -> Result<(Options, &[String])
                 }
                 Opt('r', Some(s)) => options.input_record_delimiter = new_regex(&s, &options)?,
                 Opt('s', None) => options.skip = true,
-                Opt('t', Some(s)) => options.file_types = s.clone(),
+                Opt('t', Some(s)) => options.file_types.clone_from(&s),
                 Opt('v', None) => options.verbose = true,
                 Opt('x', Some(s)) => options.match_commands.push(s.clone()),
                 Opt(_o, _) => return Err(ShellError::Usage(UsageError::new("Unknown option"))),
@@ -309,4 +309,10 @@ impl<'a> Iterator for FileOpener<'a> {
             None
         }
     }
+}
+
+// Ultimately, this should go away and we should use a custom
+// `serde::ser::Serialize` for columnar output.
+pub(crate) trait StructuredWrite {
+    fn write(&self, output: &mut dyn Write, options: &Options) -> Result<(), Error>;
 }
