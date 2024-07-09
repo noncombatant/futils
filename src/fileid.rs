@@ -43,7 +43,6 @@ impl FileID {
         write!(output, "{:>9}", self.size)?;
         output.write_all(&options.output_field_delimiter)?;
         output.write_all(self.pathname.as_bytes())?;
-        output.write_all(&options.output_field_delimiter)?;
         output.write_all(&options.output_record_delimiter)?;
         Ok(())
     }
