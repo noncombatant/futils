@@ -154,19 +154,13 @@ fn format_type(mode: os::Mode) -> String {
     } else if S_IFDIR as os::Mode == mode & S_IFDIR as os::Mode {
         "d"
     } else if S_IFREG as os::Mode == mode & S_IFREG as os::Mode {
-        match permissions {
-            Some(mode) => {
-                if mode.contains(Mode::S_IXUSR)
-                    || mode.contains(Mode::S_IXGRP)
-                    || mode.contains(Mode::S_IXOTH)
-                {
-                    "*"
-                } else {
-                    "-"
-                }
+        permissions.map_or("?", |m| {
+            if m.contains(Mode::S_IXUSR) || m.contains(Mode::S_IXGRP) || m.contains(Mode::S_IXOTH) {
+                "*"
+            } else {
+                "-"
             }
-            None => "?",
-        }
+        })
     } else if S_IFSOCK as os::Mode == mode & S_IFSOCK as os::Mode {
         "="
     } else {
