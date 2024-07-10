@@ -7,7 +7,7 @@
 use std::cmp::Ordering;
 
 use chrono::format::ParseError;
-use chrono::{DateTime, NaiveDate, NaiveDateTime, NaiveTime, Utc};
+use chrono::{DateTime, NaiveDate, NaiveDateTime, NaiveTime};
 use chrono::{Datelike, Local, Timelike};
 
 use crate::shell::{ShellError, UsageError};
@@ -16,9 +16,8 @@ use crate::shell::{ShellError, UsageError};
 /// string representation in the format `%Y-%m-%d %H:%M:%S`. If `utc` cannot be
 /// interpreted for some raisin, returns `utc` `format!`ed as a `String`.
 pub fn format_utc_timestamp(utc: i64) -> String {
-    NaiveDateTime::from_timestamp_opt(utc, 0).map_or(format!("{utc}"), |naive| {
-        let datetime: DateTime<Utc> = DateTime::from_utc(naive, Utc);
-        format!("{}", datetime.format("%Y-%m-%d %H:%M:%S"))
+    DateTime::from_timestamp(utc, 0).map_or(format!("{utc}"), |datetime| {
+        datetime.format("%Y-%m-%d %H:%M:%S").to_string()
     })
 }
 
@@ -52,7 +51,7 @@ impl Time {
         let string = string.trim();
         if string.is_empty() {
             return Ok(Self {
-                date_time: NaiveDateTime::from_timestamp_opt(0, 0).unwrap(),
+                date_time: DateTime::from_timestamp(0, 0).unwrap().naive_utc(),
                 ordering: Ordering::Greater,
             });
         }
@@ -81,14 +80,10 @@ impl Time {
     }
 
     fn from_date_time_string(string: &str, operator: Ordering) -> Result<Self, ParseError> {
-        let date_time = NaiveDateTime::parse_from_str(string, "%Y-%m-%d %H:%M:%S");
-        match date_time {
-            Ok(dt) => Ok(Self {
-                date_time: dt,
-                ordering: operator,
-            }),
-            Err(error) => Err(error),
-        }
+        Ok(Self {
+            date_time: NaiveDateTime::parse_from_str(string, "%Y-%m-%d %H:%M:%S")?,
+            ordering: operator,
+        })
     }
 
     fn from_time_string(string: &str, operator: Ordering) -> Result<Self, ParseError> {

@@ -7,7 +7,7 @@ use std::cmp::Ordering;
 use std::io::{stdout, Write};
 use std::time::SystemTime;
 
-use chrono::NaiveDateTime;
+use chrono::DateTime;
 use walkdir::{DirEntry, WalkDir};
 
 use crate::shell::{parse_options, Options, ShellResult};
@@ -28,8 +28,8 @@ fn compare_times(e: &DirEntry, t: &Time) -> Result<bool, std::io::Error> {
         .duration_since(SystemTime::UNIX_EPOCH)
         .unwrap()
         .as_secs();
-    let modified = NaiveDateTime::from_timestamp_opt(modified.try_into().unwrap(), 0).unwrap();
-    let given = t.date_time;
+    let modified = DateTime::from_timestamp(modified.try_into().unwrap(), 0).unwrap();
+    let given = t.date_time.and_utc();
     Ok(match t.ordering {
         Ordering::Greater => given <= modified,
         Ordering::Less => given >= modified,
