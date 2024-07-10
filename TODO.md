@@ -28,11 +28,9 @@ Resurrect `apply` and have it treat each record’s fields as distinct arguments
 to the command, as opposed to `map`/`mapx`, which treats the whole record as a
 single argument.
 
-Consider inverting the meaning of `-n`.
-
 It should be possible to do this:
 
-```
+```sh
 status | (head -n1 && tail -n +2 | sort -k 5)
 ```
 
