@@ -6,13 +6,14 @@
 use std::cmp::Ordering;
 use std::fs::File;
 use std::io::{stdin, stdout, Write};
+use std::process::exit;
 
 use crate::shell::{parse_options, Options, ShellResult};
 use crate::stream_splitter::StreamSplitter;
-use crate::util::{help, icmp};
+use crate::util::{exit_with_result, help, icmp};
 
-pub(crate) const COMMON_HELP: &str = include_str!("common.md");
-pub(crate) const COMMON_HELP_VERBOSE: &str = include_str!("common_verbose.md");
+pub const COMMON_HELP: &str = include_str!("common.md");
+pub const COMMON_HELP_VERBOSE: &str = include_str!("common_verbose.md");
 
 fn print(column: i8, field: &[u8], options: &Options) -> ShellResult {
     let mut out = stdout();
@@ -31,10 +32,10 @@ fn print(column: i8, field: &[u8], options: &Options) -> ShellResult {
 }
 
 /// Runs the `common` command on `arguments`.
-pub(crate) fn common_main(arguments: &[String]) -> ShellResult {
+pub fn common_main(arguments: &[String]) -> ShellResult {
     let (options, arguments) = parse_options(arguments)?;
     if options.help {
-        help(
+        exit_with_result(help(
             0,
             COMMON_HELP,
             true,
@@ -43,10 +44,13 @@ pub(crate) fn common_main(arguments: &[String]) -> ShellResult {
             } else {
                 None
             },
-        );
+        ));
     }
     if arguments.is_empty() || arguments.len() > 2 {
-        help(-1, COMMON_HELP, false, None);
+        match help(-1, COMMON_HELP, false, None) {
+            Ok(status) => exit(status),
+            Err(_) => exit(-1),
+        }
     }
 
     let mut stdin = stdin();

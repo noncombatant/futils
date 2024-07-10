@@ -11,10 +11,10 @@ use itertools::Either;
 use crate::enumerated_record::EnumeratedRecord;
 use crate::shell::{parse_options, FileOpener, Options, ShellResult, STDIN_PATHNAME};
 use crate::stream_splitter::StreamSplitter;
-use crate::util::{help, run_command};
+use crate::util::{exit_with_result, help, run_command};
 
-pub(crate) const FILTER_HELP: &str = include_str!("filter.md");
-pub(crate) const FILTER_HELP_VERBOSE: &str = include_str!("filter_verbose.md");
+pub const FILTER_HELP: &str = include_str!("filter.md");
+pub const FILTER_HELP_VERBOSE: &str = include_str!("filter_verbose.md");
 
 fn print_matches(pathname: &str, splitter: StreamSplitter, options: &Options) -> ShellResult {
     let mut stdout = stdout();
@@ -69,8 +69,8 @@ fn print_matches(pathname: &str, splitter: StreamSplitter, options: &Options) ->
                             return false;
                         }
                     }
-                    Err(e) => {
-                        eprintln!("{} \"{}\": {}", command, String::from_utf8_lossy(&er.r), e);
+                    Err(error) => {
+                        eprintln!("{command} \"{}\": {error}", String::from_utf8_lossy(&er.r));
                         return false;
                     }
                 }
@@ -89,10 +89,10 @@ fn print_matches(pathname: &str, splitter: StreamSplitter, options: &Options) ->
 }
 
 /// Runs the `filter` command on `arguments`.
-pub(crate) fn filter_main(arguments: &[String]) -> ShellResult {
+pub fn filter_main(arguments: &[String]) -> ShellResult {
     let (options, arguments) = parse_options(arguments)?;
     if options.help {
-        help(
+        exit_with_result(help(
             0,
             FILTER_HELP,
             true,
@@ -101,7 +101,7 @@ pub(crate) fn filter_main(arguments: &[String]) -> ShellResult {
             } else {
                 None
             },
-        );
+        ));
     }
     if options.json_input || options.json_output {
         unimplemented!()
@@ -121,8 +121,8 @@ pub(crate) fn filter_main(arguments: &[String]) -> ShellResult {
                     status += 1;
                 }
             }
-            Err(e) => {
-                eprintln!("{}: {}", pathname, e);
+            Err(error) => {
+                eprintln!("{pathname}: {error}");
                 status += 1;
             }
         }

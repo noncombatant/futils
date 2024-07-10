@@ -3,26 +3,26 @@
 
 use serde::Serialize;
 
-pub(crate) type LinkCount = u64;
-pub(crate) type DeviceNumber = u64;
-pub(crate) type Mode = u32;
-pub(crate) type BlockSize = i64;
+pub type LinkCount = u64;
+pub type DeviceNumber = u64;
+pub type Mode = u32;
+pub type BlockSize = i64;
 
 #[derive(Serialize)]
-pub(crate) struct Status<'a> {
-    pub(crate) name: &'a str,
-    pub(crate) file_type: String,
-    pub(crate) size: i64,
-    pub(crate) modified_time: String,
-    pub(crate) user: String,
-    pub(crate) group: String,
-    pub(crate) permissions: String,
-    pub(crate) links: LinkCount,
-    pub(crate) device: DeviceNumber,
-    pub(crate) inode: u64,
-    pub(crate) accessed_time: String,
-    pub(crate) changed_time: String,
-    pub(crate) mode: Mode,
-    pub(crate) blocks: i64,
-    pub(crate) block_size: BlockSize,
+pub struct Status<'a> {
+    pub name: &'a str,
+    pub file_type: String,
+    pub size: i64,
+    pub modified_time: String,
+    pub user: String,
+    pub group: String,
+    pub permissions: String,
+    pub links: LinkCount,
+    pub device: DeviceNumber,
+    pub inode: u64,
+    pub accessed_time: String,
+    pub changed_time: String,
+    pub mode: Mode,
+    pub blocks: i64,
+    pub block_size: BlockSize,
 }

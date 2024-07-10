@@ -9,19 +9,15 @@ use crate::shell::Options;
 use crate::util::serialize_str_or_bytes;
 
 #[derive(Serialize)]
-pub(crate) struct EnumeratedRecord<'a> {
-    pub(crate) n: Option<usize>,
-    pub(crate) pathname: &'a str,
+pub struct EnumeratedRecord<'a> {
+    pub n: Option<usize>,
+    pub pathname: &'a str,
     #[serde(serialize_with = "serialize_str_or_bytes")]
-    pub(crate) r: Vec<u8>,
+    pub r: Vec<u8>,
 }
 
 impl EnumeratedRecord<'_> {
-    pub(crate) fn write_columns(
-        &self,
-        output: &mut dyn Write,
-        options: &Options,
-    ) -> Result<(), Error> {
+    pub fn write_columns(&self, output: &mut dyn Write, options: &Options) -> Result<(), Error> {
         if options.print_empty || !self.r.is_empty() {
             if let Some(n) = self.n {
                 output.write_all(self.pathname.as_bytes())?;
@@ -35,7 +31,7 @@ impl EnumeratedRecord<'_> {
         Ok(())
     }
 
-    pub(crate) fn write_json(
+    pub fn write_json(
         &self,
         output: &mut dyn Write,
         pretty: bool,

@@ -20,7 +20,6 @@ use terminal_light::luma;
 
 use crate::shell::{ShellError, ShellResult};
 
-// Known bug: https://github.com/Canop/termimad/issues/50
 fn text_width() -> usize {
     let (terminal_width, _) = terminal_size();
     let terminal_width = terminal_width as usize;
@@ -37,7 +36,7 @@ fn terminal_text<'a>(s: &'a str, skin: &'a MadSkin) -> FmtText<'a, 'a> {
     skin.text(s, Some(text_width()))
 }
 
-pub(crate) fn get_skin(stream: Stream) -> MadSkin {
+pub fn get_skin(stream: Stream) -> MadSkin {
     let man_color = env::var("MANCOLOR").is_ok();
     let mut skin = if man_color || atty::is(stream) {
         if luma().map_or(false, |luma| luma > 0.6) {
@@ -52,32 +51,38 @@ pub(crate) fn get_skin(stream: Stream) -> MadSkin {
     skin
 }
 
-/// Prints `message` and `exit`s with `status`. If `status` is 0, prints
-/// `message` to `stdout`, otherwise to `stderr`.
-pub(crate) fn help(status: i32, message: &str, common: bool, verbose: Option<&str>) {
-    let skin = get_skin(Stream::Stdout);
-
-    if status == 0 {
-        println!("{}", terminal_text(message, &skin));
-        if common {
-            print!(
-                "{}",
-                terminal_text(include_str!("common_options.md"), &skin)
-            );
-        }
-        if let Some(v) = verbose {
-            print!("{}", terminal_text(v, &skin));
-        }
+/// Prints `message`, the contents of common_options.md if `common` is true, and
+/// `verbose` if it is present. Prints to the standard output if `status` is 0;
+/// otherwise prints to the standard error. `exit`s with `status`.
+pub fn help(status: i32, message: &str, common: bool, verbose: Option<&str>) -> ShellResult {
+    let mut output = if status == 0 {
+        &mut stdout() as &mut dyn Write
     } else {
-        eprintln!("{}", terminal_text(message, &skin));
+        &mut stderr() as &mut dyn Write
+    };
+    let skin = get_skin(if status == 0 {
+        Stream::Stdout
+    } else {
+        Stream::Stderr
+    });
+    let _ = writeln!(&mut output, "{}", terminal_text(message, &skin));
+    if common {
+        let _ = write!(
+            &mut output,
+            "{}",
+            terminal_text(include_str!("common_options.md"), &skin)
+        );
     }
-    exit(status);
+    if let Some(v) = verbose {
+        let _ = write!(&mut output, "{}", terminal_text(v, &skin));
+    }
+    Ok(status)
 }
 
 /// Runs the shell command `command`, passing it `argument`. If `verbose` is
 /// true, will print any resulting `stdout`. Prints `stderr` unconditionally.
 // TODO: `arguments` should be `&[OsString]`.
-pub(crate) fn run_command(command: &str, arguments: &[&[u8]], verbose: bool) -> ShellResult {
+pub fn run_command(command: &str, arguments: &[&[u8]], verbose: bool) -> ShellResult {
     let words = shell_words::split(command)?;
     let arguments = arguments
         .iter()
@@ -103,7 +108,7 @@ pub(crate) fn run_command(command: &str, arguments: &[&[u8]], verbose: bool) -> 
 /// Lexes `input` according to Rust’s lexical rules for strings, unescaping any
 /// backslash escape sequences. See `rustc_lexer::unescape`. Returns
 /// `ShellError` for easier compatibility with `ShellResult`.
-pub(crate) fn unescape_backslashes(input: &str) -> Result<String, ShellError> {
+pub fn unescape_backslashes(input: &str) -> Result<String, ShellError> {
     let mut result = Ok(String::new());
     // Thanks to Steve Checkoway for help:
     let mut cb = |_, ch| match (&mut result, ch) {
@@ -120,15 +125,15 @@ pub(crate) fn unescape_backslashes(input: &str) -> Result<String, ShellError> {
 
 /// Returns the basename of `pathname`. (Rust calls this `file_name` instead of
 /// `basename`, so we do, too.)
-pub(crate) fn file_name(pathname: &str) -> Option<&str> {
+pub fn file_name(pathname: &str) -> Option<&str> {
     Path::new(pathname).file_name()?.to_str()
 }
 
 /// Parses `value` and returns a `BigDecimal`.
-pub(crate) fn parse_number(value: &[u8]) -> Result<BigDecimal, ShellError> {
+pub fn parse_number(value: &[u8]) -> Result<BigDecimal, ShellError> {
     let separator = match Numeric::load_user_locale() {
         Ok(numeric) => numeric.thousands_sep,
-        Err(_) => "".to_string(),
+        Err(_) => String::new(),
     };
     let value = from_utf8(value)?;
     let value = value.replace(&separator, "");
@@ -136,7 +141,7 @@ pub(crate) fn parse_number(value: &[u8]) -> Result<BigDecimal, ShellError> {
 }
 
 /// Compares case-insensitively, without allocating.
-pub(crate) fn icmp(a: &[u8], b: &[u8]) -> Ordering {
+pub fn icmp(a: &[u8], b: &[u8]) -> Ordering {
     for (a, b) in zip(a.chars(), b.chars()) {
         let o = a.to_lowercase().cmp(b.to_lowercase());
         if o != Ordering::Equal {
@@ -148,13 +153,23 @@ pub(crate) fn icmp(a: &[u8], b: &[u8]) -> Ordering {
 
 /// Serializes `string` as a UTF-8 string if possible, or as an array of bytes
 /// otherwise.
-pub(crate) fn serialize_str_or_bytes<S>(string: &[u8], serializer: S) -> Result<S::Ok, S::Error>
+pub fn serialize_str_or_bytes<S>(string: &[u8], serializer: S) -> Result<S::Ok, S::Error>
 where
     S: Serializer,
 {
     match string.to_str() {
         Ok(s) => serializer.serialize_str(s),
         Err(_) => serializer.serialize_bytes(string.as_bytes()),
+    }
+}
+
+pub fn exit_with_result(result: ShellResult) {
+    match result {
+        Ok(status) => exit(status),
+        Err(error) => {
+            eprint!("{error}");
+            exit(-1)
+        }
     }
 }
 

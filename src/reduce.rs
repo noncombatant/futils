@@ -10,10 +10,10 @@ use crate::shell::{
     parse_options, FileOpener, Options, ShellError, ShellResult, UsageError, STDIN_PATHNAME,
 };
 use crate::stream_splitter::StreamSplitter;
-use crate::util::{help, parse_number};
+use crate::util::{exit_with_result, help, parse_number};
 
-pub(crate) const REDUCE_HELP: &str = include_str!("reduce.md");
-pub(crate) const REDUCE_HELP_VERBOSE: &str = include_str!("reduce_verbose.md");
+pub const REDUCE_HELP: &str = include_str!("reduce.md");
+pub const REDUCE_HELP_VERBOSE: &str = include_str!("reduce_verbose.md");
 
 // TODO: Change this program to work on each field in each record, instead of
 // each record. Or, make that an option. That way, you could sum each column in
@@ -33,7 +33,7 @@ fn apply_command(accumulator: &[u8], command: &str, record: &[u8]) -> Result<Vec
                 "/" => a / b,
                 _ => unreachable!(),
             };
-            Ok(Vec::from(format!("{}", r).as_bytes()))
+            Ok(Vec::from(format!("{r}").as_bytes()))
         }
         _ => {
             // Run `command` with `accumulator` and `record` as its stdin.
@@ -60,8 +60,8 @@ fn reduce(splitter: StreamSplitter, options: &Options) -> ShellResult {
                 Ok(r) => {
                     result = r;
                 }
-                Err(e) => {
-                    eprintln!("{}: {}", from_utf8(&r).unwrap(), e);
+                Err(error) => {
+                    eprintln!("{}: {error}", from_utf8(&r).unwrap());
                     status += 1;
                 }
             }
@@ -73,10 +73,10 @@ fn reduce(splitter: StreamSplitter, options: &Options) -> ShellResult {
 }
 
 /// Runs the `reduce` command on `arguments`.
-pub(crate) fn reduce_main(arguments: &[String]) -> ShellResult {
+pub fn reduce_main(arguments: &[String]) -> ShellResult {
     let (options, arguments) = parse_options(arguments)?;
     if options.help {
-        help(
+        exit_with_result(help(
             0,
             REDUCE_HELP,
             true,
@@ -85,7 +85,7 @@ pub(crate) fn reduce_main(arguments: &[String]) -> ShellResult {
             } else {
                 None
             },
-        );
+        ));
     }
     if options.json_input || options.json_output {
         unimplemented!()
@@ -101,14 +101,14 @@ pub(crate) fn reduce_main(arguments: &[String]) -> ShellResult {
                     &options,
                 ) {
                     Ok(s) => status += s,
-                    Err(e) => {
-                        eprintln!("{}: {}", pathname, e);
+                    Err(error) => {
+                        eprintln!("{pathname}: {error}");
                         status += 1;
                     }
                 }
             }
-            Err(e) => {
-                eprintln!("{}: {}", pathname, e);
+            Err(error) => {
+                eprintln!("{pathname}: {error}");
                 status += 1;
             }
         }

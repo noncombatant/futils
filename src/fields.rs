@@ -13,10 +13,10 @@ use serde::Serialize;
 
 use crate::shell::{parse_options, FileOpener, Options, ShellResult, STDIN_PATHNAME};
 use crate::stream_splitter::StreamSplitter;
-use crate::util::help;
+use crate::util::{exit_with_result, help};
 
-pub(crate) const FIELDS_HELP: &str = include_str!("fields.md");
-pub(crate) const FIELDS_HELP_VERBOSE: &str = include_str!("fields_verbose.md");
+pub const FIELDS_HELP: &str = include_str!("fields.md");
+pub const FIELDS_HELP_VERBOSE: &str = include_str!("fields_verbose.md");
 
 /// Returns the index of the first byte that is not a space character.
 fn first_non_space(record: &[u8]) -> Option<usize> {
@@ -161,10 +161,10 @@ fn print_fields(
 }
 
 /// Runs the `fields` command on `arguments`.
-pub(crate) fn fields_main(arguments: &[String]) -> ShellResult {
+pub fn fields_main(arguments: &[String]) -> ShellResult {
     let (options, arguments) = parse_options(arguments)?;
     if options.help {
-        help(
+        exit_with_result(help(
             0,
             FIELDS_HELP,
             true,
@@ -173,10 +173,10 @@ pub(crate) fn fields_main(arguments: &[String]) -> ShellResult {
             } else {
                 None
             },
-        );
+        ));
     }
     if options.invert_fields && options.fields.is_empty() {
-        help(-1, FIELDS_HELP, false, None);
+        exit_with_result(help(-1, FIELDS_HELP, false, None));
     }
 
     // TODO: To support named fields, use an `enum Field` here with `isize` and
@@ -193,13 +193,13 @@ pub(crate) fn fields_main(arguments: &[String]) -> ShellResult {
         match file.read {
             Ok(mut read) => match print_fields(&mut read, pathname, &options, &requested_fields) {
                 Ok(_) => {}
-                Err(e) => {
-                    eprintln!("{}: {}", pathname, e);
+                Err(error) => {
+                    eprintln!("{pathname}: {error}");
                     status += 1;
                 }
             },
-            Err(e) => {
-                eprintln!("{}: {}", pathname, e);
+            Err(error) => {
+                eprintln!("{pathname}: {error}");
                 status += 1;
             }
         }

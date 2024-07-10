@@ -9,10 +9,10 @@ use itertools::{chain, Itertools};
 
 use crate::shell::{parse_options, Options, ShellResult, STDIN_PATHNAME};
 use crate::stream_splitter::StreamSplitter;
-use crate::util::{help, run_command};
+use crate::util::{exit_with_result, help, run_command};
 
-pub(crate) const MAPX_HELP: &str = include_str!("mapx.md");
-pub(crate) const MAPX_HELP_VERBOSE: &str = include_str!("mapx_verbose.md");
+pub const MAPX_HELP: &str = include_str!("mapx.md");
+pub const MAPX_HELP_VERBOSE: &str = include_str!("mapx_verbose.md");
 
 /// Iterates over `StreamSplitter` and runs each of the `commands` on each
 /// record.
@@ -40,13 +40,13 @@ fn mapx(splitter: StreamSplitter, options: &Options, command: &[String]) -> Shel
             records.iter().map(|r| r.as_slice()),
         );
         match run_command(&command[0], &arguments.collect::<Vec<&[u8]>>(), true) {
-            Ok(s) => {
-                if s != 0 {
+            Ok(run_status) => {
+                if run_status != 0 {
                     status += 1;
                 }
             }
-            Err(e) => {
-                eprintln!("{:#?} ... : {}", command, e);
+            Err(error) => {
+                eprintln!("{command:#?} ... : {error}");
                 status += 1;
             }
         }
@@ -55,10 +55,10 @@ fn mapx(splitter: StreamSplitter, options: &Options, command: &[String]) -> Shel
 }
 
 /// Runs the `mapx` command on `arguments`.
-pub(crate) fn mapx_main(arguments: &[String]) -> ShellResult {
+pub fn mapx_main(arguments: &[String]) -> ShellResult {
     let (options, arguments) = parse_options(arguments)?;
     if options.help {
-        help(
+        exit_with_result(help(
             0,
             MAPX_HELP,
             true,
@@ -67,7 +67,7 @@ pub(crate) fn mapx_main(arguments: &[String]) -> ShellResult {
             } else {
                 None
             },
-        );
+        ));
     }
     if options.json_input || options.json_output {
         unimplemented!()
@@ -79,9 +79,9 @@ pub(crate) fn mapx_main(arguments: &[String]) -> ShellResult {
         &options,
         arguments,
     ) {
-        Ok(s) => status += s,
-        Err(e) => {
-            eprintln!("{:?}: {}", STDIN_PATHNAME, e);
+        Ok(mapx_status) => status += mapx_status,
+        Err(error) => {
+            eprintln!("{STDIN_PATHNAME:?}: {error}");
             status += 1;
         }
     }

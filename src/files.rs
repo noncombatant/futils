@@ -12,10 +12,10 @@ use walkdir::{DirEntry, WalkDir};
 
 use crate::shell::{parse_options, Options, ShellResult};
 use crate::time::Time;
-use crate::util::{help, run_command};
+use crate::util::{exit_with_result, help, run_command};
 
-pub(crate) const FILES_HELP: &str = include_str!("files.md");
-pub(crate) const FILES_HELP_VERBOSE: &str = include_str!("files_verbose.md");
+pub const FILES_HELP: &str = include_str!("files.md");
+pub const FILES_HELP_VERBOSE: &str = include_str!("files_verbose.md");
 
 fn is_hidden(e: &DirEntry) -> bool {
     match e.path().to_str() {
@@ -53,11 +53,11 @@ fn print_matches(pathname: &str, options: &Options) -> ShellResult {
     'outer: loop {
         let entry = match it.next() {
             None => break Ok(status),
-            Some(e) => e,
+            Some(entry) => entry,
         };
         let entry = match entry {
-            Err(e) => {
-                eprintln!("{}", e);
+            Err(error) => {
+                eprintln!("{error}");
                 status += 1;
                 continue;
             }
@@ -140,10 +140,10 @@ fn print_matches(pathname: &str, options: &Options) -> ShellResult {
 }
 
 /// Runs the `files` command on `arguments`.
-pub(crate) fn files_main(arguments: &[String]) -> ShellResult {
+pub fn files_main(arguments: &[String]) -> ShellResult {
     let (options, arguments) = parse_options(arguments)?;
     if options.help {
-        help(
+        exit_with_result(help(
             0,
             FILES_HELP,
             true,
@@ -152,7 +152,7 @@ pub(crate) fn files_main(arguments: &[String]) -> ShellResult {
             } else {
                 None
             },
-        );
+        ));
     }
     if options.json_input || options.json_output {
         unimplemented!()
@@ -163,11 +163,11 @@ pub(crate) fn files_main(arguments: &[String]) -> ShellResult {
         pathnames = arguments.into()
     }
     let mut status = 0;
-    for p in pathnames {
-        match print_matches(&p, &options) {
-            Ok(s) => status += s,
-            Err(e) => {
-                eprintln!("{}: {}", p, e);
+    for pathname in pathnames {
+        match print_matches(&pathname, &options) {
+            Ok(print_status) => status += print_status,
+            Err(error) => {
+                eprintln!("{pathname}: {error}");
                 status += 1;
             }
         }

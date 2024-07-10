@@ -25,7 +25,7 @@ use crate::util::unescape_backslashes;
 /// shell commands, enabling `*_main` to declare they return it and easily use
 /// the `?` operator. We can extend this `enum` arbitrarily, as needed.
 #[derive(Debug, From)]
-pub(crate) enum ShellError {
+pub enum ShellError {
     BigDecimal(ParseBigDecimalError),
     Escape(EscapeError),
     Getopt(getopt::Error),
@@ -42,17 +42,17 @@ pub(crate) enum ShellError {
 impl Display for ShellError {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> Result<(), std::fmt::Error> {
         match self {
-            ShellError::BigDecimal(e) => Display::fmt(e, f),
-            ShellError::Escape(e) => write!(f, "{:?}", e),
-            ShellError::Getopt(e) => Display::fmt(e, f),
-            ShellError::IntParse(e) => Display::fmt(e, f),
-            ShellError::Io(e) => Display::fmt(e, f),
-            ShellError::Json(e) => Display::fmt(e, f),
-            ShellError::Regex(e) => Display::fmt(e, f),
-            ShellError::ShellWords(e) => Display::fmt(e, f),
-            ShellError::TimeParse(e) => Display::fmt(e, f),
-            ShellError::Usage(e) => Display::fmt(e, f),
-            ShellError::Utf8(e) => Display::fmt(e, f),
+            Self::BigDecimal(e) => Display::fmt(e, f),
+            Self::Escape(e) => write!(f, "{e:?}"),
+            Self::Getopt(e) => Display::fmt(e, f),
+            Self::IntParse(e) => Display::fmt(e, f),
+            Self::Io(e) => Display::fmt(e, f),
+            Self::Json(e) => Display::fmt(e, f),
+            Self::Regex(e) => Display::fmt(e, f),
+            Self::ShellWords(e) => Display::fmt(e, f),
+            Self::TimeParse(e) => Display::fmt(e, f),
+            Self::Usage(e) => Display::fmt(e, f),
+            Self::Utf8(e) => Display::fmt(e, f),
         }
     }
 }
@@ -61,14 +61,14 @@ impl std::error::Error for ShellError {}
 
 /// Return this error for invalid invocations of shell commands.
 #[derive(Display, Debug)]
-pub(crate) struct UsageError {
+pub struct UsageError {
     details: String,
 }
 
 impl UsageError {
     /// Return a new `UsageError` from `details`.
-    pub(crate) fn new(details: &str) -> UsageError {
-        UsageError {
+    pub fn new(details: &str) -> Self {
+        Self {
             details: details.to_string(),
         }
     }
@@ -77,84 +77,84 @@ impl UsageError {
 /// The various `*_main` functions return this type. `main` catches it and
 /// `exit`s with the given `i32` status code. If there is a `ShellError`, `main`
 /// will print it to `stderr` and `exit(-1)`.
-pub(crate) type ShellResult = Result<i32, ShellError>;
+pub type ShellResult = Result<i32, ShellError>;
 
 /// The default list of command line flags. See `Options`, below.
-pub(crate) const DEFAULT_OPTION_SPEC: &str = "ad:c:eF:f:hIiJjl:M:m:nP:p:R:r:st:vx:";
+pub const DEFAULT_OPTION_SPEC: &str = "ad:c:eF:f:hIiJjl:M:m:nP:p:R:r:st:vx:";
 
 /// These are the standard command line options for `futils` programs.
 ///
 /// Not all programs use all options. Some programs may not use this option
 /// spec, depending on their needs.
-pub(crate) struct Options {
+pub struct Options {
     /// `-a`
-    pub(crate) show_all: bool,
+    pub show_all: bool,
 
     /// `-c` (“column”, “cut”)
-    pub(crate) fields: Vec<String>,
+    pub fields: Vec<String>,
 
     /// `-d`
-    pub(crate) depth: usize,
+    pub depth: usize,
 
     /// `-e`
-    pub(crate) print_empty: bool,
+    pub print_empty: bool,
 
     /// `-F`
-    pub(crate) output_field_delimiter: Vec<u8>,
+    pub output_field_delimiter: Vec<u8>,
 
     /// `-f`
-    pub(crate) input_field_delimiter: Regex,
+    pub input_field_delimiter: Regex,
 
     /// `-h`
-    pub(crate) help: bool,
+    pub help: bool,
 
     /// `-I`
-    pub(crate) invert_fields: bool,
+    pub invert_fields: bool,
 
     /// `-i`
-    pub(crate) insensitive: bool,
+    pub insensitive: bool,
 
     /// `-J`
-    pub(crate) json_output: bool,
+    pub json_output: bool,
 
     /// `-j`
-    pub(crate) json_input: bool,
+    pub json_input: bool,
 
     /// `-l`
-    pub(crate) limit: Option<isize>,
+    pub limit: Option<isize>,
 
     /// `-M`
-    pub(crate) mtime_expressions: Vec<Time>,
+    pub mtime_expressions: Vec<Time>,
 
     /// `-m`
-    pub(crate) match_expressions: Vec<Regex>,
+    pub match_expressions: Vec<Regex>,
 
     /// `-n`
-    pub(crate) no_enumerate: bool,
+    pub no_enumerate: bool,
 
     /// `-P`
-    pub(crate) parallel: bool,
+    pub parallel: bool,
 
     /// `-p`
-    pub(crate) prune_expressions: Vec<Regex>,
+    pub prune_expressions: Vec<Regex>,
 
     /// `-R`
-    pub(crate) output_record_delimiter: Vec<u8>,
+    pub output_record_delimiter: Vec<u8>,
 
     /// `-r`
-    pub(crate) input_record_delimiter: Regex,
+    pub input_record_delimiter: Regex,
 
     /// `-s`
-    pub(crate) skip: bool,
+    pub skip: bool,
 
     /// `-t`
-    pub(crate) file_types: String,
+    pub file_types: String,
 
     /// `-v`
-    pub(crate) verbose: bool,
+    pub verbose: bool,
 
     /// `-x`
-    pub(crate) match_commands: Vec<String>,
+    pub match_commands: Vec<String>,
 }
 
 /// The default input record delimiter. This pattern matches 1
@@ -177,8 +177,8 @@ const DEFAULT_FILE_TYPES: &str = "dfs";
 impl Options {
     /// Returns an `Options` with all the fields set to their `DEFAULT_*`
     /// values.
-    pub(crate) fn with_defaults() -> Result<Options, ShellError> {
-        Ok(Options {
+    pub fn with_defaults() -> Result<Self, ShellError> {
+        Ok(Self {
             show_all: false,
             fields: Vec::new(),
             depth: 0,
@@ -216,7 +216,7 @@ fn new_regex(pattern: &str, options: &Options) -> Result<Regex, regex::Error> {
 /// `Options` and the remaining positional arguments. Any options not given on
 /// the command line will have their `DEFAULT_*` values in the returned
 /// `Options` (see `Options::with_defaults`).
-pub(crate) fn parse_options(arguments: &[String]) -> Result<(Options, &[String]), ShellError> {
+pub fn parse_options(arguments: &[String]) -> Result<(Options, &[String]), ShellError> {
     let mut options = Options::with_defaults()?;
     let mut parsed = getopt::Parser::new(arguments, DEFAULT_OPTION_SPEC);
 
@@ -229,7 +229,8 @@ pub(crate) fn parse_options(arguments: &[String]) -> Result<(Options, &[String])
                 Opt('d', Some(s)) => options.depth = str::parse::<usize>(&s)?,
                 Opt('e', None) => options.print_empty = true,
                 Opt('F', Some(s)) => {
-                    options.output_field_delimiter = Vec::from(unescape_backslashes(&s)?.as_bytes())
+                    options.output_field_delimiter =
+                        Vec::from(unescape_backslashes(&s)?.as_bytes());
                 }
                 Opt('f', Some(s)) => options.input_field_delimiter = new_regex(&s, &options)?,
                 Opt('I', None) => options.invert_fields = true,
@@ -260,26 +261,26 @@ pub(crate) fn parse_options(arguments: &[String]) -> Result<(Options, &[String])
     Ok((options, arguments))
 }
 
-pub(crate) static STDIN_PATHNAME: Lazy<String> = Lazy::new(|| "<stdin>".to_string());
+pub static STDIN_PATHNAME: Lazy<String> = Lazy::new(|| "<stdin>".to_string());
 
 /// An open `Read`.
-pub(crate) struct OpenFile<'a> {
+pub struct OpenFile<'a> {
     /// The pathname by which the file was opened. If `None`, the file was
     /// already open (e.g. `stdin()`; see ).
-    pub(crate) pathname: Option<&'a String>,
+    pub pathname: Option<&'a String>,
     /// The `Read`.
-    pub(crate) read: Result<Box<dyn Read>, io::Error>,
+    pub read: Result<Box<dyn Read>, io::Error>,
 }
 
 /// An `Iterator` that iterates over a slice of pathnames, and yields
 /// `OpenFile`s.
-pub(crate) struct FileOpener<'a> {
+pub struct FileOpener<'a> {
     pathnames: &'a [String],
     i: usize,
 }
 
 impl<'a> FileOpener<'a> {
-    pub(crate) fn new(pathnames: &'a [String]) -> Self {
+    pub const fn new(pathnames: &'a [String]) -> Self {
         FileOpener { pathnames, i: 0 }
     }
 }
@@ -313,6 +314,6 @@ impl<'a> Iterator for FileOpener<'a> {
 
 // Ultimately, this should go away and we should use a custom
 // `serde::ser::Serialize` for columnar output.
-pub(crate) trait StructuredWrite {
+pub trait StructuredWrite {
     fn write(&self, output: &mut dyn Write, options: &Options) -> Result<(), Error>;
 }

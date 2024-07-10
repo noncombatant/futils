@@ -13,10 +13,10 @@ use serde::Serialize;
 use sha2::{Digest, Sha256};
 
 use crate::shell::{parse_options, Options, ShellResult, StructuredWrite};
-use crate::util::help;
+use crate::util::{exit_with_result, help};
 
-pub(crate) const FILEID_HELP: &str = include_str!("fileid.md");
-pub(crate) const FILEID_HELP_VERBOSE: &str = include_str!("fileid_verbose.md");
+pub const FILEID_HELP: &str = include_str!("fileid.md");
+pub const FILEID_HELP_VERBOSE: &str = include_str!("fileid_verbose.md");
 
 #[derive(Serialize)]
 struct FileID {
@@ -96,10 +96,10 @@ fn get_fileid(pathname: &str, verbose: bool) -> std::io::Result<FileID> {
 }
 
 /// Runs the `fileid` command on `arguments`.
-pub(crate) fn fileid_main(arguments: &[String]) -> ShellResult {
+pub fn fileid_main(arguments: &[String]) -> ShellResult {
     let (options, arguments) = parse_options(arguments)?;
     if options.help {
-        help(
+        exit_with_result(help(
             0,
             FILEID_HELP,
             true,
@@ -108,7 +108,7 @@ pub(crate) fn fileid_main(arguments: &[String]) -> ShellResult {
             } else {
                 None
             },
-        );
+        ));
     }
 
     let mut status = 0;
@@ -117,8 +117,8 @@ pub(crate) fn fileid_main(arguments: &[String]) -> ShellResult {
             Ok(file_id) => {
                 file_id.write(&mut stdout(), &options)?;
             }
-            Err(e) => {
-                eprintln!("{}", e);
+            Err(error) => {
+                eprintln!("{pathname}: {error}");
                 status += 1;
             }
         }

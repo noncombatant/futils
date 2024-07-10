@@ -15,24 +15,23 @@ use crate::shell::{ShellError, UsageError};
 /// Given the number of seconds from the Unix epoch in UTC, returns a sortable
 /// string representation in the format `%Y-%m-%d %H:%M:%S`. If `utc` cannot be
 /// interpreted for some raisin, returns `utc` `format!`ed as a `String`.
-pub(crate) fn format_utc_timestamp(utc: i64) -> String {
-    match NaiveDateTime::from_timestamp_opt(utc, 0) {
-        Some(naive) => {
-            let datetime: DateTime<Utc> = DateTime::from_utc(naive, Utc);
-            format!("{}", datetime.format("%Y-%m-%d %H:%M:%S"))
-        }
-        None => format!("{}", utc),
+pub fn format_utc_timestamp(utc: i64) -> String {
+    if let Some(naive) = NaiveDateTime::from_timestamp_opt(utc, 0) {
+        let datetime: DateTime<Utc> = DateTime::from_utc(naive, Utc);
+        format!("{}", datetime.format("%Y-%m-%d %H:%M:%S"))
+    } else {
+        format!("{utc}")
     }
 }
 
 /// A comparison operation on a `NaiveDateTime`. This is essentially a curried
 /// function (or, rather, 1 of 3 curried functions) on `date_time`.
-pub(crate) struct Time {
+pub struct Time {
     /// A date-time that another date-time will be compared to.
-    pub(crate) date_time: NaiveDateTime,
+    pub date_time: NaiveDateTime,
 
     /// What kind of comparison to perform.
-    pub(crate) ordering: Ordering,
+    pub ordering: Ordering,
 }
 
 impl Time {
@@ -51,10 +50,10 @@ impl Time {
     ///
     /// This function also accepts the empty string as a special case, in which
     /// case it returns a `Time` indicating 0 in the Unix epoch.
-    pub(crate) fn new(string: &str) -> Result<Self, ShellError> {
+    pub fn new(string: &str) -> Result<Self, ShellError> {
         let string = string.trim();
         if string.is_empty() {
-            return Ok(Time {
+            return Ok(Self {
                 date_time: NaiveDateTime::from_timestamp_opt(0, 0).unwrap(),
                 ordering: Ordering::Greater,
             });
@@ -83,18 +82,18 @@ impl Time {
         }
     }
 
-    fn from_date_time_string(string: &str, operator: Ordering) -> Result<Time, ParseError> {
+    fn from_date_time_string(string: &str, operator: Ordering) -> Result<Self, ParseError> {
         let date_time = NaiveDateTime::parse_from_str(string, "%Y-%m-%d %H:%M:%S");
         match date_time {
-            Ok(dt) => Ok(Time {
+            Ok(dt) => Ok(Self {
                 date_time: dt,
                 ordering: operator,
             }),
-            Err(e) => Err(e),
+            Err(error) => Err(error),
         }
     }
 
-    fn from_time_string(string: &str, operator: Ordering) -> Result<Time, ParseError> {
+    fn from_time_string(string: &str, operator: Ordering) -> Result<Self, ParseError> {
         let now = Local::now();
         let time = NaiveTime::parse_from_str(string, "%H:%M:%S");
         match time {
@@ -103,16 +102,16 @@ impl Time {
                     .unwrap()
                     .and_hms_opt(time.hour(), time.minute(), time.second())
                     .unwrap();
-                Ok(Time {
+                Ok(Self {
                     date_time,
                     ordering: operator,
                 })
             }
-            Err(e) => Err(e),
+            Err(error) => Err(error),
         }
     }
 
-    fn from_date_string(string: &str, operator: Ordering) -> Result<Time, ParseError> {
+    fn from_date_string(string: &str, operator: Ordering) -> Result<Self, ParseError> {
         let date = NaiveDate::parse_from_str(string, "%Y-%m-%d");
         match date {
             Ok(date) => {
@@ -120,7 +119,7 @@ impl Time {
                     .unwrap()
                     .and_hms_opt(0, 0, 0)
                     .unwrap();
-                Ok(Time {
+                Ok(Self {
                     date_time,
                     ordering: operator,
                 })

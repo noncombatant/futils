@@ -7,10 +7,10 @@ use itertools::Itertools;
 
 use crate::shell::{parse_options, FileOpener, Options, ShellResult, STDIN_PATHNAME};
 use crate::stream_splitter::StreamSplitter;
-use crate::util::{help, run_command};
+use crate::util::{exit_with_result, help, run_command};
 
-pub(crate) const MAP_HELP: &str = include_str!("map.md");
-pub(crate) const MAP_HELP_VERBOSE: &str = include_str!("map_verbose.md");
+pub const MAP_HELP: &str = include_str!("map.md");
+pub const MAP_HELP_VERBOSE: &str = include_str!("map_verbose.md");
 
 /// Iterates over `StreamSplitter` and runs each of the `commands` on each
 /// record.
@@ -36,13 +36,13 @@ fn map(splitter: StreamSplitter, options: &Options) -> ShellResult {
         let records: Vec<&[u8]> = records.iter().map(|r| r.as_slice()).collect();
         for command in &options.match_commands {
             match run_command(command, &records, true) {
-                Ok(s) => {
-                    if s != 0 {
+                Ok(run_status) => {
+                    if run_status != 0 {
                         status += 1;
                     }
                 }
-                Err(e) => {
-                    eprintln!("{} ... : {}", command, e);
+                Err(error) => {
+                    eprintln!("{command} ... : {error}");
                     status += 1;
                 }
             }
@@ -52,10 +52,10 @@ fn map(splitter: StreamSplitter, options: &Options) -> ShellResult {
 }
 
 /// Runs the `map` command on `arguments`.
-pub(crate) fn map_main(arguments: &[String]) -> ShellResult {
+pub fn map_main(arguments: &[String]) -> ShellResult {
     let (options, arguments) = parse_options(arguments)?;
     if options.help {
-        help(
+        exit_with_result(help(
             0,
             MAP_HELP,
             true,
@@ -64,7 +64,7 @@ pub(crate) fn map_main(arguments: &[String]) -> ShellResult {
             } else {
                 None
             },
-        );
+        ));
     }
     if options.json_input || options.json_output {
         unimplemented!()
@@ -79,15 +79,15 @@ pub(crate) fn map_main(arguments: &[String]) -> ShellResult {
                     StreamSplitter::new(&mut read, &options.input_record_delimiter),
                     &options,
                 ) {
-                    Ok(s) => status += s,
-                    Err(e) => {
-                        eprintln!("{}: {}", pathname, e);
+                    Ok(map_status) => status += map_status,
+                    Err(error) => {
+                        eprintln!("{pathname}: {error}");
                         status += 1;
                     }
                 }
             }
-            Err(e) => {
-                eprintln!("{}: {}", pathname, e);
+            Err(error) => {
+                eprintln!("{pathname}: {error}");
                 status += 1;
             }
         }

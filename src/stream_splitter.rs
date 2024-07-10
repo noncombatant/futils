@@ -18,7 +18,7 @@ use regex::bytes::Regex;
 ///
 /// This implementation uses a private buffer that may, in pathological cases,
 /// grow large (depending on how long it takes to match `delimiter`).
-pub(crate) struct StreamSplitter<'a> {
+pub struct StreamSplitter<'a> {
     reader: &'a mut dyn Read,
     delimiter: &'a Regex,
     buffer: Vec<u8>,
@@ -37,18 +37,14 @@ const DEFAULT_CAPACITY: usize = 64 * 1024;
 impl<'a> StreamSplitter<'a> {
     /// Creates a new `StreamSplitter` that will split the bytes of `reader`
     /// into `Vec<u8>`s.
-    pub(crate) fn new(reader: &'a mut dyn Read, delimiter: &'a Regex) -> Self {
+    pub fn new(reader: &'a mut dyn Read, delimiter: &'a Regex) -> Self {
         Self::with_capacity(reader, delimiter, DEFAULT_CAPACITY)
     }
 
     /// Creates a new `StreamSplitter` that will split the bytes of `reader`
     /// into `Vec<u8>`s. The internal buffer will be pre-allocated with at least
     /// `capacity` `u8`s of storage.
-    pub(crate) fn with_capacity(
-        reader: &'a mut dyn Read,
-        delimiter: &'a Regex,
-        capacity: usize,
-    ) -> Self {
+    pub fn with_capacity(reader: &'a mut dyn Read, delimiter: &'a Regex, capacity: usize) -> Self {
         Self {
             reader,
             delimiter,
@@ -85,9 +81,9 @@ impl<'a> Iterator for StreamSplitter<'a> {
     type Item = Result<Vec<u8>>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        if let Err(e) = self.fill() {
-            eprintln!("{}", e);
-            return Some(Err(e));
+        if let Err(error) = self.fill() {
+            eprintln!("{error}"); // TODO: the caller should do this, not us
+            return Some(Err(error));
         }
 
         if self.start == self.end && self.eof {

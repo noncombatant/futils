@@ -14,22 +14,22 @@ use users::{get_group_by_gid, get_user_by_uid};
 use crate::os;
 use crate::shell::{parse_options, Options, ShellError, ShellResult};
 use crate::time::format_utc_timestamp;
-use crate::util::help;
+use crate::util::{exit_with_result, help};
 
-pub(crate) const STATUS_HELP: &str = include_str!("status.md");
-pub(crate) const STATUS_HELP_VERBOSE: &str = include_str!("status_verbose.md");
+pub const STATUS_HELP: &str = include_str!("status.md");
+pub const STATUS_HELP_VERBOSE: &str = include_str!("status_verbose.md");
 
 fn format_uid(uid: u32) -> String {
     match get_user_by_uid(uid) {
         Some(s) => format!("{}", s.name().to_string_lossy()),
-        None => format!("{}", uid),
+        None => format!("{uid}"),
     }
 }
 
 fn format_gid(gid: u32) -> String {
     match get_group_by_gid(gid) {
         Some(s) => format!("{}", s.name().to_string_lossy()),
-        None => format!("{}", gid),
+        None => format!("{gid}"),
     }
 }
 
@@ -55,10 +55,10 @@ fn format_permissions(mode: os::Mode) -> String {
                 bytes[1] = b'w';
             }
             if mode.contains(Mode::S_IXUSR) {
-                bytes[2] = b'x'
+                bytes[2] = b'x';
             }
             if mode.contains(Mode::S_ISUID) {
-                bytes[2] = b'S'
+                bytes[2] = b'S';
             }
             if mode.contains(Mode::S_IRGRP) {
                 bytes[3] = b'r';
@@ -67,10 +67,10 @@ fn format_permissions(mode: os::Mode) -> String {
                 bytes[4] = b'w';
             }
             if mode.contains(Mode::S_IXGRP) {
-                bytes[5] = b'x'
+                bytes[5] = b'x';
             }
             if mode.contains(Mode::S_ISGID) {
-                bytes[5] = b'S'
+                bytes[5] = b'S';
             }
             if mode.contains(Mode::S_IROTH) {
                 bytes[6] = b'r';
@@ -118,16 +118,16 @@ fn format_type(mode: os::Mode) -> String {
     //
     // So, close enough for horseshoes (and hand grenades).
 
-    static S_IFMT: u16 = 0o0170000;
-    static S_IFSOCK: u16 = 0o0140000;
-    static S_IFLNK: u16 = 0o0120000;
-    static S_IFREG: u16 = 0o0100000;
-    static S_IFBLK: u16 = 0o0060000;
-    static S_IFDIR: u16 = 0o0040000;
-    static S_IFCHR: u16 = 0o0020000;
-    static S_IFIFO: u16 = 0o0010000;
-    static S_ISUID: u16 = 0o0004000;
-    static S_ISGID: u16 = 0o0002000;
+    static S_IFMT: u16 = 0o0_170_000;
+    static S_IFSOCK: u16 = 0o0_140_000;
+    static S_IFLNK: u16 = 0o0_120_000;
+    static S_IFREG: u16 = 0o0_100_000;
+    static S_IFBLK: u16 = 0o0_060_000;
+    static S_IFDIR: u16 = 0o0_040_000;
+    static S_IFCHR: u16 = 0o0_020_000;
+    static S_IFIFO: u16 = 0o0_010_000;
+    static S_ISUID: u16 = 0o0_004_000;
+    static S_ISGID: u16 = 0o0_002_000;
 
     // From ls(1):
     //
@@ -280,10 +280,10 @@ impl<'a> os::Status<'a> {
 }
 
 /// Runs the `status` command on `arguments`.
-pub(crate) fn status_main(arguments: &[String]) -> ShellResult {
+pub fn status_main(arguments: &[String]) -> ShellResult {
     let (options, arguments) = parse_options(arguments)?;
     if options.help {
-        help(
+        exit_with_result(help(
             0,
             STATUS_HELP,
             true,
@@ -292,7 +292,7 @@ pub(crate) fn status_main(arguments: &[String]) -> ShellResult {
             } else {
                 None
             },
-        );
+        ));
     }
 
     let arguments = if arguments.is_empty() {
@@ -366,9 +366,9 @@ pub(crate) fn status_main(arguments: &[String]) -> ShellResult {
                     &options.output_record_delimiter
                 })?;
             }
-            Err(e) => {
-                eprintln!("{}: {}", pathname, e);
-                status += 1
+            Err(error) => {
+                eprintln!("{pathname}: {error}");
+                status += 1;
             }
         }
     }

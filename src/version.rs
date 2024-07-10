@@ -9,10 +9,10 @@ use atty::Stream;
 use serde::Serialize;
 
 use crate::shell::{parse_options, ShellError, ShellResult};
-use crate::util::help;
+use crate::util::{exit_with_result, help};
 
-pub(crate) const VERSION_HELP: &str = include_str!("version.md");
-pub(crate) const VERSION_HELP_VERBOSE: &str = include_str!("version_verbose.md");
+pub const VERSION_HELP: &str = include_str!("version.md");
+pub const VERSION_HELP_VERBOSE: &str = include_str!("version_verbose.md");
 
 #[derive(Serialize)]
 struct VersionDatum<'a> {
@@ -108,10 +108,10 @@ const VERSION_DATA: [VersionDatum; 15] = [
     },
 ];
 
-pub(crate) fn version_main(arguments: &[String]) -> ShellResult {
+pub fn version_main(arguments: &[String]) -> ShellResult {
     let (options, arguments) = parse_options(arguments)?;
     if options.help || !arguments.is_empty() {
-        help(
+        exit_with_result(help(
             0,
             VERSION_HELP,
             true,
@@ -120,7 +120,7 @@ pub(crate) fn version_main(arguments: &[String]) -> ShellResult {
             } else {
                 None
             },
-        );
+        ));
     }
 
     let mut stdout = stdout();

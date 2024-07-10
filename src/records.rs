@@ -11,16 +11,16 @@ use itertools::Either;
 use crate::enumerated_record::EnumeratedRecord;
 use crate::shell::{parse_options, FileOpener, ShellResult, STDIN_PATHNAME};
 use crate::stream_splitter::StreamSplitter;
-use crate::util::help;
+use crate::util::{exit_with_result, help};
 
-pub(crate) const RECORDS_HELP: &str = include_str!("records.md");
-pub(crate) const RECORDS_HELP_VERBOSE: &str = include_str!("records_verbose.md");
+pub const RECORDS_HELP: &str = include_str!("records.md");
+pub const RECORDS_HELP_VERBOSE: &str = include_str!("records_verbose.md");
 
 /// Runs the `records` command on `arguments`.
-pub(crate) fn records_main(arguments: &[String]) -> ShellResult {
+pub fn records_main(arguments: &[String]) -> ShellResult {
     let (options, arguments) = parse_options(arguments)?;
     if options.help {
-        help(
+        exit_with_result(help(
             0,
             RECORDS_HELP,
             true,
@@ -29,7 +29,7 @@ pub(crate) fn records_main(arguments: &[String]) -> ShellResult {
             } else {
                 None
             },
-        );
+        ));
     }
 
     let mut status = 0;
@@ -85,8 +85,8 @@ pub(crate) fn records_main(arguments: &[String]) -> ShellResult {
                     println!("{{}}]");
                 }
             }
-            Err(e) => {
-                eprintln!("{}: {}", pathname, e);
+            Err(error) => {
+                eprintln!("{pathname}: {error}");
                 status += 1;
             }
         }

@@ -3,6 +3,17 @@
 
 //! The `futils` command.
 
+#![warn(clippy::all, clippy::pedantic, clippy::nursery, clippy::cargo)]
+#![allow(
+    clippy::single_call_fn,
+    clippy::print_stderr,
+    clippy::missing_docs_in_private_items
+)]
+// #![deny(clippy::cargo)]
+// #![deny(clippy::doc_markdown)]
+#![forbid(unsafe_code)]
+#![deny(warnings)]
+
 use std::env;
 use std::process::exit;
 
@@ -39,21 +50,21 @@ use markdown::{markdown_main, MARKDOWN_HELP};
 use records::{records_main, RECORDS_HELP};
 use reduce::{reduce_main, REDUCE_HELP};
 use status::{status_main, STATUS_HELP};
-use util::{file_name, help};
+use util::{exit_with_result, file_name, help};
 use version::{version_main, VERSION_HELP};
 
 const MAIN_HELP: &str = include_str!("main.md");
 
-fn reset_sigpipe() {
-    if cfg!(unix) {
-        unsafe {
-            libc::signal(libc::SIGPIPE, libc::SIG_DFL);
-        }
-    }
-}
+// fn reset_sigpipe() {
+//     if cfg!(unix) {
+//         unsafe {
+//             libc::signal(libc::SIGPIPE, libc::SIG_DFL);
+//         }
+//     }
+// }
 
 fn main() {
-    reset_sigpipe();
+    //reset_sigpipe();
 
     // TODO: Make `arguments` be `Vec<OsString>`, and propagate the API change
     // throughout (!). This probably means we can't use `getopt`, which seems to
@@ -61,12 +72,12 @@ fn main() {
     // least we can do is warn people:
     let args_os = env::args_os();
     let mut arguments: Vec<String> = Vec::with_capacity(args_os.size_hint().0);
-    for a in args_os {
-        match a.to_str() {
-            Some(s) => arguments.push(String::from(s)),
+    for arg in args_os {
+        match arg.to_str() {
+            Some(string) => arguments.push(String::from(string)),
             None => eprintln!(
                 "Could not convert \"{}\" to UTF-8. Skipping.",
-                a.to_string_lossy()
+                arg.to_string_lossy()
             ),
         }
     }
@@ -78,14 +89,14 @@ fn main() {
         arguments.remove(0);
     }
     if arguments.is_empty() {
-        help(-1, MAIN_HELP, false, None);
+        exit_with_result(help(-1, MAIN_HELP, false, None));
     } else {
         program_name = file_name(&arguments[0]).unwrap();
     }
 
     if program_name == "help" || program_name == "-h" || program_name == "--help" {
-        if arguments.len() < 2 {
-            help(0, MAIN_HELP, false, None);
+        exit_with_result(if arguments.len() < 2 {
+            help(0, MAIN_HELP, false, None)
         } else {
             match arguments[1].as_str() {
                 "common" => help(0, COMMON_HELP, true, None),
@@ -101,8 +112,8 @@ fn main() {
                 "status" => help(0, STATUS_HELP, true, None),
                 "version" => help(0, VERSION_HELP, true, None),
                 &_ => help(-1, MAIN_HELP, false, None),
-            };
-        }
+            }
+        });
     }
 
     match match program_name {
@@ -118,14 +129,11 @@ fn main() {
         "reduce" => reduce_main(&arguments),
         "status" => status_main(&arguments),
         "version" => version_main(&arguments),
-        _ => {
-            help(-1, MAIN_HELP, false, None);
-            unreachable!()
-        }
+        _ => help(-1, MAIN_HELP, false, None),
     } {
         Ok(status) => exit(status),
-        Err(e) => {
-            eprintln!("{}", e);
+        Err(error) => {
+            eprintln!("{error}");
             exit(-1)
         }
     }
