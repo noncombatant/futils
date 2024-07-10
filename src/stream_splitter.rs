@@ -102,13 +102,12 @@ impl<'a> Iterator for StreamSplitter<'a> {
                     // least match the same match again.
                     return Some(self.next().unwrap());
                 }
+                self.start += m.end();
                 let r = if m.start() == 0 {
                     // We matched the delimiter at the beginning of the section.
-                    self.start += m.end();
                     Ok(Vec::new())
                 } else {
                     // We matched a record.
-                    self.start += m.end();
                     Ok(section[0..m.start()].to_vec())
                 };
                 Some(r)
