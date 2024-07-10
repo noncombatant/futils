@@ -16,24 +16,13 @@ pub const MAP_HELP_VERBOSE: &str = include_str!("map_verbose.md");
 /// record.
 fn map(splitter: StreamSplitter, options: &Options) -> ShellResult {
     let mut status = 0;
-    let chunk_size = match options.limit {
-        Some(limit) => {
-            if limit > 0 {
-                limit as usize
-            } else {
-                1
-            }
-        }
-        None => 1,
-    };
-    for chunk in splitter
-        .map_while(Result::ok)
-        .chunks(chunk_size)
-        .into_iter()
-    {
+    let chunk_size = options
+        .limit
+        .map_or(1, |limit| if limit > 0 { limit as usize } else { 1 });
+    for chunk in &splitter.map_while(Result::ok).chunks(chunk_size) {
         // TODO: This is ugly and allocates.
         let records: Vec<Vec<u8>> = chunk.collect();
-        let records: Vec<&[u8]> = records.iter().map(|r| r.as_slice()).collect();
+        let records: Vec<&[u8]> = records.iter().map(std::vec::Vec::as_slice).collect();
         for command in &options.match_commands {
             match run_command(command, &records, true) {
                 Ok(run_status) => {

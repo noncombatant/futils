@@ -49,19 +49,18 @@ fn reduce(splitter: StreamSplitter, options: &Options) -> ShellResult {
     let mut stdout = stdout();
     let mut status = 0;
     let mut splitter = splitter.map_while(Result::ok);
-    let mut result = match splitter.next() {
-        Some(r) => r,
-        None => return Err(ShellError::Usage(UsageError::new("No input"))),
+    let Some(mut result) = splitter.next() else {
+        return Err(ShellError::Usage(UsageError::new("No input")));
     };
 
-    for r in splitter {
+    for record in splitter {
         for command in &options.match_commands {
-            match apply_command(&result, command, &r) {
+            match apply_command(&result, command, &record) {
                 Ok(r) => {
                     result = r;
                 }
                 Err(error) => {
-                    eprintln!("{}: {error}", from_utf8(&r).unwrap());
+                    eprintln!("{}: {error}", from_utf8(&record).unwrap());
                     status += 1;
                 }
             }

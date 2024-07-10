@@ -18,26 +18,15 @@ pub const MAPX_HELP_VERBOSE: &str = include_str!("mapx_verbose.md");
 /// record.
 fn mapx(splitter: StreamSplitter, options: &Options, command: &[String]) -> ShellResult {
     let mut status = 0;
-    let chunk_size = match options.limit {
-        Some(limit) => {
-            if limit > 0 {
-                limit as usize
-            } else {
-                1
-            }
-        }
-        None => 1,
-    };
-    for chunk in splitter
-        .map_while(Result::ok)
-        .chunks(chunk_size)
-        .into_iter()
-    {
+    let chunk_size = options
+        .limit
+        .map_or(1, |limit| if limit > 0 { limit as usize } else { 1 });
+    for chunk in &splitter.map_while(Result::ok).chunks(chunk_size) {
         // TODO: This is ugly and allocates.
         let records: Vec<Vec<u8>> = chunk.collect();
         let arguments = chain(
-            command.iter().skip(1).map(|r| r.as_bytes()),
-            records.iter().map(|r| r.as_slice()),
+            command.iter().skip(1).map(std::string::String::as_bytes),
+            records.iter().map(std::vec::Vec::as_slice),
         );
         match run_command(&command[0], &arguments.collect::<Vec<&[u8]>>(), true) {
             Ok(run_status) => {

@@ -18,10 +18,7 @@ pub const FILES_HELP: &str = include_str!("files.md");
 pub const FILES_HELP_VERBOSE: &str = include_str!("files_verbose.md");
 
 fn is_hidden(e: &DirEntry) -> bool {
-    match e.path().to_str() {
-        Some(s) => s.contains("/."),
-        None => false,
-    }
+    e.path().to_str().map_or(false, |s| s.contains("./"))
 }
 
 fn compare_times(e: &DirEntry, t: &Time) -> Result<bool, std::io::Error> {
@@ -83,13 +80,12 @@ fn print_matches(pathname: &str, options: &Options) -> ShellResult {
         }
 
         let p = entry.path();
-        let pathname = match p.to_str() {
-            Some(s) => s,
-            None => {
-                eprintln!("pathname not valid Unicode: '{}'", p.display());
-                status += 1;
-                continue;
-            }
+        let pathname = if let Some(s) = p.to_str() {
+            s
+        } else {
+            eprintln!("pathname not valid Unicode: '{}'", p.display());
+            status += 1;
+            continue;
         };
 
         for re in &options.prune_expressions {
@@ -111,8 +107,8 @@ fn print_matches(pathname: &str, options: &Options) -> ShellResult {
             match compare_times(&entry, mtime) {
                 Ok(true) => continue,
                 Ok(false) => continue 'outer,
-                Err(e) => {
-                    eprintln!("{}", e);
+                Err(error) => {
+                    eprintln!("{error}");
                     status += 1;
                     continue 'outer;
                 }
@@ -126,8 +122,8 @@ fn print_matches(pathname: &str, options: &Options) -> ShellResult {
                         continue 'outer;
                     }
                 }
-                Err(e) => {
-                    eprintln!("{} \"{}\": {}", command, pathname, e);
+                Err(error) => {
+                    eprintln!("{command} \"{pathname}\": {error}");
                     status += 1;
                     continue 'outer;
                 }
@@ -160,7 +156,7 @@ pub fn files_main(arguments: &[String]) -> ShellResult {
 
     let mut pathnames = vec![".".to_string()];
     if !arguments.is_empty() {
-        pathnames = arguments.into()
+        pathnames = arguments.into();
     }
     let mut status = 0;
     for pathname in pathnames {

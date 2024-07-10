@@ -85,7 +85,7 @@ fn print_matches(pathname: &str, splitter: StreamSplitter, options: &Options) ->
             er.write_columns(&mut stdout, options)?;
         }
     }
-    Ok(if matched { 0 } else { 1 })
+    Ok(i32::from(!matched))
 }
 
 /// Runs the `filter` command on `arguments`.

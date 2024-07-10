@@ -23,7 +23,7 @@ pub fn markdown_main(arguments: &[String]) -> ShellResult {
                 let mut buffer = String::new();
                 match read.read_to_string(&mut buffer) {
                     Ok(_) => {
-                        println!("{}", skin.text(&buffer, None))
+                        println!("{}", skin.text(&buffer, None));
                     }
                     Err(error) => {
                         let pathname = file.pathname.unwrap_or(&STDIN_PATHNAME);

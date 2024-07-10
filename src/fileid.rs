@@ -29,12 +29,9 @@ struct FileID {
 
 impl FileID {
     fn write_columns(&self, output: &mut dyn Write, options: &Options) -> Result<(), Error> {
-        match &self.hash {
-            Some(hash) => {
-                write!(output, "{:<44}", hash)?;
-                output.write_all(&options.output_field_delimiter)?;
-            }
-            None => {}
+        if let Some(hash) = &self.hash {
+            write!(output, "{hash:<44}")?;
+            output.write_all(&options.output_field_delimiter)?;
         }
         write!(output, "{:>9}", self.device)?;
         output.write_all(&options.output_field_delimiter)?;
