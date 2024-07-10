@@ -79,11 +79,9 @@ fn print_matches(pathname: &str, options: &Options) -> ShellResult {
             continue;
         }
 
-        let p = entry.path();
-        let pathname = if let Some(s) = p.to_str() {
-            s
-        } else {
-            eprintln!("pathname not valid Unicode: '{}'", p.display());
+        let path = entry.path();
+        let Some(pathname) = path.to_str() else {
+            eprintln!("pathname not valid Unicode: '{}'", path.display());
             status += 1;
             continue;
         };
@@ -154,10 +152,11 @@ pub fn files_main(arguments: &[String]) -> ShellResult {
         unimplemented!()
     }
 
-    let mut pathnames = vec![".".to_string()];
-    if !arguments.is_empty() {
-        pathnames = arguments.into();
-    }
+    let pathnames = if arguments.is_empty() {
+        vec![".".to_string()]
+    } else {
+        arguments.into()
+    };
     let mut status = 0;
     for pathname in pathnames {
         match print_matches(&pathname, &options) {

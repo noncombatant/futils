@@ -24,7 +24,7 @@ fn first_non_space(record: &[u8]) -> Option<usize> {
     SPACE_CADET.find(record).map(|m| m.start())
 }
 
-fn compute_index(i: isize, length: usize) -> usize {
+const fn compute_index(i: isize, length: usize) -> usize {
     if i < 0 {
         let length = length as isize;
         let i = i.abs();
@@ -85,7 +85,7 @@ impl<'a> EnumeratedRecord<'a> {
         let mut start = 0;
         if options.skip {
             if let Some(s) = first_non_space(record) {
-                start = s
+                start = s;
             }
         };
         let mut fields = options
