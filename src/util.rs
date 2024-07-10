@@ -23,13 +23,9 @@ use crate::shell::{ShellError, ShellResult};
 fn text_width() -> usize {
     let (terminal_width, _) = terminal_size();
     let terminal_width = terminal_width as usize;
-    match env::var("MANWIDTH") {
-        Ok(man_width) => match man_width.parse::<usize>() {
-            Ok(w) => min(terminal_width, w),
-            Err(_) => min(terminal_width, 80_usize),
-        },
-        Err(_) => min(terminal_width, 80_usize),
-    }
+    let man_width = env::var("MANWIDTH").map_or(String::new(), |v| v);
+    let man_width = man_width.parse::<usize>().map_or(80, |w| w);
+    min(terminal_width, man_width)
 }
 
 fn terminal_text<'a>(s: &'a str, skin: &'a MadSkin) -> FmtText<'a, 'a> {
@@ -51,9 +47,9 @@ pub fn get_skin(stream: Stream) -> MadSkin {
     skin
 }
 
-/// Prints `message`, the contents of common_options.md if `common` is true, and
-/// `verbose` if it is present. Prints to the standard output if `status` is 0;
-/// otherwise prints to the standard error. `exit`s with `status`.
+/// Prints `message`, the contents of `common_options.md` if `common` is true,
+/// and `verbose` if it is present. Prints to the standard output if `status` is
+/// 0; otherwise prints to the standard error. `exit`s with `status`.
 pub fn help(status: i32, message: &str, common: bool, verbose: Option<&str>) -> ShellResult {
     let mut output = if status == 0 {
         &mut stdout() as &mut dyn Write
