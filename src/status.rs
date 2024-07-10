@@ -27,7 +27,7 @@ fn format_gid(gid: u32) -> String {
     get_group_by_gid(gid).map_or(format!("{gid}"), |s| s.name().to_string_lossy().to_string())
 }
 
-fn get_permissions(mode: os::Mode) -> Option<Mode> {
+const fn get_permissions(mode: os::Mode) -> Option<Mode> {
     Mode::from_bits(
         mode & (Mode::S_IRWXU.bits()
             | Mode::S_IRWXG.bits()

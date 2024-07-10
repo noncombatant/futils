@@ -42,15 +42,6 @@ pub fn get_skin(stream: Stream) -> MadSkin {
     skin
 }
 
-fn must<T, E>(result: Result<T, E>)
-where
-    E: std::fmt::Display,
-{
-    if let Err(error) = result {
-        panic!("{error}");
-    }
-}
-
 /// Prints `message`, the contents of `common_options.md` if `common` is true,
 /// and `verbose` if it is present. Prints to the standard output if `status` is
 /// 0; otherwise prints to the standard error. `exit`s with `status`.
@@ -63,16 +54,16 @@ pub fn help(status: i32, message: &str, common: bool, verbose: Option<&str>) -> 
         0 => Stream::Stdout,
         _ => Stream::Stderr,
     });
-    must(writeln!(&mut output, "{}", terminal_text(message, &skin)));
+    writeln!(&mut output, "{}", terminal_text(message, &skin))?;
     if common {
-        must(write!(
+        write!(
             &mut output,
             "{}",
             terminal_text(include_str!("common_options.md"), &skin)
-        ));
+        )?;
     }
     if let Some(v) = verbose {
-        must(write!(&mut output, "{}", terminal_text(v, &skin)));
+        write!(&mut output, "{}", terminal_text(v, &skin))?;
     }
     Ok(status)
 }

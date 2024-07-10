@@ -14,7 +14,7 @@ pub const MAP_HELP_VERBOSE: &str = include_str!("map_verbose.md");
 
 /// Iterates over `StreamSplitter` and runs each of the `commands` on each
 /// record.
-fn map(splitter: StreamSplitter, options: &Options) -> ShellResult {
+fn map(splitter: StreamSplitter, options: &Options) -> i32 {
     let mut status = 0;
     let chunk_size = options
         .limit
@@ -37,7 +37,7 @@ fn map(splitter: StreamSplitter, options: &Options) -> ShellResult {
             }
         }
     }
-    Ok(status)
+    status
 }
 
 /// Runs the `map` command on `arguments`.
@@ -64,16 +64,10 @@ pub fn map_main(arguments: &[String]) -> ShellResult {
         let pathname = file.pathname.unwrap_or(&STDIN_PATHNAME);
         match file.read {
             Ok(mut read) => {
-                match map(
+                status += map(
                     StreamSplitter::new(&mut read, &options.input_record_delimiter),
                     &options,
-                ) {
-                    Ok(map_status) => status += map_status,
-                    Err(error) => {
-                        eprintln!("{pathname}: {error}");
-                        status += 1;
-                    }
-                }
+                );
             }
             Err(error) => {
                 eprintln!("{pathname}: {error}");
