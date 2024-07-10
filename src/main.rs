@@ -12,7 +12,8 @@
     clippy::module_name_repetitions,
     clippy::struct_excessive_bools,
     clippy::multiple_crate_versions,
-    clippy::similar_names
+    clippy::similar_names,
+    clippy::trivial_regex
 )]
 #![forbid(unsafe_code)]
 #![deny(warnings)]

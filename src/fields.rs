@@ -26,6 +26,7 @@ fn first_non_space(record: &[u8]) -> Option<usize> {
 
 const fn compute_index(i: isize, length: usize) -> usize {
     if i < 0 {
+        #[allow(clippy::cast_possible_wrap)] // Safe due to check below
         let length = length as isize;
         let i = i.abs();
         if i > length {
@@ -53,6 +54,9 @@ fn select_fields<'a>(fields: &[&'a [u8]], requested: &[isize], invert: bool) -> 
             .map(|pair| *pair.1)
             .collect()
     } else {
+        // clippy's advice doesn't work in this case, for some reason. TODO:
+        // Re-check this later.
+        #[allow(clippy::option_if_let_else)]
         requested
             .iter()
             .map(|n| {
