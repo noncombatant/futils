@@ -15,7 +15,7 @@ pub const VERSION_HELP: &str = include_str!("version.md");
 pub const VERSION_HELP_VERBOSE: &str = include_str!("version_verbose.md");
 
 #[derive(Serialize)]
-struct Version {
+struct Metadata {
     name: &'static str,
     description: &'static str,
     version: &'static str,
@@ -30,7 +30,7 @@ struct Version {
     crate_name: &'static str,
 }
 
-impl Version {
+impl Metadata {
     fn write_json(&self, output: &mut dyn Write, pretty: bool) -> Result<(), ShellError> {
         let to_json = if pretty {
             serde_json::to_writer_pretty
@@ -116,7 +116,7 @@ impl Version {
     }
 }
 
-const VERSION: Version = Version {
+const METADATA: Metadata = Metadata {
     name: env!("CARGO_PKG_NAME"),
     description: env!("CARGO_PKG_DESCRIPTION"),
     version: env!("CARGO_PKG_VERSION"),
@@ -148,9 +148,9 @@ pub fn version_main(arguments: &[String]) -> ShellResult {
 
     let mut stdout = stdout();
     if options.json_output {
-        VERSION.write_json(&mut stdout, atty::is(Stream::Stdout))?;
+        METADATA.write_json(&mut stdout, atty::is(Stream::Stdout))?;
     } else {
-        VERSION.write_columns(
+        METADATA.write_columns(
             &mut stdout,
             &options.output_field_delimiter,
             &options.output_record_delimiter,
