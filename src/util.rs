@@ -16,7 +16,6 @@ use locale::Numeric;
 use rustc_lexer::unescape::unescape_str;
 use serde::Serializer;
 use termimad::{terminal_size, Alignment, FmtText, MadSkin};
-use terminal_light::luma;
 
 use crate::shell::{ShellError, ShellResult};
 
@@ -33,13 +32,9 @@ fn terminal_text<'a>(s: &'a str, skin: &'a MadSkin) -> FmtText<'a, 'a> {
 }
 
 pub fn get_skin(stream: Stream) -> MadSkin {
-    let man_color = env::var("MANCOLOR").is_ok();
-    let mut skin = if man_color || atty::is(stream) {
-        if luma().map_or(false, |luma| luma > 0.6) {
-            MadSkin::default_light()
-        } else {
-            MadSkin::default_dark()
-        }
+    let color = env::var("MANCOLOR").is_ok();
+    let mut skin = if color || atty::is(stream) {
+        MadSkin::default()
     } else {
         MadSkin::no_style()
     };

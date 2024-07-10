@@ -9,10 +9,11 @@
     clippy::print_stderr,
     clippy::missing_docs_in_private_items,
     clippy::cast_sign_loss,
-    clippy::module_name_repetitions
+    clippy::module_name_repetitions,
+    clippy::struct_excessive_bools,
+    clippy::multiple_crate_versions,
+    clippy::similar_names
 )]
-// #![deny(clippy::cargo)]
-// #![deny(clippy::doc_markdown)]
 #![forbid(unsafe_code)]
 #![deny(warnings)]
 
