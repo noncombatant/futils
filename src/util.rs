@@ -51,15 +51,13 @@ pub fn get_skin(stream: Stream) -> MadSkin {
 /// and `verbose` if it is present. Prints to the standard output if `status` is
 /// 0; otherwise prints to the standard error. `exit`s with `status`.
 pub fn help(status: i32, message: &str, common: bool, verbose: Option<&str>) -> ShellResult {
-    let mut output = if status == 0 {
-        &mut stdout() as &mut dyn Write
-    } else {
-        &mut stderr() as &mut dyn Write
+    let mut output: &mut dyn Write = match status {
+        0 => &mut stdout(),
+        _ => &mut stderr(),
     };
-    let skin = get_skin(if status == 0 {
-        Stream::Stdout
-    } else {
-        Stream::Stderr
+    let skin = get_skin(match status {
+        0 => Stream::Stdout,
+        _ => Stream::Stderr,
     });
     let _ = writeln!(&mut output, "{}", terminal_text(message, &skin));
     if common {
