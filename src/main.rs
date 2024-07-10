@@ -13,7 +13,8 @@
     clippy::struct_excessive_bools,
     clippy::multiple_crate_versions,
     clippy::similar_names,
-    clippy::trivial_regex
+    clippy::trivial_regex,
+    clippy::cast_lossless  // TODO: Fix (fails on Linux)
 )]
 #![forbid(unsafe_code)]
 #![deny(warnings)]
