@@ -5,6 +5,6 @@ Prints the version of `futils`, metadata, and build-time configuration informati
 ## Usage
 
 ```
-futils version
+futils version [-Jv]
 futils version -hv
 ```
