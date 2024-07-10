@@ -45,50 +45,47 @@ fn get_permissions(mode: os::Mode) -> Option<Mode> {
 }
 
 fn format_permissions(mode: os::Mode) -> String {
-    match get_permissions(mode) {
-        Some(mode) => {
-            let mut bytes = vec![b'-'; 9];
-            if mode.contains(Mode::S_IRUSR) {
-                bytes[0] = b'r';
-            }
-            if mode.contains(Mode::S_IWUSR) {
-                bytes[1] = b'w';
-            }
-            if mode.contains(Mode::S_IXUSR) {
-                bytes[2] = b'x';
-            }
-            if mode.contains(Mode::S_ISUID) {
-                bytes[2] = b'S';
-            }
-            if mode.contains(Mode::S_IRGRP) {
-                bytes[3] = b'r';
-            }
-            if mode.contains(Mode::S_IWGRP) {
-                bytes[4] = b'w';
-            }
-            if mode.contains(Mode::S_IXGRP) {
-                bytes[5] = b'x';
-            }
-            if mode.contains(Mode::S_ISGID) {
-                bytes[5] = b'S';
-            }
-            if mode.contains(Mode::S_IROTH) {
-                bytes[6] = b'r';
-            }
-            if mode.contains(Mode::S_IWOTH) {
-                bytes[7] = b'w';
-            }
-            if mode.contains(Mode::S_IXOTH) {
-                bytes[8] = if mode.contains(Mode::S_ISVTX) {
-                    b'T'
-                } else {
-                    b'x'
-                }
-            }
-            String::from_utf8(bytes).unwrap()
+    get_permissions(mode).map_or("---------".to_string(), |mode| {
+        let mut bytes = vec![b'-'; 9];
+        if mode.contains(Mode::S_IRUSR) {
+            bytes[0] = b'r';
         }
-        None => "---------".to_string(),
-    }
+        if mode.contains(Mode::S_IWUSR) {
+            bytes[1] = b'w';
+        }
+        if mode.contains(Mode::S_IXUSR) {
+            bytes[2] = b'x';
+        }
+        if mode.contains(Mode::S_ISUID) {
+            bytes[2] = b'S';
+        }
+        if mode.contains(Mode::S_IRGRP) {
+            bytes[3] = b'r';
+        }
+        if mode.contains(Mode::S_IWGRP) {
+            bytes[4] = b'w';
+        }
+        if mode.contains(Mode::S_IXGRP) {
+            bytes[5] = b'x';
+        }
+        if mode.contains(Mode::S_ISGID) {
+            bytes[5] = b'S';
+        }
+        if mode.contains(Mode::S_IROTH) {
+            bytes[6] = b'r';
+        }
+        if mode.contains(Mode::S_IWOTH) {
+            bytes[7] = b'w';
+        }
+        if mode.contains(Mode::S_IXOTH) {
+            bytes[8] = if mode.contains(Mode::S_ISVTX) {
+                b'T'
+            } else {
+                b'x'
+            }
+        }
+        String::from_utf8(bytes).map_or(String::new(), |v| v)
+    })
 }
 
 fn format_type(mode: os::Mode) -> String {
@@ -170,7 +167,7 @@ fn format_type(mode: os::Mode) -> String {
 }
 
 impl<'a> os::Status<'a> {
-    fn new(status: &FileStat, name: &'a str) -> os::Status<'a> {
+    fn new(status: &FileStat, name: &'a str) -> Self {
         os::Status {
             name,
             file_type: format_type(status.st_mode),
