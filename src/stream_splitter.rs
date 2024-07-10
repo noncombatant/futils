@@ -91,32 +91,29 @@ impl<'a> Iterator for StreamSplitter<'a> {
         }
 
         let section = &self.buffer[self.start..self.end];
-        match self.delimiter.find(section) {
-            Some(m) => {
-                if self.start + m.end() == self.end && !self.eof {
-                    // `self.buffer` ends in delimiter-matching bytes, yet we
-                    // are not at EOF. So we might not have matched the
-                    // entirety of the delimiter. Therefore, start back at the
-                    // top, which incurs a `fill`, which will grow
-                    // `self.buffer`. The `unwrap` is OK because we must at
-                    // least match the same match again.
-                    return Some(self.next().unwrap());
-                }
-                self.start += m.end();
-                let r = if m.start() == 0 {
-                    // We matched the delimiter at the beginning of the section.
-                    Ok(Vec::new())
-                } else {
-                    // We matched a record.
-                    Ok(section[0..m.start()].to_vec())
-                };
-                Some(r)
+        if let Some(m) = self.delimiter.find(section) {
+            if self.start + m.end() == self.end && !self.eof {
+                // `self.buffer` ends in delimiter-matching bytes, yet we
+                // are not at EOF. So we might not have matched the
+                // entirety of the delimiter. Therefore, start back at the
+                // top, which incurs a `fill`, which will grow
+                // `self.buffer`. The `unwrap` is OK because we must at
+                // least match the same match again.
+                return Some(self.next().unwrap());
             }
-            None => {
-                // Last record, with no trailing delimiter.
-                self.start = self.end;
-                Some(Ok(section.to_vec()))
-            }
+            self.start += m.end();
+            let r = if m.start() == 0 {
+                // We matched the delimiter at the beginning of the section.
+                Ok(Vec::new())
+            } else {
+                // We matched a record.
+                Ok(section[0..m.start()].to_vec())
+            };
+            Some(r)
+        } else {
+            // Last record, with no trailing delimiter.
+            self.start = self.end;
+            Some(Ok(section.to_vec()))
         }
     }
 }
