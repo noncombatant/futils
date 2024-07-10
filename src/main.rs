@@ -7,7 +7,9 @@
 #![allow(
     clippy::single_call_fn,
     clippy::print_stderr,
-    clippy::missing_docs_in_private_items
+    clippy::missing_docs_in_private_items,
+    clippy::cast_sign_loss,
+    clippy::module_name_repetitions
 )]
 // #![deny(clippy::cargo)]
 // #![deny(clippy::doc_markdown)]

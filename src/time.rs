@@ -16,12 +16,10 @@ use crate::shell::{ShellError, UsageError};
 /// string representation in the format `%Y-%m-%d %H:%M:%S`. If `utc` cannot be
 /// interpreted for some raisin, returns `utc` `format!`ed as a `String`.
 pub fn format_utc_timestamp(utc: i64) -> String {
-    if let Some(naive) = NaiveDateTime::from_timestamp_opt(utc, 0) {
+    NaiveDateTime::from_timestamp_opt(utc, 0).map_or(format!("{utc}"), |naive| {
         let datetime: DateTime<Utc> = DateTime::from_utc(naive, Utc);
         format!("{}", datetime.format("%Y-%m-%d %H:%M:%S"))
-    } else {
-        format!("{utc}")
-    }
+    })
 }
 
 /// A comparison operation on a `NaiveDateTime`. This is essentially a curried

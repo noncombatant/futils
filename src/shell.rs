@@ -246,7 +246,7 @@ pub fn parse_options(arguments: &[String]) -> Result<(Options, &[String]), Shell
                 Opt('p', Some(s)) => options.prune_expressions.push(new_regex(&s, &options)?),
                 Opt('R', Some(s)) => {
                     options.output_record_delimiter =
-                        Vec::from(unescape_backslashes(&s)?.as_bytes())
+                        Vec::from(unescape_backslashes(&s)?.as_bytes());
                 }
                 Opt('r', Some(s)) => options.input_record_delimiter = new_regex(&s, &options)?,
                 Opt('s', None) => options.skip = true,
