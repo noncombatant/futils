@@ -82,7 +82,6 @@ impl<'a> Iterator for StreamSplitter<'a> {
 
     fn next(&mut self) -> Option<Self::Item> {
         if let Err(error) = self.fill() {
-            eprintln!("{error}"); // TODO: the caller should do this, not us
             return Some(Err(error));
         }
 

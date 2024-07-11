@@ -40,7 +40,6 @@ impl Metadata {
         Ok(to_json(output, &self)?)
     }
 
-    // TODO: support -v
     fn write_columns(
         &self,
         output: &mut dyn Write,
