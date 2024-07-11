@@ -59,15 +59,33 @@ fn select_fields<'a>(fields: &[&'a [u8]], requested: &[isize], invert: bool) -> 
         #[allow(clippy::option_if_let_else)]
         requested
             .iter()
-            .map(|n| {
-                if let Some(f) = fields.get(*n) {
-                    *f
-                } else {
-                    b""
-                }
+            .map(|n| match fields.get(*n) {
+                Some(f) => *f,
+                None => b"",
             })
             .collect()
     }
+}
+
+#[test]
+fn test_select_fields() {
+    let fields: Vec<&[u8]> = vec![b"hello", b"world", b"how's", b"it", b"goin'"];
+
+    let expected: Vec<&[u8]> = vec![b"hello", b"it"];
+    let result = select_fields(&fields, &[0, 3], false);
+    assert_eq!(expected, result);
+
+    let expected: Vec<&[u8]> = vec![b"world", b"goin'"];
+    let result = select_fields(&fields, &[1, -1], false);
+    assert_eq!(expected, result);
+
+    let expected: Vec<&[u8]> = vec![b"hello", b"how's", b"it"];
+    let result = select_fields(&fields, &[1, -1], true);
+    assert_eq!(expected, result);
+
+    let expected: Vec<&[u8]> = vec![b"world", b"how's", b"goin'"];
+    let result = select_fields(&fields, &[0, 3], true);
+    assert_eq!(expected, result);
 }
 
 // TODO: Consider folding this into enumerated_record.rs?
