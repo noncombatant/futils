@@ -24,47 +24,50 @@ fn first_non_space(record: &[u8]) -> Option<usize> {
     SPACE_CADET.find(record).map(|m| m.start())
 }
 
-const fn compute_index(i: isize, length: usize) -> usize {
-    if i < 0 {
-        #[allow(clippy::cast_possible_wrap)] // Safe due to check below
-        let length = length as isize;
-        let i = i.abs();
-        if i > length {
-            // Let the caller handle the invalid index, rather than panicking
-            // here on overflow.
-            i as usize
-        } else {
-            (length - i) as usize
+/// `select_fields` returns the `requested` indices from `fields` in 1 of 2
+/// ways:
+///
+/// When `invert` is false, it iterates over `requested` and gathers the indexed
+/// fields. When the requested index is negative, it counts from the end of
+/// `fields`; e.g. -1 is the last element, -2 is the second-to-last element, and
+/// so on.
+///
+/// When `invert` is true, it iterates over `fields` and gathers each element
+/// *unless* `requested` contains that element's index (treating negative
+/// indices as above). Note that this approach is O(n ✖️ m ✖️ m), where n =
+/// `fields.len()` and m = `requested.len()`, due to the linear behavior of
+/// `contains` on a slice and because for each index of `fields` we check both
+/// whether its positive index and its negative index is in `requested`.
+/// (There's probably a more efficient way to do it. However, both n and m are
+/// likely to be small.)
+#[allow(clippy::cast_possible_wrap)] // Checked below.
+fn select_fields<'a>(fields: &[&'a [u8]], requested: &[isize], invert: bool) -> Vec<&'a [u8]> {
+    let mut result: Vec<&'a [u8]> = vec![];
+    assert!(isize::try_from(fields.len()).is_ok());
+    let length = fields.len() as isize;
+    if invert {
+        for (n, f) in fields.iter().enumerate() {
+            assert!(isize::try_from(n).is_ok());
+            let n = n as isize;
+            let m = -(length - n);
+            if requested.contains(&n) || requested.contains(&m) {
+                continue;
+            }
+            result.push(*f);
         }
     } else {
-        i as usize
+        for n in requested {
+            let n = *n;
+            // We say `length + n` because adding a negative is subtraction,
+            // which is what we want.
+            let contains = (n >= 0 && n < length) || (n < 0 && length + n >= 0);
+            if contains {
+                let n = if n < 0 { length + n } else { n };
+                result.push(fields[n as usize]);
+            }
+        }
     }
-}
-
-fn select_fields<'a>(fields: &[&'a [u8]], requested: &[isize], invert: bool) -> Vec<&'a [u8]> {
-    let requested: Vec<usize> = requested
-        .iter()
-        .map(|f| compute_index(*f, fields.len()))
-        .collect();
-    if invert {
-        fields
-            .iter()
-            .enumerate()
-            .filter(|pair| !requested.contains(&(pair.0)))
-            .map(|pair| *pair.1)
-            .collect()
-    } else {
-        // clippy's advice doesn't work in this case, for some reason. TODO:
-        // Re-check this later.
-        #[allow(clippy::option_if_let_else)]
-        requested
-            .iter()
-            .map(|n| match fields.get(*n) {
-                Some(f) => *f,
-                None => b"",
-            })
-            .collect()
-    }
+    result
 }
 
 #[test]
