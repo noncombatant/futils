@@ -11,35 +11,28 @@ Consider a file called farm-animals.txt containing the following records:
 
 You can use `filter` to select records from this file, as follows.
 
-To show only the lines in the file that contain goats:
+To show only the lines in the file that contain goats (this will match “Goats”, “goat”, “GOATS”, and so on):
 
 ```
 filter -m goat farm-animals.txt
 ```
 
-As above, but search case-insensitively: this will match “Goats”, “goat”, “GOATS”, and so on:
+As above, but search case-sensitively:
 
 ```
-filter -m '(?i)goat' farm-animals.txt
-```
-
-Equivalently:
-
-```
-filter -i -m goat farm-animals.txt
+filter -S -m 'goat' farm-animals.txt
 ```
 
 It’s unclear why anyone would want only *non*-goat animals, but this is how to do that:
 
 ```
-filter -p '(?i)goat' farm-animals.txt
-filter -i -p goat farm-animals.txt
+filter -p goat farm-animals.txt
 ```
 
 Show records that match “moss”, but exclude billy goats, regardless of how “billy” is capitalized:
 
 ```
-filter -m moss -i -p billy farm-animals.txt
+filter -m moss -p billy farm-animals.txt
 ```
 
 To print a list of the animals for which the (hypothetical) program `check-if-hungry` succeeds:

@@ -76,10 +76,10 @@ pub fn common_main(arguments: &[String]) -> ShellResult {
     let mut record2 = records2.next();
     while record1.is_some() || record2.is_some() {
         match (&record1, &record2) {
-            (Some(r1), Some(r2)) => match if options.insensitive {
-                icmp(r1, r2)
-            } else {
+            (Some(r1), Some(r2)) => match if options.case_sensitive {
                 r1.cmp(r2)
+            } else {
+                icmp(r1, r2)
             } {
                 Ordering::Equal => {
                     print(3, r1, &options)?;

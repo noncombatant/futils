@@ -17,26 +17,17 @@ struct TestCase<'a> {
     expected_status: i32,
 }
 
+fn sort_lines(v: &str) -> String {
+    let mut lines = v
+        .split('\n')
+        .filter(|l| !l.is_empty())
+        .collect::<Vec<&str>>();
+    lines.sort();
+    lines.join("\n")
+}
+
 #[cfg(test)]
 impl<'a> TestCase<'a> {
-    fn new(
-        name: &'a str,
-        program: &'a str,
-        arguments: &'a [&'a str],
-        expected: &'a str,
-        sorted: bool,
-        expected_status: i32,
-    ) -> Self {
-        Self {
-            name,
-            program,
-            arguments,
-            expected,
-            sorted,
-            expected_status,
-        }
-    }
-
     fn run(&self) {
         let output = Command::new(FUTILS)
             .arg(self.program)
@@ -44,19 +35,16 @@ impl<'a> TestCase<'a> {
             .output();
         match output {
             Ok(output) => {
-                if self.sorted {
-                    let mut lines = from_utf8(&output.stdout)
-                        .unwrap()
-                        .split('\n')
-                        .filter(|l| !l.is_empty())
-                        .collect::<Vec<&str>>();
-                    lines.sort();
-                    let output = lines.join("\n");
-                    assert_eq!(self.expected, output);
+                let lines = from_utf8(&output.stdout).unwrap();
+                let lines = if self.sorted {
+                    &sort_lines(lines)
                 } else {
-                    println!("{:#?}", self.arguments);
-                    assert_eq!(self.expected, from_utf8(&output.stdout).unwrap());
+                    lines
+                };
+                if self.expected != lines {
+                    eprintln!("{}", self.name);
                 }
+                assert_eq!(self.expected, lines);
                 assert!(output.stderr.is_empty());
                 assert_eq!(self.expected_status, output.status.code().unwrap());
             }
@@ -78,44 +66,44 @@ fn run_tests(cases: &[TestCase]) {
 #[test]
 fn test_files_match_basic() {
     run_tests(&[
-        TestCase::new(
-            "files match basic simple",
-            "files",
-            &["-m", "goat", "test-data"],
-            "test-data/goat\n",
-            false,
-            0,
-        ),
-        TestCase::new(
-            "files match basic simple case-insensitive",
-            "files",
-            &["-m", "(?i)goat", "test-data"],
-            "test-data/Goats
+        TestCase {
+            name: "files match basic simple case-sensitive",
+            program: "files",
+            arguments: &["-S", "-m", "goat", "test-data"],
+            expected: "test-data/goat\n",
+            sorted: false,
+            expected_status: 0,
+        },
+        TestCase {
+            name: "files match basic simple case-insensitive",
+            program: "files",
+            arguments: &["-m", "goat", "test-data"],
+            expected: "test-data/Goats
 test-data/goat",
-            true,
-            0,
-        ),
-        TestCase::new(
-            "files match basic simple case-insensitive 2",
-            "files",
-            &["-m", "(?i)goats", "test-data"],
-            "test-data/Goats",
-            true,
-            0,
-        ),
-        TestCase::new(
-            "files match multiple path parts",
-            "files",
-            &["-m", "p/y", "test-data"],
-            "test-data/lurp/norp/yibb",
-            true,
-            0,
-        ),
-        TestCase::new(
-            "files match depth 1",
-            "files",
-            &["-d", "1", "test-data"],
-            "test-data
+            sorted: true,
+            expected_status: 0,
+        },
+        TestCase {
+            name: "files match basic simple case-insensitive 2",
+            program: "files",
+            arguments: &["-m", "(?i)goats", "test-data"],
+            expected: "test-data/Goats",
+            sorted: true,
+            expected_status: 0,
+        },
+        TestCase {
+            name: "files match multiple path parts",
+            program: "files",
+            arguments: &["-m", "p/y", "test-data"],
+            expected: "test-data/lurp/norp/yibb",
+            sorted: true,
+            expected_status: 0,
+        },
+        TestCase {
+            name: "files match depth 1",
+            program: "files",
+            arguments: &["-d", "1", "test-data"],
+            expected: "test-data
 test-data/Goats
 test-data/columns.txt
 test-data/common1.txt
@@ -124,20 +112,20 @@ test-data/farm-animals.txt
 test-data/goat
 test-data/lurp
 test-data/numbers.txt",
-            true,
-            0,
-        ),
+            sorted: true,
+            expected_status: 0,
+        },
     ]);
 }
 
 #[test]
 fn test_files_prune_basic() {
     run_tests(&[
-        TestCase::new(
-            "files prune basic simple case-insensitive",
-            "files",
-            &["-p", "(?i)goat", "test-data"],
-            "test-data
+        TestCase {
+            name: "files prune basic simple case-insensitive",
+            program: "files",
+            arguments: &["-p", "goat", "test-data"],
+            expected: "test-data
 test-data/columns.txt
 test-data/common1.txt
 test-data/common2.txt
@@ -146,14 +134,15 @@ test-data/lurp
 test-data/lurp/norp
 test-data/lurp/norp/yibb
 test-data/numbers.txt",
-            true,
-            0,
-        ),
-        TestCase::new(
-            "files prune basic simple case-insensitive -i",
-            "files",
-            &["-i", "-p", "goat", "test-data"],
-            "test-data
+            sorted: true,
+            expected_status: 0,
+        },
+        TestCase {
+            name: "files prune basic simple case-sensitive",
+            program: "files",
+            arguments: &["-S", "-p", "goat", "test-data"],
+            expected: "test-data
+test-data/Goats
 test-data/columns.txt
 test-data/common1.txt
 test-data/common2.txt
@@ -162,14 +151,14 @@ test-data/lurp
 test-data/lurp/norp
 test-data/lurp/norp/yibb
 test-data/numbers.txt",
-            true,
-            0,
-        ),
-        TestCase::new(
-            "files prune basic simple case-insensitive alternation",
-            "files",
-            &["-p", "(?i)(goat|yibb)", "test-data"],
-            "test-data
+            sorted: true,
+            expected_status: 0,
+        },
+        TestCase {
+            name: "files prune basic simple case-insensitive alternation",
+            program: "files",
+            arguments: &["-p", "(?i)(goat|yibb)", "test-data"],
+            expected: "test-data
 test-data/columns.txt
 test-data/common1.txt
 test-data/common2.txt
@@ -177,325 +166,324 @@ test-data/farm-animals.txt
 test-data/lurp
 test-data/lurp/norp
 test-data/numbers.txt",
-            true,
-            0,
-        ),
-        TestCase::new(
-            "files prune complex",
-            "files",
-            &[
+            sorted: true,
+            expected_status: 0,
+        },
+        TestCase {
+            name: "files prune complex",
+            program: "files",
+            arguments: &[
                 "-p",
                 "(?i)(goat|yibb)",
                 "-m",
                 "co",
-                "-i",
                 "-p",
-                "MON",
+                "mon",
                 "test-data",
             ],
-            "test-data/columns.txt",
-            true,
-            0,
-        ),
+            expected: "test-data/columns.txt",
+            sorted: true,
+            expected_status: 0,
+        },
     ]);
 }
 
 #[test]
 fn test_fields_basic() {
     run_tests(&[
-        TestCase::new(
-            "fields column 0",
-            "fields",
-            &["-c0", "test-data/columns.txt"],
-            "test-data/columns.txt	    1	yeah
+        TestCase {
+            name: "fields column 0",
+            program: "fields",
+            arguments: &["-c0", "test-data/columns.txt"],
+            expected: "test-data/columns.txt	    1	yeah
 test-data/columns.txt	    2	whee
 ",
-            false,
-            0,
-        ),
-        TestCase::new(
-            "fields 2 columns, non-enumerated",
-            "fields",
-            &["-c0", "-c2", "-n", "test-data/columns.txt"],
-            "yeah	hey
+            sorted: false,
+            expected_status: 0,
+        },
+        TestCase {
+            name: "fields 2 columns, non-enumerated",
+            program: "fields",
+            arguments: &["-c0", "-c2", "-n", "test-data/columns.txt"],
+            expected: "yeah	hey
 whee	ouch
 ",
-            false,
-            0,
-        ),
-        TestCase::new(
-            "fields custom output delimiters",
-            "fields",
-            &["-RX", "-FY", "-n", "test-data/columns.txt"],
-            "yeahYwowYheyYfriendsXwheeYbonkYouchYboingX",
-            false,
-            0,
-        ),
-        TestCase::new(
-            "fields all but column 2",
-            "fields",
-            &["-I", "-c1", "test-data/columns.txt"],
-            "test-data/columns.txt	    1	yeah	hey	friends
+            sorted: false,
+            expected_status: 0,
+        },
+        TestCase {
+            name: "fields custom output delimiters",
+            program: "fields",
+            arguments: &["-RX", "-FY", "-n", "test-data/columns.txt"],
+            expected: "yeahYwowYheyYfriendsXwheeYbonkYouchYboingX",
+            sorted: false,
+            expected_status: 0,
+        },
+        TestCase {
+            name: "fields all but column 2",
+            program: "fields",
+            arguments: &["-I", "-c1", "test-data/columns.txt"],
+            expected: "test-data/columns.txt	    1	yeah	hey	friends
 test-data/columns.txt	    2	whee	ouch	boing
 ",
-            false,
-            0,
-        ),
-        TestCase::new(
-            "fields negative columns, non-enumerated",
-            "fields",
-            &["-c-1", "-c-2", "-n", "test-data/columns.txt"],
-            "friends	hey
+            sorted: false,
+            expected_status: 0,
+        },
+        TestCase {
+            name: "fields negative columns, non-enumerated",
+            program: "fields",
+            arguments: &["-c-1", "-c-2", "-n", "test-data/columns.txt"],
+            expected: "friends	hey
 boing	ouch
 ",
-            false,
-            0,
-        ),
-        TestCase::new(
-            "fields inverted negative columns",
-            "fields",
-            &["-I", "-c-1", "-c-2", "test-data/columns.txt"],
-            "test-data/columns.txt	    1	yeah	wow
+            sorted: false,
+            expected_status: 0,
+        },
+        TestCase {
+            name: "fields inverted negative columns",
+            program: "fields",
+            arguments: &["-I", "-c-1", "-c-2", "test-data/columns.txt"],
+            expected: "test-data/columns.txt	    1	yeah	wow
 test-data/columns.txt	    2	whee	bonk
 ",
-            false,
-            0,
-        ),
-        TestCase::new(
-            "fields negative columns",
-            "fields",
-            &["-c-1", "-c-2", "test-data/columns.txt"],
-            "test-data/columns.txt	    1	friends	hey
+            sorted: false,
+            expected_status: 0,
+        },
+        TestCase {
+            name: "fields negative columns",
+            program: "fields",
+            arguments: &["-c-1", "-c-2", "test-data/columns.txt"],
+            expected: "test-data/columns.txt	    1	friends	hey
 test-data/columns.txt	    2	boing	ouch
 ",
-            false,
-            0,
-        ),
+            sorted: false,
+            expected_status: 0,
+        },
     ]);
 }
 
 #[test]
 fn test_filter_basic() {
     run_tests(&[
-        TestCase::new(
-            "filter non-enumerated case-insensitive combined options",
-            "filter",
-            &["-nm", "(?i)goat", "test-data/farm-animals.txt"],
-            "1	mountain goat	grass, moss, vegetation
+        TestCase {
+            name: "filter non-enumerated case-insensitive combined options",
+            program: "filter",
+            arguments: &["-nm", "(?i)goat", "test-data/farm-animals.txt"],
+            expected: "1	mountain goat	grass, moss, vegetation
 4	billy goats	grass, moss, vegetation, tin cans
 ",
-            false,
-            0,
-        ),
-        TestCase::new(
-            "filter case-insensitive -i",
-            "filter",
-            &["-i", "-m", "goat", "test-data/farm-animals.txt"],
-            "test-data/farm-animals.txt	    1	1	mountain goat	grass, moss, vegetation
+            sorted: false,
+            expected_status: 0,
+        },
+        TestCase {
+            name: "filter case-insensitive",
+            program: "filter",
+            arguments: &["-m", "goat", "test-data/farm-animals.txt"],
+            expected: "test-data/farm-animals.txt	    1	1	mountain goat	grass, moss, vegetation
 test-data/farm-animals.txt	    2	4	billy goats	grass, moss, vegetation, tin cans
 ",
-            false,
-            0,
-        ),
-        TestCase::new(
-            "filter non-enumerated case-insensitive",
-            "filter",
-            &["-n", "-m", "(?i)goat", "test-data/farm-animals.txt"],
-            "1	mountain goat	grass, moss, vegetation
+            sorted: false,
+            expected_status: 0,
+        },
+        TestCase {
+            name: "filter non-enumerated case-insensitive",
+            program: "filter",
+            arguments: &["-n", "-m", "goat", "test-data/farm-animals.txt"],
+            expected: "1	mountain goat	grass, moss, vegetation
 4	billy goats	grass, moss, vegetation, tin cans
 ",
-            false,
-            0,
-        ),
-        TestCase::new(
-            "filter prune case-insensitive",
-            "filter",
-            &["-p", "(?i)goat", "test-data/farm-animals.txt"],
-            "test-data/farm-animals.txt	    3	12	sheep	grass, more grass
+            sorted: false,
+            expected_status: 0,
+        },
+        TestCase {
+            name: "filter prune case-insensitive",
+            program: "filter",
+            arguments: &["-p", "goat", "test-data/farm-animals.txt"],
+            expected: "test-data/farm-animals.txt	    3	12	sheep	grass, more grass
 test-data/farm-animals.txt	    4	1,749	llamas	exclusively human flesh (for some reason)
 ",
-            false,
-            0,
-        ),
-        TestCase::new(
-            "filter non-enumerated prune case-insensitive",
-            "filter",
-            &["-n", "-i", "-p", "goat", "test-data/farm-animals.txt"],
-            "12	sheep	grass, more grass
+            sorted: false,
+            expected_status: 0,
+        },
+        TestCase {
+            name: "filter non-enumerated prune case-insensitive",
+            program: "filter",
+            arguments: &["-n", "-p", "goat", "test-data/farm-animals.txt"],
+            expected: "12	sheep	grass, more grass
 1,749	llamas	exclusively human flesh (for some reason)
 ",
-            false,
-            0,
-        ),
-        TestCase::new(
-            "filter match capitals",
-            "filter",
-            &["-m", "GOAT", "test-data/farm-animals.txt"],
-            "",
-            false,
-            1,
-        ),
-        TestCase::new(
-            "filter match capitals, meaningless -i",
-            "filter",
-            &["-m", "GOAT", "-i", "test-data/farm-animals.txt"],
-            "",
-            false,
-            1,
-        ),
+            sorted: false,
+            expected_status: 0,
+        },
+        TestCase {
+            name: "filter match capitals",
+            program: "filter",
+            arguments: &["-S", "-m", "GOAT", "test-data/farm-animals.txt"],
+            expected: "",
+            sorted: false,
+            expected_status: 1,
+        },
+        TestCase {
+            name: "filter match capitals, meaningless -i",
+            program: "filter",
+            arguments: &["-m", "GOAT", "test-data/farm-animals.txt"],
+            expected: "",
+            sorted: false,
+            expected_status: 1,
+        },
     ]);
 }
 
 #[test]
 fn test_filter_limit0() {
     run_tests(&[
-        TestCase::new(
-            "filter limit 0 match",
-            "filter",
-            &["-l", "0", "-m", "chunk", "test-data/farm-animals.txt"],
-            "",
-            false,
-            1,
-        ),
-        TestCase::new(
-            "filter limit 0 prune",
-            "filter",
-            &["-l", "0", "-p", "chunk", "test-data/farm-animals.txt"],
-            "",
-            false,
-            0,
-        ),
-        TestCase::new(
-            "filter limit case-insensitive",
-            "filter",
-            &["-l", "0", "-m", "(?i)goat", "test-data/farm-animals.txt"],
-            "",
-            false,
-            0,
-        ),
+        TestCase {
+            name: "filter limit 0 match",
+            program: "filter",
+            arguments: &["-l", "0", "-m", "chunk", "test-data/farm-animals.txt"],
+            expected: "",
+            sorted: false,
+            expected_status: 1,
+        },
+        TestCase {
+            name: "filter limit 0 prune",
+            program: "filter",
+            arguments: &["-l", "0", "-p", "chunk", "test-data/farm-animals.txt"],
+            expected: "",
+            sorted: false,
+            expected_status: 0,
+        },
+        TestCase {
+            name: "filter limit case-insensitive",
+            program: "filter",
+            arguments: &["-l", "0", "-m", "(?i)goat", "test-data/farm-animals.txt"],
+            expected: "",
+            sorted: false,
+            expected_status: 0,
+        },
     ]);
 }
 
 #[test]
 fn test_records_basic() {
     run_tests(&[
-        TestCase::new(
-            "records non-enumerated",
-            "records",
-            &["-n", "test-data/farm-animals.txt"],
-            "1	mountain goat	grass, moss, vegetation
+        TestCase {
+            name: "records non-enumerated",
+            program: "records",
+            arguments: &["-n", "test-data/farm-animals.txt"],
+            expected: "1	mountain goat	grass, moss, vegetation
 4	billy goats	grass, moss, vegetation, tin cans
 12	sheep	grass, more grass
 1,749	llamas	exclusively human flesh (for some reason)
 ",
-            false,
-            0,
-        ),
-        TestCase::new(
-            "records enumerated",
-            "records",
-            &["test-data/farm-animals.txt"],
-            "test-data/farm-animals.txt	    1	1	mountain goat	grass, moss, vegetation
+            sorted: false,
+            expected_status: 0,
+        },
+        TestCase {
+            name: "records enumerated",
+            program: "records",
+            arguments: &["test-data/farm-animals.txt"],
+            expected: "test-data/farm-animals.txt	    1	1	mountain goat	grass, moss, vegetation
 test-data/farm-animals.txt	    2	4	billy goats	grass, moss, vegetation, tin cans
 test-data/farm-animals.txt	    3	12	sheep	grass, more grass
 test-data/farm-animals.txt	    4	1,749	llamas	exclusively human flesh (for some reason)
 ",
-            false,
-            0,
-        ),
-        TestCase::new(
-            "records limit",
-            "records",
-            &["-l", "2", "test-data/farm-animals.txt"],
-            "test-data/farm-animals.txt	    1	1	mountain goat	grass, moss, vegetation
+            sorted: false,
+            expected_status: 0,
+        },
+        TestCase {
+            name: "records limit",
+            program: "records",
+            arguments: &["-l", "2", "test-data/farm-animals.txt"],
+            expected: "test-data/farm-animals.txt	    1	1	mountain goat	grass, moss, vegetation
 test-data/farm-animals.txt	    2	4	billy goats	grass, moss, vegetation, tin cans
 ",
-            false,
-            0,
-        ),
+            sorted: false,
+            expected_status: 0,
+        },
     ]);
 }
 
 #[test]
 fn test_reduce_basic() {
     run_tests(&[
-        TestCase::new(
-            "reduce add",
-            "reduce",
-            &["-x", "+", "test-data/numbers.txt"],
-            "2102784
+        TestCase {
+            name: "reduce add",
+            program: "reduce",
+            arguments: &["-x", "+", "test-data/numbers.txt"],
+            expected: "2102784
 ",
-            false,
-            0,
-        ),
-        TestCase::new(
-            "reduce subtract",
-            "reduce",
-            &["-x", "-", "test-data/numbers.txt"],
-            "-2100736
+            sorted: false,
+            expected_status: 0,
+        },
+        TestCase {
+            name: "reduce subtract",
+            program: "reduce",
+            arguments: &["-x", "-", "test-data/numbers.txt"],
+            expected: "-2100736
 ",
-            false,
-            0,
-        ),
-        TestCase::new(
-            "reduce multiply",
-            "reduce",
-            &["-x", "*", "test-data/numbers.txt"],
-            "2361183241434822606848
+            sorted: false,
+            expected_status: 0,
+        },
+        TestCase {
+            name: "reduce multiply",
+            program: "reduce",
+            arguments: &["-x", "*", "test-data/numbers.txt"],
+            expected: "2361183241434822606848
 ",
-            false,
-            0,
-        ),
-        TestCase::new(
-            "reduce divide",
-            "reduce",
-            &["-x", "/", "test-data/numbers.txt"],
-            "4.44089209850062616169452667236328125E-16
+            sorted: false,
+            expected_status: 0,
+        },
+        TestCase {
+            name: "reduce divide",
+            program: "reduce",
+            arguments: &["-x", "/", "test-data/numbers.txt"],
+            expected: "4.44089209850062616169452667236328125E-16
 ",
-            false,
-            0,
-        ),
+            sorted: false,
+            expected_status: 0,
+        },
     ]);
 }
 
 #[test]
 fn test_common_basic() {
     run_tests(&[
-        TestCase::new(
-            "common output field separator",
-            "common",
-            &[
+        TestCase {
+            name: "common output field separator -S",
+            program: "common",
+            arguments: &[
                 "-F",
                 ",\\t",
+                "-S",
                 "test-data/common1.txt",
                 "test-data/common2.txt",
             ],
-            ",	,	Atlanta
+            expected: ",	,	Atlanta
 ,	,	Boston
 Cincinnati
 ,	cincinnati
 ,	Detroit
 ",
-            false,
-            0,
-        ),
-        TestCase::new(
-            "common output field separator meaningless -i",
-            "common",
-            &[
+            sorted: false,
+            expected_status: 0,
+        },
+        TestCase {
+            name: "common output field separator meaningless",
+            program: "common",
+            arguments: &[
                 "-F",
                 ",\\t",
-                "-i",
                 "test-data/common1.txt",
                 "test-data/common2.txt",
             ],
-            ",	,	Atlanta
+            expected: ",	,	Atlanta
 ,	,	Boston
 ,	,	Cincinnati
 ,	Detroit
 ",
-            false,
-            0,
-        ),
+            sorted: false,
+            expected_status: 0,
+        },
     ]);
 }

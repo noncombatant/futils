@@ -5,8 +5,8 @@ Reads `file1` (or `stdin`) and `file2`, which should both be sorted, and produce
 ## Usage
 
 ```
-common [-i] [file1] file2
+common [-S] [file1] file2
 common -hv
 ```
 
-* `-i`: Compare records case-insensitively.
+* `-S`: Compare records case-sensitively.

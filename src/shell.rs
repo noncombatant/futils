@@ -80,7 +80,7 @@ impl UsageError {
 pub type ShellResult = Result<i32, ShellError>;
 
 /// The default list of command line flags. See `Options`, below.
-pub const DEFAULT_OPTION_SPEC: &str = "ad:c:eF:f:hIiJjl:M:m:nP:p:R:r:st:vx:";
+pub const DEFAULT_OPTION_SPEC: &str = "ad:c:eF:f:hIJjl:M:m:nP:p:R:r:Sst:vx:";
 
 /// These are the standard command line options for `futils` programs.
 ///
@@ -111,9 +111,6 @@ pub struct Options {
     /// `-I`
     pub invert_fields: bool,
 
-    /// `-i`
-    pub insensitive: bool,
-
     /// `-J`
     pub json_output: bool,
 
@@ -143,6 +140,9 @@ pub struct Options {
 
     /// `-r`
     pub input_record_delimiter: Regex,
+
+    /// `-S`
+    pub case_sensitive: bool,
 
     /// `-s`
     pub skip: bool,
@@ -187,7 +187,6 @@ impl Options {
             input_field_delimiter: Regex::new(DEFAULT_INPUT_FIELD_DELIMITER)?,
             help: false,
             invert_fields: false,
-            insensitive: false,
             json_output: false,
             json_input: false,
             limit: None,
@@ -198,6 +197,7 @@ impl Options {
             prune_expressions: Vec::new(),
             output_record_delimiter: Vec::from(DEFAULT_OUTPUT_RECORD_DELIMITER),
             input_record_delimiter: Regex::new(DEFAULT_INPUT_RECORD_DELIMITER)?,
+            case_sensitive: false,
             skip: false,
             file_types: String::from(DEFAULT_FILE_TYPES),
             verbose: false,
@@ -208,7 +208,7 @@ impl Options {
 
 fn new_regex(pattern: &str, options: &Options) -> Result<Regex, regex::Error> {
     RegexBuilder::new(pattern)
-        .case_insensitive(options.insensitive)
+        .case_insensitive(!(options.case_sensitive || pattern.chars().any(char::is_uppercase)))
         .build()
 }
 
@@ -234,7 +234,6 @@ pub fn parse_options(arguments: &[String]) -> Result<(Options, &[String]), Shell
                 }
                 Opt('f', Some(s)) => options.input_field_delimiter = new_regex(&s, &options)?,
                 Opt('I', None) => options.invert_fields = true,
-                Opt('i', None) => options.insensitive = true,
                 Opt('h', None) => options.help = true,
                 Opt('J', None) => options.json_output = true,
                 Opt('j', None) => options.json_input = true,
@@ -249,6 +248,7 @@ pub fn parse_options(arguments: &[String]) -> Result<(Options, &[String]), Shell
                         Vec::from(unescape_backslashes(&s)?.as_bytes());
                 }
                 Opt('r', Some(s)) => options.input_record_delimiter = new_regex(&s, &options)?,
+                Opt('S', None) => options.case_sensitive = true,
                 Opt('s', None) => options.skip = true,
                 Opt('t', Some(s)) => options.file_types.clone_from(&s),
                 Opt('v', None) => options.verbose = true,

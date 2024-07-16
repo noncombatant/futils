@@ -30,35 +30,22 @@ Another way to do this is:
 files -m '\.rs$' | map -x 'filter -n -m goat'
 ```
 
-Match all Markdown files:
+Match all Markdown files, even if the file extension is not lowercase:
 
 ```
 files -m '\.md$'
 ```
 
-Match all Markdown files, even if the file extension is not lowercase:
+Match all Markdown files, but only if the extension is lowercase:
 
 ```
-files -i -m '\.md$'
+files -S -m '\.md$'
 ```
 
-Note that this will *not* work:
+Show all Markdown files, except those whose names case-insensitively match “goat”:
 
 ```
-files -m '\.md$' -i
-```
-
-Show all Markdown files, except those whose names case-insensitively match
-“goat”:
-
-```
-files -m '\.md$' -i -p goat
-```
-
-Show all Markdown files regardless of the case of the file extension, except those whose names case-insensitively match “goat”:
-
-```
-files -i -m '\.md$' -p goat
+files -m '\.md$' -p goat
 ```
 
 ## See Also

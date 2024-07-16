@@ -7,16 +7,16 @@ If you give no specifications, `files` prints all pathnames (whose basenames do 
 ## Usage
 
 ```
-files [-aiv] [-d depth] [-M datetime] [-m regex] [-p regex] [-t types] [-x command] [pathname [...]]
+files [-aSv] [-d depth] [-M datetime] [-m regex] [-p regex] [-t types] [-x command] [pathname [...]]
 files -hv
 ```
 
 * `-a`: Search all paths, including those containing components whose basenames start with a dot. By default, `files` ignores these files and directories.
 * `-d`: Descend at most `depth` levels below the command line arguments in the directory hierarchy.
-* `-i`: Use case-insensitive regular expressions for `-m` and `-p` expressions that come *after* the `-i` in the argument list.
 * `-m`: Print pathnames that match the regular expression.
 * `-M`: Print pathnames that refer to files whose modification times match the given `datetime` expression (see below).
 * `-p`: Do not print (i.e. prune) pathnames that match the regular expression.
+* `-S`: Use case-sensitive regular expressions for `-m` and `-p` expressions that come *after* the `-S` in the argument list.
 * `-t`: Print only pathnames that refer to files that are among the given `types`: ‘d’irectory, ‘f’ile, and ‘s’ymlink. The default value for `types` is “dfs”, i.e. `files` prints pathnames of all 3 types.
 * `-v`: Print the standard output of commands given with the `-x` option. (By default, `files` only prints their standard error.)
 * `-x`: Print pathnames for which `command` exited with status 0.
