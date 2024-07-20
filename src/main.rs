@@ -89,14 +89,14 @@ fn main() {
 
     // If we were invoked as `futils`, shift the arguments left.
     let program_name = arguments[0].clone();
-    let mut program_name = file_name(&program_name).unwrap();
+    let mut program_name = file_name(&program_name).expect("could not get program name");
     if program_name.eq("futils") {
         arguments.remove(0);
     }
     if arguments.is_empty() {
         exit_with_result(help(-1, MAIN_HELP, false, None));
     } else {
-        program_name = file_name(&arguments[0]).unwrap();
+        program_name = file_name(&arguments[0]).expect("could not get program name");
     }
 
     if program_name == "help" || program_name == "-h" || program_name == "--help" {
