@@ -12,7 +12,7 @@ use nix::sys::stat::{lstat, FileStat, Mode};
 use users::{get_group_by_gid, get_user_by_uid};
 
 use crate::os;
-use crate::shell::{parse_options, Options, ShellError, ShellResult};
+use crate::shell::{parse_options, EmptyResult, Options, ShellResult};
 use crate::time::format_utc_timestamp;
 use crate::util::{exit_with_result, help};
 
@@ -183,7 +183,7 @@ impl<'a> os::Status<'a> {
         }
     }
 
-    fn write_columns(&self, output: &mut dyn Write, options: &Options) -> Result<(), ShellError> {
+    fn write_columns(&self, output: &mut dyn Write, options: &Options) -> EmptyResult {
         if options.verbose {
             self.write_columns_verbose(output, &options.output_field_delimiter)
         } else {
@@ -191,11 +191,7 @@ impl<'a> os::Status<'a> {
         }
     }
 
-    fn write_columns_concise(
-        &self,
-        output: &mut dyn Write,
-        field_delimiter: &[u8],
-    ) -> Result<(), ShellError> {
+    fn write_columns_concise(&self, output: &mut dyn Write, field_delimiter: &[u8]) -> EmptyResult {
         output.write_all(self.file_type.as_bytes())?;
         output.write_all(field_delimiter)?;
         output.write_all(self.permissions.as_bytes())?;
@@ -212,11 +208,7 @@ impl<'a> os::Status<'a> {
         Ok(())
     }
 
-    fn write_columns_verbose(
-        &self,
-        output: &mut dyn Write,
-        field_delimiter: &[u8],
-    ) -> Result<(), ShellError> {
+    fn write_columns_verbose(&self, output: &mut dyn Write, field_delimiter: &[u8]) -> EmptyResult {
         output.write_all(self.name.as_bytes())?;
         output.write_all(field_delimiter)?;
         output.write_all(format!("{}", self.size).as_bytes())?;
@@ -254,7 +246,7 @@ impl<'a> os::Status<'a> {
         Ok(())
     }
 
-    fn write_json(&self, output: &mut dyn Write, pretty: bool) -> Result<(), ShellError> {
+    fn write_json(&self, output: &mut dyn Write, pretty: bool) -> EmptyResult {
         let to_json = if pretty {
             serde_json::to_writer_pretty
         } else {

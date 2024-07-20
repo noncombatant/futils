@@ -10,7 +10,7 @@ use chrono::format::ParseError;
 use chrono::{DateTime, NaiveDate, NaiveDateTime, NaiveTime};
 use chrono::{Datelike, Local, Timelike};
 
-use crate::shell::{ShellError, UsageError};
+use crate::shell::UsageError;
 
 /// Given the number of seconds from the Unix epoch in UTC, returns a sortable
 /// string representation in the format `%Y-%m-%d %H:%M:%S`. If `utc` cannot be
@@ -47,7 +47,7 @@ impl Time {
     ///
     /// This function also accepts the empty string as a special case, in which
     /// case it returns a `Time` indicating 0 in the Unix epoch.
-    pub fn new(string: &str) -> Result<Self, ShellError> {
+    pub fn new(string: &str) -> anyhow::Result<Self> {
         let string = string.trim();
         if string.is_empty() {
             return Ok(Self {
@@ -61,11 +61,7 @@ impl Time {
             "<" => Ordering::Less,
             "=" => Ordering::Equal,
             ">" => Ordering::Greater,
-            _ => {
-                return Err(ShellError::Usage(UsageError::new(
-                    "Invalid datetime expression",
-                )))
-            }
+            _ => return Err(UsageError::new("Invalid datetime expression").into()),
         };
         let string = string.trim();
 

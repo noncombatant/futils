@@ -6,9 +6,7 @@
 use std::io::{stdout, Write};
 use std::str::from_utf8;
 
-use crate::shell::{
-    parse_options, FileOpener, Options, ShellError, ShellResult, UsageError, STDIN_PATHNAME,
-};
+use crate::shell::{parse_options, FileOpener, Options, ShellResult, UsageError, STDIN_PATHNAME};
 use crate::stream_splitter::StreamSplitter;
 use crate::util::{exit_with_result, help, parse_number};
 
@@ -21,7 +19,11 @@ pub const REDUCE_HELP_VERBOSE: &str = include_str!("reduce_verbose.md");
 // reporting them be optional.
 
 /// Returns the result of applying `command` to `accumulator` and `record`.
-fn apply_command(accumulator: &[u8], command: &str, record: &[u8]) -> Result<Vec<u8>, ShellError> {
+fn apply_command(
+    accumulator: &[u8],
+    command: &str,
+    record: &[u8],
+) -> Result<Vec<u8>, anyhow::Error> {
     match command {
         "+" | "-" | "*" | "/" => {
             let a = parse_number(accumulator)?;
@@ -50,7 +52,7 @@ fn reduce(splitter: StreamSplitter, options: &Options) -> ShellResult {
     let mut status = 0;
     let mut splitter = splitter.map_while(Result::ok);
     let Some(mut result) = splitter.next() else {
-        return Err(ShellError::Usage(UsageError::new("No input")));
+        return Err(UsageError::new("No input").into());
     };
 
     for record in splitter {

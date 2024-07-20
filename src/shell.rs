@@ -4,80 +4,55 @@
 //! A simple framework for command line programs: error types, option parsing,
 //! and assorted gadgets.
 
-use std::fmt::{Debug, Display};
+use std::fmt::Debug;
 use std::fs::File;
 use std::io::{self, stdin, Error, Read, Write};
-use std::num::ParseIntError;
 use std::str;
 
-use bigdecimal::ParseBigDecimalError;
-use chrono::format;
-use derive_more::{Display, From};
+use anyhow::Result;
+use derive_more::Display;
 use getopt::Opt;
 use once_cell::sync::Lazy;
 use regex::bytes::{Regex, RegexBuilder};
-use rustc_lexer::unescape::EscapeError;
 
 use crate::time::Time;
 use crate::util::unescape_backslashes;
 
-/// `ShellError` accounts for a variety of errors that can happen when running
-/// shell commands, enabling `*_main` to declare they return it and easily use
-/// the `?` operator. We can extend this `enum` arbitrarily, as needed.
-#[derive(Debug, From)]
-pub enum ShellError {
-    BigDecimal(ParseBigDecimalError),
-    Escape(EscapeError),
-    Getopt(getopt::Error),
-    IntParse(ParseIntError),
-    Io(io::Error),
-    Json(serde_json::Error),
-    Regex(regex::Error),
-    ShellWords(shell_words::ParseError),
-    TimeParse(format::ParseError),
-    Usage(UsageError),
-    Utf8(str::Utf8Error),
-}
-
-impl Display for ShellError {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> Result<(), std::fmt::Error> {
-        match self {
-            Self::BigDecimal(e) => Display::fmt(e, f),
-            Self::Escape(e) => write!(f, "{e:?}"),
-            Self::Getopt(e) => Display::fmt(e, f),
-            Self::IntParse(e) => Display::fmt(e, f),
-            Self::Io(e) => Display::fmt(e, f),
-            Self::Json(e) => Display::fmt(e, f),
-            Self::Regex(e) => Display::fmt(e, f),
-            Self::ShellWords(e) => Display::fmt(e, f),
-            Self::TimeParse(e) => Display::fmt(e, f),
-            Self::Usage(e) => Display::fmt(e, f),
-            Self::Utf8(e) => Display::fmt(e, f),
-        }
-    }
-}
-
-impl std::error::Error for ShellError {}
-
 /// Return this error for invalid invocations of shell commands.
 #[derive(Display, Debug)]
 pub struct UsageError {
-    details: String,
+    description: String,
 }
 
 impl UsageError {
-    /// Return a new `UsageError` from `details`.
-    pub fn new(details: &str) -> Self {
+    /// Return a new `UsageError` from `description`.
+    pub fn new(description: &str) -> Self {
         Self {
-            details: details.to_string(),
+            description: description.to_string(),
         }
     }
 }
 
+impl std::error::Error for UsageError {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        None
+    }
+    fn description(&self) -> &str {
+        &self.description
+    }
+    fn cause(&self) -> Option<&dyn std::error::Error> {
+        None
+    }
+    //fn provide<'a>(&'a self, request: &mut Request<'a>) {}
+}
+
 /// The various `*_main` functions return this type. `main` catches it and
-/// `exit`s with the given `i32` status code. If there is a `ShellError`, `main`
-/// will print it to `stderr` and `exit(-1)`.
-pub type ShellResult = Result<i32, ShellError>;
+/// `exit`s with the given `i32` status code. If there is an error, `main` will
+/// print it to `stderr` and `exit(-1)`.
+pub type ShellResult = anyhow::Result<i32>;
+
+/// A synonym for convenience.
+pub type EmptyResult = anyhow::Result<()>;
 
 /// The default list of command line flags. See `Options`, below.
 pub const DEFAULT_OPTION_SPEC: &str = "ad:c:eF:f:hIJjl:M:m:nP:p:R:r:Sst:vx:";
@@ -177,7 +152,7 @@ const DEFAULT_FILE_TYPES: &str = "dfs";
 impl Options {
     /// Returns an `Options` with all the fields set to their `DEFAULT_*`
     /// values.
-    pub fn with_defaults() -> Result<Self, ShellError> {
+    pub fn with_defaults() -> Result<Self> {
         Ok(Self {
             show_all: false,
             fields: Vec::new(),
@@ -216,7 +191,7 @@ fn new_regex(pattern: &str, options: &Options) -> Result<Regex, regex::Error> {
 /// `Options` and the remaining positional arguments. Any options not given on
 /// the command line will have their `DEFAULT_*` values in the returned
 /// `Options` (see `Options::with_defaults`).
-pub fn parse_options(arguments: &[String]) -> Result<(Options, &[String]), ShellError> {
+pub fn parse_options(arguments: &[String]) -> Result<(Options, &[String])> {
     let mut options = Options::with_defaults()?;
     let mut parsed = getopt::Parser::new(arguments, DEFAULT_OPTION_SPEC);
 
@@ -253,7 +228,7 @@ pub fn parse_options(arguments: &[String]) -> Result<(Options, &[String]), Shell
                 Opt('t', Some(s)) => options.file_types.clone_from(&s),
                 Opt('v', None) => options.verbose = true,
                 Opt('x', Some(s)) => options.match_commands.push(s.clone()),
-                Opt(_o, _) => return Err(ShellError::Usage(UsageError::new("Unknown option"))),
+                Opt(_o, _) => return Err(UsageError::new("Unknown option").into()),
             },
         }
     }

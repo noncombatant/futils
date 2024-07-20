@@ -8,7 +8,7 @@ use std::io::{stdout, Write};
 use atty::Stream;
 use serde::Serialize;
 
-use crate::shell::{parse_options, ShellError, ShellResult};
+use crate::shell::{parse_options, EmptyResult, ShellResult};
 use crate::util::{exit_with_result, help};
 
 pub const VERSION_HELP: &str = include_str!("version.md");
@@ -31,7 +31,7 @@ struct Metadata {
 }
 
 impl Metadata {
-    fn write_json(&self, output: &mut dyn Write, pretty: bool) -> Result<(), ShellError> {
+    fn write_json(&self, output: &mut dyn Write, pretty: bool) -> EmptyResult {
         let to_json = if pretty {
             serde_json::to_writer_pretty
         } else {
@@ -46,7 +46,7 @@ impl Metadata {
         field_delimiter: &[u8],
         record_delimiter: &[u8],
         verbose: bool,
-    ) -> Result<(), ShellError> {
+    ) -> EmptyResult {
         if verbose {
             write!(output, "Name")?;
             output.write_all(field_delimiter)?;

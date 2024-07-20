@@ -17,7 +17,7 @@ use rustc_lexer::unescape::unescape_str;
 use serde::Serializer;
 use termimad::{terminal_size, Alignment, FmtText, MadSkin};
 
-use crate::shell::{ShellError, ShellResult};
+use crate::shell::ShellResult;
 
 fn text_width() -> usize {
     let (terminal_width, _) = terminal_size();
@@ -95,9 +95,8 @@ pub fn run_command(command: &str, arguments: &[&[u8]], verbose: bool) -> ShellRe
 }
 
 /// Lexes `input` according to Rust’s lexical rules for strings, unescaping any
-/// backslash escape sequences. See `rustc_lexer::unescape`. Returns
-/// `ShellError` for easier compatibility with `ShellResult`.
-pub fn unescape_backslashes(input: &str) -> Result<String, ShellError> {
+/// backslash escape sequences. See `rustc_lexer::unescape`.
+pub fn unescape_backslashes(input: &str) -> anyhow::Result<String> {
     let mut result = Ok(String::new());
     // Thanks to Steve Checkoway for help:
     let mut cb = |_, ch| match (&mut result, ch) {
@@ -108,7 +107,7 @@ pub fn unescape_backslashes(input: &str) -> Result<String, ShellError> {
     unescape_str(input, &mut cb);
     match result {
         Ok(s) => Ok(s),
-        Err(e) => Err(ShellError::Escape(e)),
+        Err(e) => Err(anyhow::Error::msg(format!("{e:?}"))),
     }
 }
 
@@ -119,7 +118,7 @@ pub fn file_name(pathname: &str) -> Option<&str> {
 }
 
 /// Parses `value` and returns a `BigDecimal`.
-pub fn parse_number(value: &[u8]) -> Result<BigDecimal, ShellError> {
+pub fn parse_number(value: &[u8]) -> anyhow::Result<BigDecimal> {
     let separator = match Numeric::load_user_locale() {
         Ok(numeric) => numeric.thousands_sep,
         Err(_) => String::new(),
