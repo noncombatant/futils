@@ -16,7 +16,6 @@
     clippy::trivial_regex,
     clippy::cast_lossless  // TODO: Fix (fails on Linux)
 )]
-#![forbid(unsafe_code)]
 #![deny(warnings)]
 
 use std::env;
@@ -60,16 +59,16 @@ use version::{version_main, VERSION_HELP};
 
 const MAIN_HELP: &str = include_str!("main.md");
 
-// fn reset_sigpipe() {
-//     if cfg!(unix) {
-//         unsafe {
-//             libc::signal(libc::SIGPIPE, libc::SIG_DFL);
-//         }
-//     }
-// }
+fn reset_sigpipe() {
+    if cfg!(unix) {
+        unsafe {
+            libc::signal(libc::SIGPIPE, libc::SIG_DFL);
+        }
+    }
+}
 
 fn main() {
-    //reset_sigpipe();
+    reset_sigpipe();
 
     // TODO: Make `arguments` be `Vec<OsString>`, and propagate the API change
     // throughout (!). This probably means we can't use `getopt`, which seems to
