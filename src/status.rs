@@ -209,8 +209,6 @@ impl<'a> os::Status<'a> {
     }
 
     fn write_columns_verbose(&self, output: &mut dyn Write, field_delimiter: &[u8]) -> EmptyResult {
-        output.write_all(self.name.as_bytes())?;
-        output.write_all(field_delimiter)?;
         output.write_all(format!("{}", self.size).as_bytes())?;
         output.write_all(field_delimiter)?;
         output.write_all(self.modified_time.as_bytes())?;
@@ -243,6 +241,8 @@ impl<'a> os::Status<'a> {
         output.write_all(format!("{}", self.blocks).as_bytes())?;
         output.write_all(field_delimiter)?;
         output.write_all(format!("{}", self.block_size).as_bytes())?;
+        output.write_all(field_delimiter)?;
+        output.write_all(self.name.as_bytes())?;
         Ok(())
     }
 
@@ -293,7 +293,6 @@ pub fn status_main(arguments: &[String]) -> ShellResult {
     } else if !options.json_output {
         let headers = if options.verbose {
             vec![
-                b"Name".as_slice(),
                 b"Size".as_slice(),
                 b"Modified".as_slice(),
                 b"User".as_slice(),
@@ -309,6 +308,7 @@ pub fn status_main(arguments: &[String]) -> ShellResult {
                 b"Mode".as_slice(),
                 b"Blocks".as_slice(),
                 b"Block Size".as_slice(),
+                b"Name".as_slice(),
             ]
         } else {
             vec![

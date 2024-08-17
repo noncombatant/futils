@@ -49,4 +49,4 @@ Make `pretty: bool` be a member of `Options` and a command-line switch.
 
 Might be better off with `try_for_each` than with `map_while`.
 
-`status -v` should have name in the last column! Also, -J should not imply -v.
+`-J` should not imply `-v`.
