@@ -40,8 +40,8 @@ skipping ahead.
 Maybe there should also be an option to suppress the header.
 
 Make `write_columns` and `write_json` into a trait `StructuredWrite`, and wrap
-them into a `write` function of that trait that takes `&Options` and picks the
-right one.
+them into a `write` function of that trait that takes `&Options` (or, `verbose`
+and `json_output`) and picks the right one.
 
 Overall pattern: “walk and awk”
 
