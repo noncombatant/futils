@@ -4,13 +4,13 @@
 //! The `futils files` command.
 
 use std::cmp::Ordering;
-use std::io::{stdout, Write};
+use std::io::{Write, stdout};
 use std::time::SystemTime;
 
 use chrono::DateTime;
 use walkdir::{DirEntry, WalkDir};
 
-use crate::shell::{parse_options, Options, ShellResult};
+use crate::shell::{Options, ShellResult, parse_options};
 use crate::time::Time;
 use crate::util::{exit_with_result, help, run_command};
 

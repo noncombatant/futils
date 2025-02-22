@@ -4,15 +4,15 @@
 //! The `futils status` command.
 
 use std::fs::read_dir;
-use std::io::{stdout, Write};
+use std::io::{Write, stdout};
 use std::path::Path;
 
 use atty::Stream;
-use nix::sys::stat::{lstat, FileStat, Mode};
+use nix::sys::stat::{FileStat, Mode, lstat};
 use users::{get_group_by_gid, get_user_by_uid};
 
 use crate::os;
-use crate::shell::{parse_options, EmptyResult, Options, ShellResult};
+use crate::shell::{EmptyResult, Options, ShellResult, parse_options};
 use crate::time::format_utc_timestamp;
 use crate::util::{exit_with_result, help};
 
@@ -334,11 +334,7 @@ pub fn status_main(arguments: &[String]) -> ShellResult {
                     s.write_columns(&mut stdout, &options)?;
                 }
                 stdout.write_all(if options.json_output {
-                    if i < count - 1 {
-                        b",\n"
-                    } else {
-                        b"\n"
-                    }
+                    if i < count - 1 { b",\n" } else { b"\n" }
                 } else {
                     &options.output_record_delimiter
                 })?;

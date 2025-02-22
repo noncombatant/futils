@@ -3,20 +3,20 @@
 
 //! The `futils filter` command.
 
-use std::io::{stdout, Write};
-
+use crate::{
+    enumerated_record::EnumeratedRecord,
+    shell::{FileOpener, Options, STDIN_PATHNAME, ShellResult, parse_options},
+    util::{exit_with_result, help, run_command},
+};
 use atty::Stream;
 use itertools::Either;
-
-use crate::enumerated_record::EnumeratedRecord;
-use crate::shell::{parse_options, FileOpener, Options, ShellResult, STDIN_PATHNAME};
-use crate::stream_splitter::StreamSplitter;
-use crate::util::{exit_with_result, help, run_command};
+use regex_splitter::RegexSplitter;
+use std::io::{Write, stdout};
 
 pub const FILTER_HELP: &str = include_str!("filter.md");
 pub const FILTER_HELP_VERBOSE: &str = include_str!("filter_verbose.md");
 
-fn print_matches(pathname: &str, splitter: StreamSplitter, options: &Options) -> ShellResult {
+fn print_matches(pathname: &str, splitter: RegexSplitter, options: &Options) -> ShellResult {
     let mut stdout = stdout();
     let mut matched = false;
     let records = splitter.map_while(Result::ok);
@@ -114,7 +114,7 @@ pub fn filter_main(arguments: &[String]) -> ShellResult {
             Ok(mut read) => {
                 let s = print_matches(
                     pathname,
-                    StreamSplitter::new(&mut read, &options.input_record_delimiter),
+                    RegexSplitter::new(&mut read, &options.input_record_delimiter),
                     &options,
                 )?;
                 if s != 0 {

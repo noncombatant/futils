@@ -3,12 +3,13 @@
 
 //! The `futils reduce` command.
 
-use std::io::{stdout, Write};
+use crate::{
+    shell::{FileOpener, Options, STDIN_PATHNAME, ShellResult, UsageError, parse_options},
+    util::{exit_with_result, help, parse_number},
+};
+use regex_splitter::RegexSplitter;
+use std::io::{Write, stdout};
 use std::str::from_utf8;
-
-use crate::shell::{parse_options, FileOpener, Options, ShellResult, UsageError, STDIN_PATHNAME};
-use crate::stream_splitter::StreamSplitter;
-use crate::util::{exit_with_result, help, parse_number};
 
 pub const REDUCE_HELP: &str = include_str!("reduce.md");
 pub const REDUCE_HELP_VERBOSE: &str = include_str!("reduce_verbose.md");
@@ -44,10 +45,10 @@ fn apply_command(
     }
 }
 
-/// Iterates over `StreamSplitter` and runs each of the `commands` on each
+/// Iterates over `RegexSplitter` and runs each of the `commands` on each
 /// record. `verbose` enables printing `stdout` from the `commands`. Each
 /// record’s output is delimited by `output_delimiter`.
-fn reduce(splitter: StreamSplitter, options: &Options) -> ShellResult {
+fn reduce(splitter: RegexSplitter, options: &Options) -> ShellResult {
     let mut stdout = stdout();
     let mut status = 0;
     let mut splitter = splitter.map_while(Result::ok);
@@ -98,7 +99,7 @@ pub fn reduce_main(arguments: &[String]) -> ShellResult {
         match file.read {
             Ok(mut read) => {
                 match reduce(
-                    StreamSplitter::new(&mut read, &options.input_record_delimiter),
+                    RegexSplitter::new(&mut read, &options.input_record_delimiter),
                     &options,
                 ) {
                     Ok(s) => status += s,

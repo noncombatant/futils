@@ -4,7 +4,7 @@
 //! The `futils fileid` command.
 
 use std::fs;
-use std::io::{copy, stdout, Error, Write};
+use std::io::{Error, Write, copy, stdout};
 use std::os::unix::fs::MetadataExt;
 
 use atty::Stream;
@@ -12,7 +12,7 @@ use base64ct::{Base64, Encoding};
 use serde::Serialize;
 use sha2::{Digest, Sha256};
 
-use crate::shell::{parse_options, Options, ShellResult, StructuredWrite};
+use crate::shell::{Options, ShellResult, StructuredWrite, parse_options};
 use crate::util::{exit_with_result, help};
 
 pub const FILEID_HELP: &str = include_str!("fileid.md");

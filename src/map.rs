@@ -3,18 +3,19 @@
 
 //! The `futils map` command.
 
+use crate::{
+    shell::{FileOpener, Options, STDIN_PATHNAME, ShellResult, parse_options},
+    util::{exit_with_result, help, run_command},
+};
 use itertools::Itertools;
-
-use crate::shell::{parse_options, FileOpener, Options, ShellResult, STDIN_PATHNAME};
-use crate::stream_splitter::StreamSplitter;
-use crate::util::{exit_with_result, help, run_command};
+use regex_splitter::RegexSplitter;
 
 pub const MAP_HELP: &str = include_str!("map.md");
 pub const MAP_HELP_VERBOSE: &str = include_str!("map_verbose.md");
 
-/// Iterates over `StreamSplitter` and runs each of the `commands` on each
+/// Iterates over `RegexSplitter` and runs each of the `commands` on each
 /// record.
-fn map(splitter: StreamSplitter, options: &Options) -> i32 {
+fn map(splitter: RegexSplitter, options: &Options) -> i32 {
     let mut status = 0;
     let chunk_size = options
         .limit
@@ -65,7 +66,7 @@ pub fn map_main(arguments: &[String]) -> ShellResult {
         match file.read {
             Ok(mut read) => {
                 status += map(
-                    StreamSplitter::new(&mut read, &options.input_record_delimiter),
+                    RegexSplitter::new(&mut read, &options.input_record_delimiter),
                     &options,
                 );
             }

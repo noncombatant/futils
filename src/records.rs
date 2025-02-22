@@ -3,15 +3,15 @@
 
 //! The `futils records` command.
 
-use std::io::{stdout, Write};
-
+use crate::{
+    enumerated_record::EnumeratedRecord,
+    shell::{FileOpener, STDIN_PATHNAME, ShellResult, parse_options},
+    util::{exit_with_result, help},
+};
 use atty::Stream;
 use itertools::Either;
-
-use crate::enumerated_record::EnumeratedRecord;
-use crate::shell::{parse_options, FileOpener, ShellResult, STDIN_PATHNAME};
-use crate::stream_splitter::StreamSplitter;
-use crate::util::{exit_with_result, help};
+use regex_splitter::RegexSplitter;
+use std::io::{Write, stdout};
 
 pub const RECORDS_HELP: &str = include_str!("records.md");
 pub const RECORDS_HELP_VERBOSE: &str = include_str!("records_verbose.md");
@@ -38,7 +38,7 @@ pub fn records_main(arguments: &[String]) -> ShellResult {
         let pathname = file.pathname.unwrap_or(&STDIN_PATHNAME);
         match file.read {
             Ok(mut read) => {
-                let records = StreamSplitter::new(&mut read, &options.input_record_delimiter)
+                let records = RegexSplitter::new(&mut read, &options.input_record_delimiter)
                     .map_while(Result::ok);
                 let records = match options.limit {
                     Some(limit) => {
@@ -48,7 +48,7 @@ pub fn records_main(arguments: &[String]) -> ShellResult {
                             // TODO: For best efficiency — not reading the
                             // entire stream first when not necessary — we will
                             // probably want to implement `DoubleEndedIterator`
-                            // for `StreamSplitter`.
+                            // for `RegexSplitter`.
                             Either::Left(
                                 records
                                     .collect::<Vec<Vec<u8>>>()

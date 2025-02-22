@@ -3,20 +3,20 @@
 
 //! The `futils mapx` command.
 
+use crate::{
+    shell::{Options, ShellResult, parse_options},
+    util::{exit_with_result, help, run_command},
+};
+use itertools::{Itertools, chain};
+use regex_splitter::RegexSplitter;
 use std::io::stdin;
-
-use itertools::{chain, Itertools};
-
-use crate::shell::{parse_options, Options, ShellResult};
-use crate::stream_splitter::StreamSplitter;
-use crate::util::{exit_with_result, help, run_command};
 
 pub const MAPX_HELP: &str = include_str!("mapx.md");
 pub const MAPX_HELP_VERBOSE: &str = include_str!("mapx_verbose.md");
 
-/// Iterates over `StreamSplitter` and runs each of the `commands` on each
+/// Iterates over `RegexSplitter` and runs each of the `commands` on each
 /// record.
-fn mapx(splitter: StreamSplitter, options: &Options, command: &[String]) -> i32 {
+fn mapx(splitter: RegexSplitter, options: &Options, command: &[String]) -> i32 {
     let mut status = 0;
     let chunk_size = options
         .limit
@@ -62,7 +62,7 @@ pub fn mapx_main(arguments: &[String]) -> ShellResult {
         unimplemented!()
     }
     Ok(mapx(
-        StreamSplitter::new(&mut stdin(), &options.input_record_delimiter),
+        RegexSplitter::new(&mut stdin(), &options.input_record_delimiter),
         &options,
         arguments,
     ))

@@ -1,18 +1,19 @@
 //! The `futils apply` command.
 
 use std::io::{stdout, Write};
-
-use crate::shell::{parse_options, FileOpener, Options, ShellResult, STDIN_PATHNAME};
-use crate::stream_splitter::StreamSplitter;
-use crate::util::{help, run_command};
+use crate::{
+    shell::{parse_options, FileOpener, Options, ShellResult, STDIN_PATHNAME},
+    util::{help, run_command}
+};
+use regex_splitter::RegexSplitter;
 
 /// Command line usage help.
 pub(crate) const APPLY_HELP: &str = include_str!("apply_help.md");
 
-/// Iterates over `StreamSplitter` and runs the first field as a command on the
+/// Iterates over `RegexSplitter` and runs the first field as a command on the
 /// rest of the record, taking each field as an argument. Each record’s output
 /// is delimited by `output_delimiter`.
-fn apply(splitter: StreamSplitter, options: &Options) -> ShellResult {
+fn apply(splitter: RegexSplitter, options: &Options) -> ShellResult {
     let mut stdout = stdout();
     let mut status = 0;
     for r in splitter.map_while(|r| r.ok()) {
@@ -58,7 +59,7 @@ pub(crate) fn apply_main(arguments: &[String]) -> ShellResult {
         match file.read {
             Ok(mut read) => {
                 match apply(
-                    StreamSplitter::new(&mut read, &options.input_record_delimiter),
+                    RegexSplitter::new(&mut read, &options.input_record_delimiter),
                     &options,
                 ) {
                     Ok(s) => status += s,

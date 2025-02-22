@@ -18,9 +18,6 @@
 )]
 #![deny(warnings)]
 
-use std::env;
-use std::process::exit;
-
 mod common;
 mod enumerated_record;
 mod fields;
@@ -34,7 +31,6 @@ mod records;
 mod reduce;
 mod shell;
 mod status;
-mod stream_splitter;
 mod time;
 mod util;
 mod version;
@@ -43,19 +39,20 @@ mod version;
 #[cfg_attr(target_os = "macos", path = "darwin.rs")]
 mod os;
 
-use common::{common_main, COMMON_HELP};
-use fields::{fields_main, FIELDS_HELP};
-use fileid::{fileid_main, FILEID_HELP};
-use files::{files_main, FILES_HELP};
-use filter::{filter_main, FILTER_HELP};
-use map::{map_main, MAP_HELP};
-use mapx::{mapx_main, MAPX_HELP};
-use markdown::{markdown_main, MARKDOWN_HELP};
-use records::{records_main, RECORDS_HELP};
-use reduce::{reduce_main, REDUCE_HELP};
-use status::{status_main, STATUS_HELP};
+use common::{COMMON_HELP, common_main};
+use fields::{FIELDS_HELP, fields_main};
+use fileid::{FILEID_HELP, fileid_main};
+use files::{FILES_HELP, files_main};
+use filter::{FILTER_HELP, filter_main};
+use map::{MAP_HELP, map_main};
+use mapx::{MAPX_HELP, mapx_main};
+use markdown::{MARKDOWN_HELP, markdown_main};
+use records::{RECORDS_HELP, records_main};
+use reduce::{REDUCE_HELP, reduce_main};
+use status::{STATUS_HELP, status_main};
+use std::{env, process::exit};
 use util::{exit_with_result, file_name, help};
-use version::{version_main, VERSION_HELP};
+use version::{VERSION_HELP, version_main};
 
 const MAIN_HELP: &str = include_str!("main.md");
 

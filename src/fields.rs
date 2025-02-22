@@ -3,17 +3,17 @@
 
 //! The `futils fields` command.
 
-use std::io::{stdout, Error, Read, Write};
-use std::num::ParseIntError;
-
+use crate::{
+    shell::{FileOpener, Options, STDIN_PATHNAME, ShellResult, parse_options},
+    util::{exit_with_result, help},
+};
 use atty::Stream;
 use once_cell::sync::Lazy;
 use regex::bytes::Regex;
+use regex_splitter::RegexSplitter;
 use serde::Serialize;
-
-use crate::shell::{parse_options, FileOpener, Options, ShellResult, STDIN_PATHNAME};
-use crate::stream_splitter::StreamSplitter;
-use crate::util::{exit_with_result, help};
+use std::io::{Error, Read, Write, stdout};
+use std::num::ParseIntError;
 
 pub const FIELDS_HELP: &str = include_str!("fields.md");
 pub const FIELDS_HELP_VERBOSE: &str = include_str!("fields_verbose.md");
@@ -165,7 +165,7 @@ fn print_fields(
     options: &Options,
     requested_fields: &[isize],
 ) -> ShellResult {
-    for (n, r) in StreamSplitter::new(reader, &options.input_record_delimiter)
+    for (n, r) in RegexSplitter::new(reader, &options.input_record_delimiter)
         .map_while(Result::ok)
         .enumerate()
     {

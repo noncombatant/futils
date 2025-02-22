@@ -3,14 +3,15 @@
 
 //! The `futils common` command.
 
+use crate::{
+    shell::{Options, ShellResult, parse_options},
+    util::{exit_with_result, help, icmp},
+};
+use regex_splitter::RegexSplitter;
 use std::cmp::Ordering;
 use std::fs::File;
-use std::io::{stdin, stdout, Write};
+use std::io::{Write, stdin, stdout};
 use std::process::exit;
-
-use crate::shell::{parse_options, Options, ShellResult};
-use crate::stream_splitter::StreamSplitter;
-use crate::util::{exit_with_result, help, icmp};
 
 pub const COMMON_HELP: &str = include_str!("common.md");
 pub const COMMON_HELP_VERBOSE: &str = include_str!("common_verbose.md");
@@ -56,16 +57,16 @@ pub fn common_main(arguments: &[String]) -> ShellResult {
     let mut stdin = stdin();
     let mut file1 = File::open(&arguments[0])?;
     let mut file2: File;
-    let records1: StreamSplitter;
-    let records2: StreamSplitter;
+    let records1: RegexSplitter;
+    let records2: RegexSplitter;
     let delimiter = &options.input_record_delimiter;
     if arguments.len() == 2 {
         file2 = File::open(&arguments[1])?;
-        records1 = StreamSplitter::new(&mut file1, delimiter);
-        records2 = StreamSplitter::new(&mut file2, delimiter);
+        records1 = RegexSplitter::new(&mut file1, delimiter);
+        records2 = RegexSplitter::new(&mut file2, delimiter);
     } else {
-        records1 = StreamSplitter::new(&mut stdin, delimiter);
-        records2 = StreamSplitter::new(&mut file1, delimiter);
+        records1 = RegexSplitter::new(&mut stdin, delimiter);
+        records2 = RegexSplitter::new(&mut file1, delimiter);
     }
 
     let mut records1 = records1.map_while(Result::ok);

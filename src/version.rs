@@ -3,12 +3,12 @@
 
 //! The `futils version` command.
 
-use std::io::{stdout, Write};
+use std::io::{Write, stdout};
 
 use atty::Stream;
 use serde::Serialize;
 
-use crate::shell::{parse_options, EmptyResult, ShellResult};
+use crate::shell::{EmptyResult, ShellResult, parse_options};
 use crate::util::{exit_with_result, help};
 
 pub const VERSION_HELP: &str = include_str!("version.md");

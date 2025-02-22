@@ -3,13 +3,14 @@ authors = ["Chris Palmer"]
 name = "futils"
 repository = "https://github.com/noncombatant/futils"
 description = "Functional utilities for the POSIX shell"
-version = "0.6.3"
+version = "0.6.4"
 edition = "2024"
 license = "Apache-2.0"
 keywords = ["functional", "shell"]
 categories = ["command-line-utilities"]
 
 [dependencies]
+regex-splitter = { path = "../regex-splitter" }
 anyhow = "1.0.86"
 atty = ">=0.2.14"
 base64ct = { version = ">=1.6.0", features = ["alloc"] }

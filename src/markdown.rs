@@ -1,10 +1,11 @@
 // Copyright 2023 by [Chris Palmer](https://noncombatant.org)
 // SPDX-License-Identifier: Apache-2.0
 
+use crate::{
+    shell::{FileOpener, STDIN_PATHNAME, ShellResult, parse_options},
+    util::{exit_with_result, get_skin, help},
+};
 use atty::Stream;
-
-use crate::shell::{parse_options, FileOpener, ShellResult, STDIN_PATHNAME};
-use crate::util::{exit_with_result, get_skin, help};
 
 pub const MARKDOWN_HELP: &str = include_str!("markdown.md");
 

@@ -6,7 +6,7 @@
 
 use std::fmt::Debug;
 use std::fs::File;
-use std::io::{self, stdin, Error, Read, Write};
+use std::io::{self, Error, Read, Write, stdin};
 use std::str;
 
 use anyhow::Result;

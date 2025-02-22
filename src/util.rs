@@ -1,13 +1,13 @@
 // Copyright 2022 by [Chris Palmer](https://noncombatant.org)
 // SPDX-License-Identifier: Apache-2.0
 
-use std::cmp::{min, Ordering};
+use std::cmp::{Ordering, min};
 use std::env;
-use std::io::{stderr, stdout, Write};
+use std::io::{Write, stderr, stdout};
 use std::iter::zip;
 use std::path::Path;
-use std::process::{exit, Command};
-use std::str::{self, from_utf8, FromStr};
+use std::process::{Command, exit};
+use std::str::{self, FromStr, from_utf8};
 
 use atty::Stream;
 use bigdecimal::BigDecimal;
@@ -15,7 +15,7 @@ use bstr::ByteSlice;
 use locale::Numeric;
 use rustc_lexer::unescape::unescape_str;
 use serde::Serializer;
-use termimad::{terminal_size, Alignment, FmtText, MadSkin};
+use termimad::{Alignment, FmtText, MadSkin, terminal_size};
 
 use crate::shell::ShellResult;
 
