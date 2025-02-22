@@ -5,14 +5,14 @@
 //! and assorted gadgets.
 
 use crate::{time::Time, util::unescape_backslashes};
-use anyhow::Result;
 use getopt::Opt;
 use once_cell::sync::Lazy;
 use regex::bytes::{Regex, RegexBuilder};
 use std::{
-    fmt::{Debug, Display, Formatter},
+    error::Error,
+    fmt::{self, Debug, Display, Formatter},
     fs::File,
-    io::{self, Error, Read, Write, stdin},
+    io::{self, Read, Write, stdin},
     str,
 };
 
@@ -32,19 +32,19 @@ impl UsageError {
 }
 
 impl Display for UsageError {
-    fn fmt(&self, f: &mut Formatter) -> std::fmt::Result {
+    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         write!(f, "{}", self.description)
     }
 }
 
-impl std::error::Error for UsageError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+impl Error for UsageError {
+    fn source(&self) -> Option<&(dyn Error + 'static)> {
         None
     }
     fn description(&self) -> &str {
         &self.description
     }
-    fn cause(&self) -> Option<&dyn std::error::Error> {
+    fn cause(&self) -> Option<&dyn Error> {
         None
     }
 }
@@ -52,10 +52,10 @@ impl std::error::Error for UsageError {
 /// The various `*_main` functions return this type. `main` catches it and
 /// `exit`s with the given `i32` status code. If there is an error, `main` will
 /// print it to `stderr` and `exit(-1)`.
-pub type ShellResult = anyhow::Result<i32>;
+pub type ShellResult = Result<i32, Box<dyn Error>>;
 
 /// A synonym for convenience.
-pub type EmptyResult = anyhow::Result<()>;
+pub type EmptyResult = Result<(), Box<dyn Error>>;
 
 /// The default list of command line flags. See `Options`, below.
 pub const DEFAULT_OPTION_SPEC: &str = "ad:c:eF:f:hIJjl:M:m:nP:p:R:r:Sst:vx:";
@@ -155,7 +155,7 @@ const DEFAULT_FILE_TYPES: &str = "dfs";
 impl Options {
     /// Returns an `Options` with all the fields set to their `DEFAULT_*`
     /// values.
-    pub fn with_defaults() -> Result<Self> {
+    pub fn with_defaults() -> Result<Self, regex::Error> {
         Ok(Self {
             show_all: false,
             fields: Vec::new(),
@@ -194,7 +194,7 @@ fn new_regex(pattern: &str, options: &Options) -> Result<Regex, regex::Error> {
 /// `Options` and the remaining positional arguments. Any options not given on
 /// the command line will have their `DEFAULT_*` values in the returned
 /// `Options` (see `Options::with_defaults`).
-pub fn parse_options(arguments: &[String]) -> Result<(Options, &[String])> {
+pub fn parse_options(arguments: &[String]) -> Result<(Options, &[String]), Box<dyn Error>> {
     let mut options = Options::with_defaults()?;
     let mut parsed = getopt::Parser::new(arguments, DEFAULT_OPTION_SPEC);
 
@@ -293,5 +293,5 @@ impl<'a> Iterator for FileOpener<'a> {
 // Ultimately, this should go away and we should use a custom
 // `serde::ser::Serialize` for columnar output.
 pub trait StructuredWrite {
-    fn write(&self, output: &mut dyn Write, options: &Options) -> Result<(), Error>;
+    fn write(&self, output: &mut dyn Write, options: &Options) -> Result<(), io::Error>;
 }

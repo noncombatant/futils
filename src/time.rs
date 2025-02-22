@@ -4,13 +4,11 @@
 //! A not-very-good way to represent and compare times provided as text strings
 //! on the command line.
 
-use std::cmp::Ordering;
-
-use chrono::format::ParseError;
-use chrono::{DateTime, NaiveDate, NaiveDateTime, NaiveTime};
-use chrono::{Datelike, Local, Timelike};
-
 use crate::shell::UsageError;
+use chrono::{
+    DateTime, Datelike, Local, NaiveDate, NaiveDateTime, NaiveTime, Timelike, format::ParseError,
+};
+use std::{cmp::Ordering, error::Error};
 
 /// Given the number of seconds from the Unix epoch in UTC, returns a sortable
 /// string representation in the format `%Y-%m-%d %H:%M:%S`. If `utc` cannot be
@@ -47,7 +45,7 @@ impl Time {
     ///
     /// This function also accepts the empty string as a special case, in which
     /// case it returns a `Time` indicating 0 in the Unix epoch.
-    pub fn new(string: &str) -> anyhow::Result<Self> {
+    pub fn new(string: &str) -> Result<Self, Box<dyn Error>> {
         let string = string.trim();
         if string.is_empty() {
             return Ok(Self {
