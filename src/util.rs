@@ -1,23 +1,25 @@
 // Copyright 2022 by [Chris Palmer](https://noncombatant.org)
 // SPDX-License-Identifier: Apache-2.0
 
-use std::cmp::{Ordering, min};
-use std::env;
-use std::io::{Write, stderr, stdout};
-use std::iter::zip;
-use std::path::Path;
-use std::process::{Command, exit};
-use std::str::{self, FromStr, from_utf8};
-
+use crate::shell::ShellResult;
 use atty::Stream;
 use bigdecimal::BigDecimal;
 use bstr::ByteSlice;
 use locale::Numeric;
-use rustc_lexer::unescape::unescape_str;
+use rustc_lexer::unescape::{EscapeError, unescape_str};
 use serde::Serializer;
+use std::{
+    cmp::{Ordering, min},
+    env,
+    error::Error,
+    fmt::{self, Debug, Display, Formatter},
+    io::{Write, stderr, stdout},
+    iter::zip,
+    path::Path,
+    process::{Command, exit},
+    str::{self, FromStr, from_utf8},
+};
 use termimad::{Alignment, FmtText, MadSkin, terminal_size};
-
-use crate::shell::ShellResult;
 
 fn text_width() -> usize {
     let (terminal_width, _) = terminal_size();
@@ -94,9 +96,42 @@ pub fn run_command(command: &str, arguments: &[&[u8]], verbose: bool) -> ShellRe
     Ok(output.status.code().unwrap_or(0))
 }
 
+// `EscapeError` does not actually implement `Error`, so we have to do it
+// ourselves.
+pub struct MyEscapeError {
+    #[allow(unused)]
+    error: EscapeError,
+}
+
+impl Error for MyEscapeError {
+    fn source(&self) -> Option<&(dyn Error + 'static)> {
+        None
+    }
+
+    fn description(&self) -> &str {
+        stringify!(self.error)
+    }
+
+    fn cause(&self) -> Option<&dyn Error> {
+        None
+    }
+}
+
+impl Display for MyEscapeError {
+    fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), fmt::Error> {
+        write!(f, "{}", stringify!(self.error))
+    }
+}
+
+impl Debug for MyEscapeError {
+    fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), fmt::Error> {
+        write!(f, "{}", stringify!(self.error))
+    }
+}
+
 /// Lexes `input` according to Rust’s lexical rules for strings, unescaping any
 /// backslash escape sequences. See `rustc_lexer::unescape`.
-pub fn unescape_backslashes(input: &str) -> anyhow::Result<String> {
+pub fn unescape_backslashes(input: &str) -> Result<String, MyEscapeError> {
     let mut result = Ok(String::new());
     // Thanks to Steve Checkoway for help:
     let mut cb = |_, ch| match (&mut result, ch) {
@@ -107,7 +142,7 @@ pub fn unescape_backslashes(input: &str) -> anyhow::Result<String> {
     unescape_str(input, &mut cb);
     match result {
         Ok(s) => Ok(s),
-        Err(e) => Err(anyhow::Error::msg(format!("{e:?}"))),
+        Err(e) => Err(MyEscapeError { error: e }),
     }
 }
 
@@ -118,7 +153,7 @@ pub fn file_name(pathname: &str) -> Option<&str> {
 }
 
 /// Parses `value` and returns a `BigDecimal`.
-pub fn parse_number(value: &[u8]) -> anyhow::Result<BigDecimal> {
+pub fn parse_number(value: &[u8]) -> Result<BigDecimal, Box<dyn Error>> {
     let separator = match Numeric::load_user_locale() {
         Ok(numeric) => numeric.thousands_sep,
         Err(_) => String::new(),

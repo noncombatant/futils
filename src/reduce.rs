@@ -8,8 +8,11 @@ use crate::{
     util::{exit_with_result, help, parse_number},
 };
 use regex_splitter::RegexSplitter;
-use std::io::{Write, stdout};
-use std::str::from_utf8;
+use std::{
+    error::Error,
+    io::{Write, stdout},
+    str::from_utf8,
+};
 
 pub const REDUCE_HELP: &str = include_str!("reduce.md");
 pub const REDUCE_HELP_VERBOSE: &str = include_str!("reduce_verbose.md");
@@ -24,7 +27,7 @@ fn apply_command(
     accumulator: &[u8],
     command: &str,
     record: &[u8],
-) -> Result<Vec<u8>, anyhow::Error> {
+) -> Result<Vec<u8>, Box<dyn Error>> {
     match command {
         "+" | "-" | "*" | "/" => {
             let a = parse_number(accumulator)?;

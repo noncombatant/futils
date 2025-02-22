@@ -27,12 +27,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "anyhow"
-version = "1.0.96"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6b964d184e89d9b6b67dd2715bc8e74cf3107fb2b529990c90cf517326150bf4"
-
-[[package]]
 name = "atty"
 version = "0.2.14"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -312,7 +306,6 @@ checksum = "37909eebbb50d72f9059c3b6d82c0463f2ff062c9e95845c43a6c9c0355411be"
 name = "futils"
 version = "0.6.4"
 dependencies = [
- "anyhow",
  "atty",
  "base64ct",
  "bigdecimal",
