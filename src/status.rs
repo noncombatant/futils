@@ -20,11 +20,17 @@ pub const STATUS_HELP: &str = include_str!("status.md");
 pub const STATUS_HELP_VERBOSE: &str = include_str!("status_verbose.md");
 
 fn format_uid(uid: u32) -> String {
-    get_user_by_uid(uid).map_or(format!("{uid}"), |s| s.name().to_string_lossy().to_string())
+    get_user_by_uid(uid).map_or_else(
+        || format!("{uid}"),
+        |s| s.name().to_string_lossy().to_string(),
+    )
 }
 
 fn format_gid(gid: u32) -> String {
-    get_group_by_gid(gid).map_or(format!("{gid}"), |s| s.name().to_string_lossy().to_string())
+    get_group_by_gid(gid).map_or_else(
+        || format!("{gid}"),
+        |s| s.name().to_string_lossy().to_string(),
+    )
 }
 
 const fn get_permissions(mode: os::Mode) -> Option<Mode> {

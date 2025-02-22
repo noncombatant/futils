@@ -108,7 +108,7 @@ impl Error for MyEscapeError {
         None
     }
 
-    fn description(&self) -> &str {
+    fn description(&self) -> &'static str {
         stringify!(self.error)
     }
 

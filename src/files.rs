@@ -18,7 +18,7 @@ pub const FILES_HELP: &str = include_str!("files.md");
 pub const FILES_HELP_VERBOSE: &str = include_str!("files_verbose.md");
 
 fn is_hidden(e: &DirEntry) -> bool {
-    e.path().to_str().map_or(false, |s| s.contains("/."))
+    e.path().to_str().is_some_and(|s| s.contains("/."))
 }
 
 fn compare_times(e: &DirEntry, t: &Time) -> Result<bool, std::io::Error> {

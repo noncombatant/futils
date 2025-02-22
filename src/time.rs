@@ -14,9 +14,10 @@ use std::{cmp::Ordering, error::Error};
 /// string representation in the format `%Y-%m-%d %H:%M:%S`. If `utc` cannot be
 /// interpreted for some raisin, returns `utc` `format!`ed as a `String`.
 pub fn format_utc_timestamp(utc: i64) -> String {
-    DateTime::from_timestamp(utc, 0).map_or(format!("{utc}"), |datetime| {
-        datetime.format("%Y-%m-%d %H:%M:%S").to_string()
-    })
+    DateTime::from_timestamp(utc, 0).map_or_else(
+        || format!("{utc}"),
+        |datetime| datetime.format("%Y-%m-%d %H:%M:%S").to_string(),
+    )
 }
 
 /// A comparison operation on a `NaiveDateTime`. This is essentially a curried
