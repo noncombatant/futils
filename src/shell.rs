@@ -4,22 +4,20 @@
 //! A simple framework for command line programs: error types, option parsing,
 //! and assorted gadgets.
 
-use std::fmt::Debug;
-use std::fs::File;
-use std::io::{self, Error, Read, Write, stdin};
-use std::str;
-
+use crate::{time::Time, util::unescape_backslashes};
 use anyhow::Result;
-use derive_more::Display;
 use getopt::Opt;
 use once_cell::sync::Lazy;
 use regex::bytes::{Regex, RegexBuilder};
-
-use crate::time::Time;
-use crate::util::unescape_backslashes;
+use std::{
+    fmt::{Debug, Display, Formatter},
+    fs::File,
+    io::{self, Error, Read, Write, stdin},
+    str,
+};
 
 /// Return this error for invalid invocations of shell commands.
-#[derive(Display, Debug)]
+#[derive(Debug)]
 pub struct UsageError {
     description: String,
 }
@@ -33,6 +31,12 @@ impl UsageError {
     }
 }
 
+impl Display for UsageError {
+    fn fmt(&self, f: &mut Formatter) -> std::fmt::Result {
+        write!(f, "{}", self.description)
+    }
+}
+
 impl std::error::Error for UsageError {
     fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
         None
@@ -43,7 +47,6 @@ impl std::error::Error for UsageError {
     fn cause(&self) -> Option<&dyn std::error::Error> {
         None
     }
-    //fn provide<'a>(&'a self, request: &mut Request<'a>) {}
 }
 
 /// The various `*_main` functions return this type. `main` catches it and
