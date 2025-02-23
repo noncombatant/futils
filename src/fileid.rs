@@ -7,7 +7,6 @@ use crate::{
     shell::{Options, ShellResult, StructuredWrite, parse_options},
     util::{exit_with_result, help},
 };
-use atty::Stream;
 use base64ct::{Base64, Encoding};
 use blake3::Hasher;
 use serde::Serialize;
@@ -61,7 +60,7 @@ impl StructuredWrite for FileID {
     fn write(&self, output: &mut dyn Write, options: &Options) -> Result<(), Error> {
         if options.json_output {
             // TODO: `pretty` should be a command-line switch.
-            self.write_json(output, atty::is(Stream::Stdout))
+            self.write_json(output, true)
         } else {
             self.write_columns(output, options)
         }

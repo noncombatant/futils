@@ -3,18 +3,19 @@
 
 //! The `futils status` command.
 
-use std::fs::read_dir;
-use std::io::{Write, stdout};
-use std::path::Path;
-
-use atty::Stream;
+use crate::{
+    os,
+    shell::{EmptyResult, Options, ShellResult, parse_options},
+    time::format_utc_timestamp,
+    util::{exit_with_result, help},
+};
 use nix::sys::stat::{FileStat, Mode, lstat};
+use std::{
+    fs::read_dir,
+    io::{IsTerminal, Write, stdout},
+    path::Path,
+};
 use users::{get_group_by_gid, get_user_by_uid};
-
-use crate::os;
-use crate::shell::{EmptyResult, Options, ShellResult, parse_options};
-use crate::time::format_utc_timestamp;
-use crate::util::{exit_with_result, help};
 
 pub const STATUS_HELP: &str = include_str!("status.md");
 pub const STATUS_HELP_VERBOSE: &str = include_str!("status_verbose.md");
@@ -335,7 +336,8 @@ pub fn status_main(arguments: &[String]) -> ShellResult {
             Ok(s) => {
                 let s = os::Status::new(&s, pathname);
                 if options.json_output {
-                    s.write_json(&mut stdout, atty::is(Stream::Stdout))?;
+                    let t = stdout.is_terminal();
+                    s.write_json(&mut stdout, t)?;
                 } else {
                     s.write_columns(&mut stdout, &options)?;
                 }

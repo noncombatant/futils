@@ -3,13 +3,12 @@
 
 //! The `futils version` command.
 
-use std::io::{Write, stdout};
-
-use atty::Stream;
+use crate::{
+    shell::{EmptyResult, ShellResult, parse_options},
+    util::{exit_with_result, help},
+};
 use serde::Serialize;
-
-use crate::shell::{EmptyResult, ShellResult, parse_options};
-use crate::util::{exit_with_result, help};
+use std::io::{IsTerminal, Write, stdout};
 
 pub const VERSION_HELP: &str = include_str!("version.md");
 pub const VERSION_HELP_VERBOSE: &str = include_str!("version_verbose.md");
@@ -147,7 +146,8 @@ pub fn version_main(arguments: &[String]) -> ShellResult {
 
     let mut stdout = stdout();
     if options.json_output {
-        METADATA.write_json(&mut stdout, atty::is(Stream::Stdout))?;
+        let t = stdout.is_terminal();
+        METADATA.write_json(&mut stdout, t)?;
     } else {
         METADATA.write_columns(
             &mut stdout,

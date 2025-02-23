@@ -7,13 +7,14 @@ use crate::{
     shell::{FileOpener, Options, STDIN_PATHNAME, ShellResult, parse_options},
     util::{exit_with_result, help},
 };
-use atty::Stream;
 use once_cell::sync::Lazy;
 use regex::bytes::Regex;
 use regex_splitter::RegexSplitter;
 use serde::Serialize;
-use std::io::{Error, Read, Write, stdout};
-use std::num::ParseIntError;
+use std::{
+    io::{Error, IsTerminal, Read, Write, stdout},
+    num::ParseIntError,
+};
 
 pub const FIELDS_HELP: &str = include_str!("fields.md");
 pub const FIELDS_HELP_VERBOSE: &str = include_str!("fields_verbose.md");
@@ -165,6 +166,7 @@ fn print_fields(
     options: &Options,
     requested_fields: &[isize],
 ) -> ShellResult {
+    let mut stdout = stdout();
     for (n, r) in RegexSplitter::new(reader, &options.input_record_delimiter)
         .map_while(Result::ok)
         .enumerate()
@@ -177,9 +179,10 @@ fn print_fields(
             options,
         );
         if options.json_output {
-            fields.write_json(&mut stdout(), atty::is(Stream::Stdout))?;
+            let t = stdout.is_terminal();
+            fields.write_json(&mut stdout, t)?;
         } else {
-            fields.write_columns(&mut stdout(), options)?;
+            fields.write_columns(&mut stdout, options)?;
         }
     }
     Ok(0)

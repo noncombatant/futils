@@ -8,10 +8,9 @@ use crate::{
     shell::{FileOpener, STDIN_PATHNAME, ShellResult, parse_options},
     util::{exit_with_result, help},
 };
-use atty::Stream;
 use itertools::Either;
 use regex_splitter::RegexSplitter;
-use std::io::{Write, stdout};
+use std::io::{IsTerminal, Write, stdout};
 
 pub const RECORDS_HELP: &str = include_str!("records.md");
 pub const RECORDS_HELP_VERBOSE: &str = include_str!("records_verbose.md");
@@ -75,7 +74,8 @@ pub fn records_main(arguments: &[String]) -> ShellResult {
                     r: pair.1,
                 }) {
                     if options.json_output {
-                        er.write_json(&mut stdout, atty::is(Stream::Stdout), &options)?;
+                        let t = stdout.is_terminal();
+                        er.write_json(&mut stdout, t, &options)?;
                         stdout.write_all(b",\n")?;
                     } else {
                         er.write_columns(&mut stdout, &options)?;

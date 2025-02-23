@@ -8,10 +8,9 @@ use crate::{
     shell::{FileOpener, Options, STDIN_PATHNAME, ShellResult, parse_options},
     util::{exit_with_result, help, run_command},
 };
-use atty::Stream;
 use itertools::Either;
 use regex_splitter::RegexSplitter;
-use std::io::{Write, stdout};
+use std::io::{IsTerminal, Write, stdout};
 
 pub const FILTER_HELP: &str = include_str!("filter.md");
 pub const FILTER_HELP_VERBOSE: &str = include_str!("filter_verbose.md");
@@ -79,7 +78,8 @@ fn print_matches(pathname: &str, splitter: RegexSplitter, options: &Options) -> 
         })
     {
         if options.json_output {
-            er.write_json(&mut stdout, atty::is(Stream::Stdout), options)?;
+            let t = stdout.is_terminal();
+            er.write_json(&mut stdout, t, options)?;
             stdout.write_all(b",\n")?;
         } else {
             er.write_columns(&mut stdout, options)?;

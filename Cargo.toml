@@ -11,7 +11,6 @@ categories = ["command-line-utilities"]
 
 [dependencies]
 regex-splitter = { path = "../regex-splitter" }
-atty = ">=0.2.14"
 base64ct = { version = ">=1.6.0", features = ["alloc"] }
 bigdecimal = ">=0.4.5"
 bstr = ">=1.9.1"
