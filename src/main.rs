@@ -28,7 +28,6 @@ mod map;
 mod mapx;
 mod markdown;
 mod records;
-mod reduce;
 mod shell;
 mod status;
 mod time;
@@ -48,7 +47,6 @@ use map::{MAP_HELP, map_main};
 use mapx::{MAPX_HELP, mapx_main};
 use markdown::{MARKDOWN_HELP, markdown_main};
 use records::{RECORDS_HELP, records_main};
-use reduce::{REDUCE_HELP, reduce_main};
 use status::{STATUS_HELP, status_main};
 use std::{env, process::exit};
 use util::{exit_with_result, file_name, help};
@@ -109,7 +107,6 @@ fn main() {
                 "mapx" => help(0, MAPX_HELP, true, None),
                 "markdown" => help(0, MARKDOWN_HELP, true, None),
                 "records" => help(0, RECORDS_HELP, true, None),
-                "reduce" => help(0, REDUCE_HELP, true, None),
                 "status" => help(0, STATUS_HELP, true, None),
                 "version" => help(0, VERSION_HELP, true, None),
                 &_ => help(-1, MAIN_HELP, false, None),
@@ -127,7 +124,6 @@ fn main() {
         "mapx" => mapx_main(&arguments),
         "markdown" => markdown_main(&arguments),
         "records" => records_main(&arguments),
-        "reduce" => reduce_main(&arguments),
         "status" => status_main(&arguments),
         "version" => version_main(&arguments),
         _ => help(-1, MAIN_HELP, false, None),

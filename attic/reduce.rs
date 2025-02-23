@@ -14,6 +14,17 @@ use std::{
     str::from_utf8,
 };
 
+/// Parses `value` and returns a `BigDecimal`.
+pub fn parse_number(value: &[u8]) -> Result<BigDecimal, Box<dyn Error>> {
+    let separator = match Numeric::load_user_locale() {
+        Ok(numeric) => numeric.thousands_sep,
+        Err(_) => String::new(),
+    };
+    let value = from_utf8(value)?;
+    let value = value.replace(&separator, "");
+    Ok(BigDecimal::from_str(&value)?)
+}
+
 pub const REDUCE_HELP: &str = include_str!("reduce.md");
 pub const REDUCE_HELP_VERBOSE: &str = include_str!("reduce_verbose.md");
 

@@ -2,9 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use crate::shell::ShellResult;
-use bigdecimal::BigDecimal;
 use bstr::ByteSlice;
-use locale::Numeric;
 use rustc_lexer::unescape::{EscapeError, unescape_str};
 use serde::Serializer;
 use std::{
@@ -16,7 +14,7 @@ use std::{
     iter::zip,
     path::Path,
     process::{Command, exit},
-    str::{self, FromStr, from_utf8},
+    str::{self},
 };
 use termimad::{Alignment, FmtText, MadSkin, terminal_size};
 
@@ -146,17 +144,6 @@ pub fn unescape_backslashes(input: &str) -> Result<String, MyEscapeError> {
 /// `basename`, so we do, too.)
 pub fn file_name(pathname: &str) -> Option<&str> {
     Path::new(pathname).file_name()?.to_str()
-}
-
-/// Parses `value` and returns a `BigDecimal`.
-pub fn parse_number(value: &[u8]) -> Result<BigDecimal, Box<dyn Error>> {
-    let separator = match Numeric::load_user_locale() {
-        Ok(numeric) => numeric.thousands_sep,
-        Err(_) => String::new(),
-    };
-    let value = from_utf8(value)?;
-    let value = value.replace(&separator, "");
-    Ok(BigDecimal::from_str(&value)?)
 }
 
 /// Compares case-insensitively, without allocating.
