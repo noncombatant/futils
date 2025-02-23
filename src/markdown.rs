@@ -3,9 +3,8 @@
 
 use crate::{
     shell::{FileOpener, STDIN_PATHNAME, ShellResult, parse_options},
-    util::{exit_with_result, get_skin, help},
+    util::{exit_with_result, help, skin, terminal_text},
 };
-use atty::Stream;
 
 pub const MARKDOWN_HELP: &str = include_str!("markdown.md");
 
@@ -16,7 +15,7 @@ pub fn markdown_main(arguments: &[String]) -> ShellResult {
         exit_with_result(help(0, MARKDOWN_HELP, false, None));
     }
 
-    let skin = get_skin(Stream::Stdout);
+    let skin = skin();
     let mut status = 0;
     for file in FileOpener::new(arguments) {
         match file.read {
@@ -24,7 +23,7 @@ pub fn markdown_main(arguments: &[String]) -> ShellResult {
                 let mut buffer = String::new();
                 match read.read_to_string(&mut buffer) {
                     Ok(_) => {
-                        println!("{}", skin.text(&buffer, None));
+                        println!("{}", terminal_text(&buffer, &skin));
                     }
                     Err(error) => {
                         let pathname = file.pathname.unwrap_or(&STDIN_PATHNAME);

@@ -50,3 +50,5 @@ Make `pretty: bool` be a member of `Options` and a command-line switch.
 Might be better off with `try_for_each` than with `map_while`.
 
 `-J` should not imply `-v`.
+
+Remove `atty` dependency, if possible.

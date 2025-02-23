@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use crate::shell::ShellResult;
-use atty::Stream;
 use bigdecimal::BigDecimal;
 use bstr::ByteSlice;
 use locale::Numeric;
@@ -21,21 +20,21 @@ use std::{
 };
 use termimad::{Alignment, FmtText, MadSkin, terminal_size};
 
-fn text_width() -> usize {
-    let (terminal_width, _) = terminal_size();
-    let terminal_width = terminal_width as usize;
-    let man_width = env::var("MANWIDTH").map_or(String::new(), |v| v);
-    let man_width = man_width.parse::<usize>().map_or(80, |w| w);
-    min(terminal_width, man_width)
+pub fn text_width() -> usize {
+    let (terminal, _) = terminal_size();
+    let man = env::var("MANWIDTH")
+        .map_or(String::new(), |v| v)
+        .parse::<usize>()
+        .map_or(80, |w| w);
+    min(terminal as usize, man)
 }
 
-fn terminal_text<'a>(s: &'a str, skin: &'a MadSkin) -> FmtText<'a, 'a> {
+pub fn terminal_text<'a>(s: &'a str, skin: &'a MadSkin) -> FmtText<'a, 'a> {
     skin.text(s, Some(text_width()))
 }
 
-pub fn get_skin(stream: Stream) -> MadSkin {
-    let color = env::var("MANCOLOR").is_ok();
-    let mut skin = if color || atty::is(stream) {
+pub fn skin() -> MadSkin {
+    let mut skin = if env::var("MANCOLOR").is_ok() {
         MadSkin::default()
     } else {
         MadSkin::no_style()
@@ -52,10 +51,7 @@ pub fn help(status: i32, message: &str, common: bool, verbose: Option<&str>) -> 
         0 => &mut stdout(),
         _ => &mut stderr(),
     };
-    let skin = get_skin(match status {
-        0 => Stream::Stdout,
-        _ => Stream::Stderr,
-    });
+    let skin = skin();
     writeln!(&mut output, "{}", terminal_text(message, &skin))?;
     if common {
         write!(
