@@ -7,10 +7,6 @@ fun?
 Completeness: Unit and integration tests for everything. Rustdoc for all
 top-level and `pub` identifiers.
 
-Use David Cook’s non-copying `StreamSplitter`, in some magical future when it
-can be made to `impl Iterator`. Currently, we rely too much on the `Iterator`
-trait to do without it.
-
 Run all documented examples as actual tests with this form:
 
 ```
@@ -50,3 +46,6 @@ Make `pretty: bool` be a member of `Options` and a command-line switch.
 Might be better off with `try_for_each` than with `map_while`.
 
 `-J` should not imply `-v`.
+
+Remove `reduce` and any dependencies it uniquely requires (`bigdecimal` at
+least).
