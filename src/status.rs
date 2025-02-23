@@ -9,29 +9,45 @@ use crate::{
     time::format_utc_timestamp,
     util::{exit_with_result, help},
 };
+use libc::{getgrgid, getpwuid};
 use nix::sys::stat::{FileStat, Mode, lstat};
 use std::{
+    ffi::CStr,
     fs::read_dir,
     io::{IsTerminal, Write, stdout},
     path::Path,
+    str,
 };
-use users::{get_group_by_gid, get_user_by_uid};
 
 pub const STATUS_HELP: &str = include_str!("status.md");
 pub const STATUS_HELP_VERBOSE: &str = include_str!("status_verbose.md");
 
+// TODO: Memoize this?
+fn user_name(uid: u32) -> Option<String> {
+    let p = unsafe { getpwuid(uid) };
+    if p.is_null() {
+        return None;
+    }
+    let name = unsafe { CStr::from_ptr((*p).pw_name) };
+    Some(String::from_utf8_lossy(name.to_bytes()).into())
+}
+
+// TODO: Memoize this?
+fn group_name(gid: u32) -> Option<String> {
+    let p = unsafe { getgrgid(gid) };
+    if p.is_null() {
+        return None;
+    }
+    let name = unsafe { CStr::from_ptr((*p).gr_name) };
+    Some(String::from_utf8_lossy(name.to_bytes()).into())
+}
+
 fn format_uid(uid: u32) -> String {
-    get_user_by_uid(uid).map_or_else(
-        || format!("{uid}"),
-        |s| s.name().to_string_lossy().to_string(),
-    )
+    user_name(uid).map_or_else(|| format!("{uid}"), |s| s)
 }
 
 fn format_gid(gid: u32) -> String {
-    get_group_by_gid(gid).map_or_else(
-        || format!("{gid}"),
-        |s| s.name().to_string_lossy().to_string(),
-    )
+    group_name(gid).map_or_else(|| format!("{gid}"), |s| s)
 }
 
 const fn get_permissions(mode: os::Mode) -> Option<Mode> {
