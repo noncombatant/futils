@@ -3,17 +3,19 @@
 
 //! The `futils fileid` command.
 
-use std::fs;
-use std::io::{Error, Write, copy, stdout};
-use std::os::unix::fs::MetadataExt;
-
+use crate::{
+    shell::{Options, ShellResult, StructuredWrite, parse_options},
+    util::{exit_with_result, help},
+};
 use atty::Stream;
 use base64ct::{Base64, Encoding};
+use blake3::Hasher;
 use serde::Serialize;
-use sha2::{Digest, Sha256};
-
-use crate::shell::{Options, ShellResult, StructuredWrite, parse_options};
-use crate::util::{exit_with_result, help};
+use std::{
+    fs,
+    io::{Error, Write, copy, stdout},
+    os::unix::fs::MetadataExt,
+};
 
 pub const FILEID_HELP: &str = include_str!("fileid.md");
 pub const FILEID_HELP_VERBOSE: &str = include_str!("fileid_verbose.md");
@@ -74,9 +76,9 @@ fn get_fileid(pathname: &str, verbose: bool) -> std::io::Result<FileID> {
             Some(if metadata.is_symlink() {
                 "symlink".to_string()
             } else if metadata.is_file() {
-                let mut hasher = Sha256::new();
+                let mut hasher = Hasher::new();
                 let _ = copy(&mut file, &mut hasher)?;
-                Base64::encode_string(&hasher.finalize())
+                Base64::encode_string(hasher.finalize().as_bytes())
             } else if metadata.is_dir() {
                 "directory".to_string()
             } else {
